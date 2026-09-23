@@ -1,0 +1,14 @@
+[Unit]
+Description=XinAn DongShi Spring Boot API
+After=network.target mysql.service
+
+[Service]
+User=ubuntu
+WorkingDirectory=/opt/xinan-dongshi
+EnvironmentFile=/etc/xinan-dongshi/xinan-dongshi.env
+ExecStart=/usr/bin/java -Xms128m -Xmx512m -jar /opt/xinan-dongshi/app/Ece-0.0.1-SNAPSHOT.jar
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

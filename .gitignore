@@ -1,0 +1,57 @@
+# Local secrets and machine-specific configuration
+scripts/deepseek-env.local.ps1
+scripts/roboflow-env.local.txt
+.env.local
+.env.*.local
+*.local.ps1
+*.local.txt
+
+# Logs, caches and runtime output
+logs/
+*.log
+*.out.log
+*.pid
+.ultralytics/
+.playwright-cli/
+demo-output/
+files/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Python virtual environments
+.venv/
+.venv*/
+venv/
+env/
+
+# Frontend dependencies and build output
+node_modules/
+dist/
+coverage/
+.vite/
+*.tsbuildinfo
+
+# Java/Maven build output
+target/
+*.class
+
+# IDE and operating-system files
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Training datasets and generated experiment output
+yolo-moudle/face/yolo_face_detection_flask/datasets/
+yolo-moudle/face/yolo_face_detection_flask/runs/
+yolo-moudle/face/train*/
+
+# Bundled third-party binaries and duplicate archives
+yolo-moudle/face/ffmpeg-7.1-full_build/
+*.zip
+*.rar
+*.7z

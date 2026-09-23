@@ -1,0 +1,578 @@
+/* ===== HomePage — Roadshow Design ===== */
+.home-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  animation: fadeIn 0.6s ease;
+}
+
+/* ================================================
+   1. Hero Card
+   ================================================ */
+.hero-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 40px 44px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, rgba(255,255,255,0.82) 0%, rgba(245,248,250,0.82) 40%, rgba(250,245,255,0.82) 100%);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,255,255,0.85);
+  overflow: hidden;
+}
+
+.hero-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  z-index: 1;
+}
+
+.hero-greeting-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.hero-wave {
+  font-size: 36px;
+  flex-shrink: 0;
+  animation: float 2.5s ease-in-out infinite;
+}
+
+.hero-title {
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--text-heading);
+  line-height: 1.45;
+  letter-spacing: -0.2px;
+}
+
+.hero-companion {
+  display: inline;
+  color: var(--purple);
+  font-weight: 700;
+}
+
+.hero-subtitle {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin-top: 6px;
+  line-height: 1.6;
+  font-style: italic;
+}
+
+/* Hero tags */
+.hero-tags {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.tag-mood {
+  background: rgba(192, 132, 252, 0.1);
+  color: var(--purple);
+  border: 1px solid rgba(192, 132, 252, 0.2);
+}
+
+.tag-streak {
+  background: rgba(240, 162, 97, 0.1);
+  color: var(--warm);
+  border: 1px solid rgba(240, 162, 97, 0.2);
+}
+
+/* ================================================
+   Emotion Flower (CSS petals)
+   ================================================ */
+.hero-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  z-index: 1;
+  flex-shrink: 0;
+}
+
+.emotion-flower {
+  position: relative;
+  width: 130px;
+  height: 130px;
+}
+
+.flower-petal {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 14px;
+  height: 46px;
+  margin-left: -7px;
+  margin-top: -46px;
+  border-radius: 50%;
+  transform-origin: 7px 46px;
+  transition: all 0.5s ease;
+}
+
+.petal-active {
+  background: linear-gradient(180deg, #e9b8ff 0%, #c084fc 60%, #a855f7 100%);
+  box-shadow: 0 0 8px rgba(192, 132, 252, 0.35);
+}
+
+.petal-inactive {
+  background: #e8e4ec;
+  opacity: 0.45;
+}
+
+.flower-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 44px;
+  height: 44px;
+  margin-left: -22px;
+  margin-top: -22px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fef9ff 0%, #f3e8ff 60%, #e9d5ff 100%);
+  box-shadow: 0 2px 12px rgba(192, 132, 252, 0.3), inset 0 1px 0 rgba(255,255,255,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flower-center-emoji {
+  font-size: 20px;
+  animation: float 3s ease-in-out infinite;
+}
+
+.flower-label {
+  font-size: 13px;
+  color: var(--purple);
+  font-weight: 600;
+  background: rgba(192, 132, 252, 0.08);
+  padding: 4px 14px;
+  border-radius: 12px;
+}
+
+/* Hero decorative blur dots */
+.hero-blur {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+.hero-blur-1 {
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(192, 132, 252, 0.25), transparent);
+  top: -60px;
+  right: 60px;
+}
+
+.hero-blur-2 {
+  width: 160px;
+  height: 160px;
+  background: radial-gradient(circle, rgba(91, 174, 138, 0.2), transparent);
+  bottom: -40px;
+  left: 40%;
+}
+
+/* ================================================
+   2. Stats Row
+   ================================================ */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+}
+
+.stat-icon-ring {
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-emoji {
+  font-size: 24px;
+}
+
+.stat-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.stat-value {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+}
+
+.stat-sub {
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* ================================================
+   3. Quick Actions
+   ================================================ */
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.action-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 22px;
+  cursor: pointer;
+  text-align: left;
+  border: 1px solid rgba(255,255,255,0.85);
+  transition: all 0.3s ease;
+}
+
+.action-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+.action-emoji-ring {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-emoji {
+  font-size: 24px;
+}
+
+.action-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.action-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-heading);
+}
+
+.action-sub {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.action-arrow {
+  font-size: 20px;
+  font-weight: 600;
+  opacity: 0.5;
+  transition: all 0.3s ease;
+}
+
+.action-card:hover .action-arrow {
+  opacity: 1;
+  transform: translateX(3px);
+}
+
+/* ================================================
+   4 & 5. Two-Column: Healing + Trend
+   ================================================ */
+.home-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.section-heading {
+  font-size: 17px;
+  margin-bottom: 18px;
+  font-weight: 600;
+}
+
+/* --- Healing Recs --- */
+.healing-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.healing-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 12px;
+  border-radius: var(--radius-sm);
+  transition: background 0.2s ease;
+}
+
+.healing-item:hover {
+  background: rgba(91, 174, 138, 0.04);
+}
+
+.healing-emoji {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.healing-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.healing-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-heading);
+  margin-bottom: 2px;
+}
+
+.healing-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.healing-tag {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 10px;
+  background: var(--primary-bg);
+  color: var(--primary);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.healing-duration {
+  font-size: 13px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+/* --- Weekly Trend --- */
+.trend-badge {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding: 16px;
+  border-radius: var(--radius-sm);
+  background: rgba(91, 174, 138, 0.06);
+}
+
+.trend-arrow-ring {
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(91, 174, 138, 0.3);
+}
+
+.trend-arrow {
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+  animation: float 2.5s ease-in-out infinite;
+}
+
+.trend-percent {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: -0.5px;
+}
+
+.trend-summary {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+/* Mini bar chart */
+.trend-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 100px;
+  padding: 0 4px;
+}
+
+.trend-bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.trend-bar {
+  width: 100%;
+  max-width: 36px;
+  background: linear-gradient(180deg, #7ec9a5 0%, #5bae8a 100%);
+  border-radius: 6px 6px 0 0;
+  transition: height 0.6s ease;
+  min-height: 4px;
+}
+
+.trend-bar-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 8px;
+}
+
+.trend-axis-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  padding: 0 4px;
+}
+
+.trend-note {
+  margin-top: 12px;
+  font-size: 13px;
+  text-align: center;
+}
+
+/* ================================================
+   6. Recent Activity
+   ================================================ */
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  transition: background 0.2s ease;
+}
+
+.activity-item:hover {
+  background: rgba(91, 174, 138, 0.03);
+}
+
+.activity-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.activity-item-emoji {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.activity-item-title {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-heading);
+}
+
+.activity-item-time {
+  font-size: 13px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+/* ================================================
+   Responsive
+   ================================================ */
+@media (max-width: 900px) {
+  .hero-card {
+    flex-direction: column;
+    text-align: center;
+    padding: 28px 24px;
+  }
+
+  .hero-greeting-row {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .hero-title {
+    font-size: 24px;
+  }
+
+  .hero-tags {
+    justify-content: center;
+  }
+
+  .stats-row,
+  .quick-actions {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .home-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-row,
+  .quick-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card {
+    flex-direction: row;
+  }
+
+  .healing-tag,
+  .healing-duration {
+    display: none;
+  }
+}

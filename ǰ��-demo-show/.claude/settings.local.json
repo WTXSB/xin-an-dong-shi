@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"console.log\\(require\\('react-router-dom/package.json'\\).version\\)\")",
+      "Bash(npx vite *)",
+      "Bash(pkill -f \"vite\")",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\" http://localhost:5173/)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\" http://localhost:5173/home)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\" http://localhost:5173/login)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\" http://localhost:5173/detect)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\" http://localhost:5173/chat)",
+      "Bash(grep -rn \"hero\\\\.png\\\\|from './assets/react.svg'\\\\|from './assets/vite.svg'\" src/)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/home)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/detect)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/chat)"
+    ]
+  }
+}

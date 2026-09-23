@@ -1,0 +1,631 @@
+/* ============================================================
+   MindfulnessPage — 正念练习 · Breathing Practice
+   ============================================================ */
+
+/* ── Page Container ─────────────────────────────────── */
+.mindfulness-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  animation: fadeIn 0.6s ease;
+}
+
+/* ── Page Header ───────────────────────────────────── */
+.mindfulness-header {
+  flex-shrink: 0;
+}
+
+.mindfulness-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-heading);
+  margin-bottom: 4px;
+}
+
+.mindfulness-subtitle {
+  font-size: 15px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* ── Two-Column Layout ─────────────────────────────── */
+.mindfulness-layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 20px;
+  align-items: start;
+}
+
+.mindfulness-main {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.mindfulness-side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 100px;
+}
+
+/* ============================================================
+   BREATHING CIRCLE CARD
+   ============================================================ */
+.breathing-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 32px 24px !important;
+  position: relative;
+  overflow: visible;
+}
+
+.breathing-card-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 8px;
+  width: 100%;
+  justify-content: center;
+}
+
+.breathing-card-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-heading);
+}
+
+.breathing-round-badge {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--primary);
+  background: var(--primary-bg);
+  padding: 4px 14px;
+  border-radius: 14px;
+  animation: fadeIn 0.3s ease;
+}
+
+/* ── Circle Area ───────────────────────────────────── */
+.breathing-circle-area {
+  position: relative;
+  width: 320px;
+  height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 12px 0 8px;
+}
+
+/* ── Breathing Rings ───────────────────────────────── */
+.breathing-ring {
+  position: absolute;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: width 0.2s ease, height 0.2s ease;
+}
+
+/* Echo ring — slightly larger, softer, follows the main ring */
+.breathing-ring--echo {
+  background: transparent;
+  border: 2px solid rgba(91, 174, 138, 0.15);
+  transition: width 0.35s ease, height 0.35s ease, border-color 0.5s ease;
+}
+
+/* Main breathing ring */
+.breathing-ring--main {
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(91, 174, 138, 0.04) 0%,
+    rgba(91, 174, 138, 0.1) 50%,
+    rgba(91, 174, 138, 0.18) 100%
+  );
+  border: 2.5px solid rgba(91, 174, 138, 0.35);
+  transition: width 0.2s ease, height 0.2s ease, box-shadow 0.3s ease;
+}
+
+/* ── Ring Inner Content ────────────────────────────── */
+.breathing-ring-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  z-index: 1;
+}
+
+.breathing-phase-label {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-heading);
+  letter-spacing: 2px;
+}
+
+.breathing-countdown {
+  font-size: 48px;
+  font-weight: 800;
+  color: var(--primary);
+  line-height: 1;
+  letter-spacing: -1px;
+  font-variant-numeric: tabular-nums;
+}
+
+.breathing-phase-duration {
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  background: rgba(91, 174, 138, 0.06);
+  padding: 3px 14px;
+  border-radius: 10px;
+}
+
+/* Idle state inside ring */
+.breathing-idle-icon {
+  font-size: 40px;
+  animation: float 3s ease-in-out infinite;
+}
+
+.breathing-idle-text {
+  font-size: 16px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+/* ── Reward Toast ──────────────────────────────────── */
+.breathing-reward {
+  position: absolute;
+  top: 18px;
+  right: 28px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: 20px;
+  background: linear-gradient(
+    135deg,
+    rgba(192, 132, 252, 0.12),
+    rgba(192, 132, 252, 0.06)
+  );
+  border: 1px solid rgba(192, 132, 252, 0.2);
+  opacity: 0;
+  transform: translateY(-8px);
+  pointer-events: none;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.breathing-reward--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reward-toast-emoji {
+  font-size: 18px;
+  animation: float 2s ease-in-out infinite;
+}
+
+.reward-toast-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--purple);
+}
+
+/* ── Progress Bar ──────────────────────────────────── */
+.breathing-progress-bar {
+  width: 100%;
+  max-width: 280px;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.breathing-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-light), var(--primary));
+  border-radius: 2px;
+  min-width: 2px;
+}
+
+/* ── Controls ──────────────────────────────────────── */
+.breathing-controls {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.breathing-btn {
+  flex: 1;
+  padding: 12px 20px !important;
+  font-size: 15px !important;
+  border-radius: 14px !important;
+}
+
+.breathing-btn--start {
+  padding: 14px 24px !important;
+  font-size: 16px !important;
+}
+
+.breathing-btn--reset {
+  background: rgba(0, 0, 0, 0.03) !important;
+  color: var(--text-secondary) !important;
+  border: 1px solid var(--border) !important;
+  flex: 0 0 auto;
+  padding: 12px 20px !important;
+}
+
+.breathing-btn--reset:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.06) !important;
+  color: var(--text-heading) !important;
+}
+
+.breathing-btn--reset:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   QUICK NAV BUTTONS
+   ============================================================ */
+.mindfulness-quick-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.quick-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px !important;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  transition: all 0.3s ease;
+  text-align: left;
+}
+
+.quick-nav-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.quick-nav-emoji {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.quick-nav-label {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-heading);
+  line-height: 1.4;
+}
+
+.quick-nav-arrow {
+  font-size: 18px;
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.quick-nav-btn:hover .quick-nav-arrow {
+  transform: translateX(3px);
+  color: var(--primary);
+}
+
+/* ============================================================
+   STATS MINI CARDS
+   ============================================================ */
+.stats-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stat-mini-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px !important;
+}
+
+.stat-mini-emoji {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.stat-mini-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-mini-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-heading);
+  line-height: 1.2;
+}
+
+.stat-mini-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* ============================================================
+   ANXIAONING COMPANION CARD
+   ============================================================ */
+.companion-card {
+  padding: 20px !important;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.78) 0%,
+    rgba(250, 245, 255, 0.78) 100%
+  ) !important;
+}
+
+.companion-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.companion-avatar-ring {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fef5ff 0%, #f3e8ff 60%, #ede0f8 100%);
+  box-shadow: 0 2px 10px rgba(192, 132, 252, 0.2), inset 0 1px 0 rgba(255,255,255,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.companion-avatar-emoji {
+  font-size: 20px;
+  animation: float 3s ease-in-out infinite;
+}
+
+.companion-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.companion-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-heading);
+}
+
+.companion-role {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.companion-bubble {
+  padding: 16px 18px;
+  border-radius: 16px;
+  border-bottom-left-radius: 4px;
+  background: #f5f3f0;
+  transition: all 0.5s ease;
+}
+
+.companion-bubble--active {
+  background: linear-gradient(135deg, #eef7f1, #f0f4f8);
+  border-left: 3px solid var(--primary-light);
+}
+
+.companion-bubble p {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-heading);
+}
+
+/* ============================================================
+   COURSE CENTER
+   ============================================================ */
+.course-center {
+  display: flex;
+  flex-direction: column;
+  padding: 28px !important;
+}
+
+.course-center-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-heading);
+  margin-bottom: 4px;
+}
+
+.course-center-subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+
+.course-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.course-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.65);
+  border: 1.5px solid rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+  font-family: var(--sans);
+}
+
+.course-card:hover {
+  border-color: var(--primary-light);
+  background: rgba(91, 174, 138, 0.04);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.course-card--active {
+  border-color: var(--primary);
+  background: rgba(91, 174, 138, 0.07);
+  box-shadow: 0 0 0 3px rgba(91, 174, 138, 0.08);
+}
+
+.course-emoji {
+  font-size: 32px;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.course-card:hover .course-emoji {
+  transform: scale(1.15);
+}
+
+.course-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.course-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-heading);
+}
+
+.course-duration {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.course-check {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+  animation: fadeIn 0.25s ease;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 1000px) {
+  .mindfulness-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .mindfulness-side {
+    position: static;
+    order: -1; /* Stats above breathing on narrow screens */
+  }
+
+  .stats-cards {
+    flex-direction: row;
+    gap: 10px;
+  }
+
+  .stat-mini-card {
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 6px;
+    padding: 14px 10px !important;
+  }
+
+  .stat-mini-value {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 680px) {
+  .breathing-circle-area {
+    width: 260px;
+    height: 260px;
+  }
+
+  .breathing-card {
+    padding: 24px 20px 20px !important;
+  }
+
+  .breathing-card-title {
+    font-size: 18px;
+  }
+
+  .breathing-countdown {
+    font-size: 40px;
+  }
+
+  .breathing-phase-label {
+    font-size: 22px;
+  }
+
+  .course-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .mindfulness-quick-nav {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-cards {
+    flex-direction: column;
+  }
+
+  .stat-mini-card {
+    flex-direction: row;
+    text-align: left;
+  }
+
+  .breathing-reward {
+    position: relative;
+    top: auto;
+    right: auto;
+    margin-bottom: 12px;
+    align-self: center;
+  }
+}
+
+@media (max-width: 420px) {
+  .breathing-circle-area {
+    width: 220px;
+    height: 220px;
+  }
+
+  .breathing-controls {
+    flex-direction: column;
+  }
+
+  .breathing-btn--reset {
+    flex: 1;
+  }
+
+  .course-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .breathing-countdown {
+    font-size: 36px;
+  }
+}

@@ -1,0 +1,116 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>心安动识 App 效果图</title>
+<style>
+:root{
+  --ink:#17202a;
+  --muted:#62717f;
+  --paper:#fbfaf6;
+  --line:#dfe8e4;
+  --teal:#2f9f91;
+  --mint:#dff4ed;
+  --sky:#dceeff;
+  --coral:#ff8b6a;
+  --amber:#f6c45c;
+  --blue:#5078d8;
+  --rose:#ffe0db;
+  --green:#5fc98a;
+  --shadow:0 28px 70px rgba(30,45,56,.16);
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:2400px;height:1600px;overflow:hidden;background:#eef5f1;color:var(--ink);font-family:"Microsoft YaHei","PingFang SC","Noto Sans SC",Arial,sans-serif;letter-spacing:0}
+.stage{position:relative;width:2400px;height:1600px;padding:88px 96px;background:
+  radial-gradient(circle at 7% 12%,rgba(255,214,203,.72),transparent 28%),
+  radial-gradient(circle at 88% 5%,rgba(210,236,255,.88),transparent 30%),
+  linear-gradient(135deg,#fbfaf6 0%,#edf8f3 50%,#f7fbff 100%)}
+.header{position:absolute;left:104px;top:78px;display:flex;gap:14px;align-items:center;color:#27423d;font-weight:700;font-size:32px}
+.mark{width:54px;height:54px;border-radius:16px;background:#173d36;color:white;display:grid;place-items:center;font-weight:800;box-shadow:0 14px 34px rgba(23,61,54,.22)}
+.hero{position:absolute;left:104px;top:190px;width:690px}
+.kicker{display:inline-flex;align-items:center;gap:10px;height:44px;padding:0 18px;border:1px solid rgba(47,159,145,.28);background:rgba(255,255,255,.68);border-radius:999px;color:#2d7269;font-weight:700;font-size:20px}
+h1{margin:34px 0 22px;font-size:88px;line-height:1.02;font-weight:850;color:#18262f;letter-spacing:0}
+.hero p{margin:0;color:#526270;font-size:29px;line-height:1.62;font-weight:500}
+.pillRow{display:flex;flex-wrap:wrap;gap:14px;margin-top:38px;width:660px}
+.pill{height:48px;padding:0 18px;border-radius:999px;background:rgba(255,255,255,.76);border:1px solid rgba(23,32,42,.08);display:flex;align-items:center;gap:10px;color:#435360;font-size:19px;font-weight:700}
+.pill b{display:grid;place-items:center;width:22px;height:22px;border-radius:8px;background:#2f9f91;color:#fff;font-size:14px}
+.advantage{position:absolute;left:104px;bottom:104px;width:710px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.advCard{height:150px;background:rgba(255,255,255,.78);border:1px solid rgba(25,50,45,.09);border-radius:20px;padding:22px 24px;box-shadow:0 18px 44px rgba(48,62,70,.08)}
+.advCard strong{display:block;font-size:25px;color:#1f3d38;margin-bottom:11px}
+.advCard span{font-size:17px;line-height:1.5;color:#5a6975}
+.deviceDeck{position:absolute;right:72px;top:146px;width:1430px;height:1300px}
+.phone{position:absolute;width:342px;height:720px;border-radius:50px;background:#121b22;padding:14px;box-shadow:var(--shadow)}
+.phone::before{content:"";position:absolute;left:50%;top:20px;transform:translateX(-50%);width:104px;height:26px;background:#111820;border-radius:999px;z-index:3}
+.screen{position:relative;width:100%;height:100%;border-radius:38px;overflow:hidden;background:#fbfbf8;padding:32px 24px 24px}
+.phone.one{left:20px;top:162px;transform:rotate(-6deg)}
+.phone.two{left:348px;top:48px;transform:rotate(2deg);z-index:4}
+.phone.three{left:676px;top:178px;transform:rotate(-1deg);z-index:3}
+.phone.four{left:1002px;top:78px;transform:rotate(6deg);z-index:2}
+.status{display:flex;justify-content:space-between;align-items:center;margin-bottom:26px;color:#1d2a34;font-size:14px;font-weight:800}.dot{width:8px;height:8px;background:#1d2a34;border-radius:50%;display:inline-block;margin-left:5px}.appTop{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.avatar{width:44px;height:44px;border-radius:16px;background:#173d36;color:#fff;display:grid;place-items:center;font-weight:800}.miniBtn{width:40px;height:40px;border-radius:14px;background:#eef7f2;border:1px solid #dbe8e3;display:grid;place-items:center;font-weight:900;color:#2f776e}.title{font-size:26px;font-weight:850;color:#18262f;line-height:1.22}.sub{font-size:13px;color:#71808c;margin-top:5px;line-height:1.45}.heroCard{border-radius:26px;background:linear-gradient(145deg,#19463e,#2f9f91);color:white;padding:24px;margin:18px 0 16px;min-height:154px}.heroCard small{font-size:14px;opacity:.82}.heroCard .big{font-size:54px;font-weight:850;line-height:1;margin:14px 0 8px}.heroCard p{margin:0;font-size:15px;line-height:1.55;color:rgba(255,255,255,.88)}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.metric{border-radius:18px;padding:16px;background:#fff;border:1px solid #e5eee9;min-height:93px}.metric b{font-size:26px;color:#1b3d37}.metric span{display:block;margin-top:6px;font-size:13px;color:#697985}.task{display:flex;gap:12px;align-items:center;padding:15px;border-radius:18px;background:#f3f7fb;border:1px solid #e0eaf2;margin-top:12px}.check{width:28px;height:28px;border-radius:10px;background:#dff4ed;color:#20786e;display:grid;place-items:center;font-weight:900}.task strong{font-size:15px;display:block}.task span{font-size:12px;color:#6b7985}.moods{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}.mood{height:34px;padding:0 11px;border-radius:12px;background:#f2f6f4;color:#53636f;font-weight:700;font-size:13px;display:flex;align-items:center}.mood.active{background:#173d36;color:#fff}.noteBox{height:146px;border-radius:22px;background:#fff;border:1px solid #e4ece8;padding:18px;color:#54626c;font-size:15px;line-height:1.65}.aiHint{margin-top:14px;border-radius:22px;background:#eaf7f2;border:1px solid #cfe9df;padding:17px}.aiHint strong{font-size:16px;color:#1d5f56}.aiHint p{font-size:13px;color:#58706b;line-height:1.55;margin:8px 0 0}.phone.three .aiHint{padding:12px 14px;margin-top:10px}.phone.three .aiHint p{display:none}.stickers{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.sticker{border-radius:16px;background:#fff6e2;border:1px solid #f3dfae;padding:13px;font-size:13px;color:#6b5a30;font-weight:700}.chatHead{border-radius:24px;background:#f0f8f5;padding:18px;margin-bottom:18px;display:flex;gap:12px;align-items:center}.agent{width:48px;height:48px;border-radius:17px;background:#2f9f91;color:#fff;display:grid;place-items:center;font-weight:850}.bubble{border-radius:22px;padding:16px 18px;margin:12px 0;font-size:14px;line-height:1.62}.bot{background:#eaf7f2;color:#294a44;border-top-left-radius:8px}.user{background:#173d36;color:#fff;margin-left:38px;border-top-right-radius:8px}.planCard{border-radius:22px;background:#fff;border:1px solid #e4ece8;margin-top:14px;padding:17px}.planCard h3{font-size:16px;margin:0 0 12px}.steps{display:grid;gap:9px}.step{display:flex;align-items:center;gap:10px;font-size:13px;color:#596873}.num{width:23px;height:23px;border-radius:9px;background:#ffe5dd;color:#b5462c;display:grid;place-items:center;font-size:12px;font-weight:850}.privacy{display:flex;gap:8px;margin:16px 0}.privacy span{height:30px;padding:0 10px;border-radius:10px;background:#f2f7fb;border:1px solid #dfeaf3;color:#4d667a;font-size:12px;font-weight:750;display:flex;align-items:center}.scan{height:150px;border-radius:26px;background:linear-gradient(160deg,#e9f8f3,#fff7df);border:1px solid #deebe6;position:relative;overflow:hidden;margin:18px 0}.scan::after{content:"";position:absolute;left:28px;right:28px;top:50%;height:2px;background:#2f9f91;box-shadow:0 0 22px #2f9f91}.scan .face{position:absolute;left:98px;top:34px;width:100px;height:100px;border-radius:34px;border:2px solid rgba(47,159,145,.44)}.record{border-radius:20px;background:#fff;border:1px solid #e5eee9;padding:16px;margin-top:13px}.record b{font-size:16px;color:#1f3d38}.record p{font-size:13px;color:#657681;line-height:1.55;margin:8px 0 0}.bottomNav{position:absolute;left:23px;right:23px;bottom:18px;height:56px;border-radius:22px;background:rgba(255,255,255,.9);box-shadow:0 12px 32px rgba(27,40,48,.1);display:flex;justify-content:space-around;align-items:center}.navDot{width:30px;height:30px;border-radius:12px;background:#eef4f1;color:#62716d;display:grid;place-items:center;font-size:12px;font-weight:850}.navDot.on{background:#173d36;color:white}.caption{position:absolute;left:64px;right:64px;bottom:32px;height:128px;border-radius:28px;background:rgba(255,255,255,.72);border:1px solid rgba(34,60,54,.1);backdrop-filter:blur(12px);padding:24px 30px;display:flex;align-items:center;justify-content:space-between}.caption strong{font-size:31px;color:#173d36}.caption span{font-size:20px;color:#63727e}.flow{display:flex;align-items:center;gap:14px}.flow b{height:44px;padding:0 18px;border-radius:14px;background:#173d36;color:white;display:flex;align-items:center;font-size:17px}.flow i{font-style:normal;color:#5e7770;font-size:24px}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="header"><div class="mark">心</div><span>心安动识 App｜青少年成长陪伴系统</span></div>
+  <section class="hero">
+    <div class="kicker">温柔感知 · 内驱力养成 · 拖延干预</div>
+    <h1>看见情绪线索，找回行动的力量</h1>
+    <p>把 YOLO 多模态感知、情绪日记、安心对话与心灵 SPA 导引连接成闭环。它不急着评判孩子，只陪 TA 从一个很小的开始重新获得掌控感。</p>
+    <div class="pillRow">
+      <div class="pill"><b>1</b> 不贴标签，只给线索</div>
+      <div class="pill"><b>2</b> 3 分钟起步，降低行动阻力</div>
+      <div class="pill"><b>3</b> 授权边界清晰可控</div>
+      <div class="pill"><b>4</b> 从觉察到复盘的全栈闭环</div>
+    </div>
+  </section>
+  <section class="advantage">
+    <div class="advCard"><strong>比聊天类产品更完整</strong><span>不仅对话安抚，还能结合感知、记录、行动计划和复盘，形成可持续成长路径。</span></div>
+    <div class="advCard"><strong>比打卡类产品更温柔</strong><span>用陪伴式语言拆解拖延，不制造羞耻感，帮助青少年恢复内驱力。</span></div>
+    <div class="advCard"><strong>比识别工具更有边界</strong><span>视觉数据不自动进入对话，保存记录与素材都交给用户决定。</span></div>
+    <div class="advCard"><strong>比单点功能更强</strong><span>Vue、Spring、Flask YOLO 与智能体服务组合，覆盖感知、疗愈、学习行动和资源导引。</span></div>
+  </section>
+  <section class="deviceDeck">
+    <div class="phone one"><div class="screen">
+      <div class="status"><span>9:41</span><span><i class="dot"></i><i class="dot"></i><i class="dot"></i></span></div>
+      <div class="appTop"><div><div class="title">今日安顿</div><div class="sub">下午好，林同学。先从一件小事开始。</div></div><div class="avatar">心</div></div>
+      <div class="heroCard"><small>今日行动力</small><div class="big">72</div><p>状态比昨天更稳定。建议先完成一个 3 分钟任务。</p></div>
+      <div class="grid2"><div class="metric"><b>7天</b><span>连续觉察</span></div><div class="metric"><b>3次</b><span>主动开始</span></div></div>
+      <div class="task"><div class="check">✓</div><div><strong>打开作业页</strong><span>不要求写完，只进入状态</span></div></div>
+      <div class="task"><div class="check">·</div><div><strong>做一次肩颈放松</strong><span>45 秒，降低身体紧绷</span></div></div>
+      <div class="bottomNav"><div class="navDot on">首</div><div class="navDot">记</div><div class="navDot">安</div><div class="navDot">感</div></div>
+    </div></div>
+    <div class="phone two"><div class="screen">
+      <div class="status"><span>9:41</span><span><i class="dot"></i><i class="dot"></i><i class="dot"></i></span></div>
+      <div class="appTop"><div><div class="title">情绪日记</div><div class="sub">记录感受，不给自己扣分。</div></div><div class="miniBtn">记</div></div>
+      <div class="moods"><span class="mood">平静</span><span class="mood active">焦虑</span><span class="mood">疲惫</span><span class="mood">好转</span></div>
+      <div class="noteBox">今天看到任务列表时有点逃避。不是不想做好，而是担心开始后做不好。先写下第一句话，身体会慢慢跟上。</div>
+      <div class="aiHint"><strong>AI 温柔观察</strong><p>你已经把“害怕做不好”说清楚了。下一步不需要证明自己，只需要完成一个可开始的动作。</p></div>
+      <div class="stickers"><div class="sticker">身体：肩颈紧</div><div class="sticker">行为：刷短视频</div><div class="sticker">需要：被理解</div><div class="sticker">明天：先 3 分钟</div></div>
+      <div class="bottomNav"><div class="navDot">首</div><div class="navDot on">记</div><div class="navDot">安</div><div class="navDot">感</div></div>
+    </div></div>
+    <div class="phone three"><div class="screen">
+      <div class="status"><span>9:41</span><span><i class="dot"></i><i class="dot"></i><i class="dot"></i></span></div>
+      <div class="chatHead"><div class="agent">安</div><div><div class="title">安心对话</div><div class="sub">陪你把感受说清，也把行动变轻</div></div></div>
+      <div class="bubble user">我又拖到现在，感觉自己很没用。</div>
+      <div class="bubble bot">先把“没用”放一放。你只是卡在开始前。我们只做一步：打开资料页，写下第一句。</div>
+      <div class="planCard"><h3>3 分钟行动计划</h3><div class="steps"><div class="step"><span class="num">1</span>打开文档，不评价内容</div><div class="step"><span class="num">2</span>写一个标题或关键词</div><div class="step"><span class="num">3</span>完成后回来给自己一次确认</div></div></div>
+      <div class="aiHint"><strong>内驱力提示</strong><p>把目标从“必须优秀”改成“我愿意开始”。掌控感会先回来。</p></div>
+      <div class="bottomNav"><div class="navDot">首</div><div class="navDot">记</div><div class="navDot on">安</div><div class="navDot">感</div></div>
+    </div></div>
+    <div class="phone four"><div class="screen">
+      <div class="status"><span>9:41</span><span><i class="dot"></i><i class="dot"></i><i class="dot"></i></span></div>
+      <div class="appTop"><div><div class="title">温柔感知</div><div class="sub">仅在授权后开启，结果用于自我觉察。</div></div><div class="miniBtn">感</div></div>
+      <div class="privacy"><span>保存记录：开</span><span>素材保存：关</span></div>
+      <div class="scan"><div class="face"></div></div>
+      <div class="record"><b>主要线索</b><p>表情偏紧张，肩颈有轻微收缩。建议先做一次呼吸，不急着处理任务。</p></div>
+      <div class="record"><b>小练习</b><p>吸气 4 秒，呼气 6 秒，重复 3 轮。把注意力放回身体。</p></div>
+      <div class="bottomNav"><div class="navDot">首</div><div class="navDot">记</div><div class="navDot">安</div><div class="navDot on">感</div></div>
+    </div></div>
+    <div class="caption"><div><strong>从“感受到我怎么了”到“我可以先做一点”</strong><br><span>为青少年、家校心理支持与自我成长场景设计的温柔行动系统</span></div><div class="flow"><b>感知</b><i>→</i><b>日记</b><i>→</i><b>对话</b><i>→</i><b>复盘</b></div></div>
+  </section>
+</div>
+</body>
+</html>
+
+
