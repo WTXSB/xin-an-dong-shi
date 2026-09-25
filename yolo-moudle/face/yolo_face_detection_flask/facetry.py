@@ -15,9 +15,27 @@ from flask_socketio import SocketIO, emit
 # 那种启动方式不会把本文件所在目录加入 sys.path，导致找不到 bfrb_detect。
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from bfrb_detect import BfrbDetector, BehaviorDetector, is_behavior_model  # BFRB 检测（见 bfrb_detect.py）
+from bfrb_events import BfrbEventAggregator
 
 # 表情类别（顺序必须和你训练时的 data.yaml 完全一致！）
 EMOTION_CLASSES = ['angry', 'happy', 'neutral', 'sad']
+
+ANALYSIS_MODES = [
+    {
+        "value": "combined",
+        "label": "综合分析（情绪 + BFRB双证据）",
+        "modelLabel": "emotion.pt + bfrb_behavior.pt + 手脸几何",
+    },
+    {"value": "emotion", "label": "情绪表情识别", "modelLabel": "emotion.pt"},
+    {"value": "bfrb_behavior", "label": "BFRB行为直检", "modelLabel": "bfrb_behavior.pt"},
+    {"value": "bfrb_geometry", "label": "BFRB手脸几何", "modelLabel": "yolo26_hand_pose.pt + yolo26_face.pt"},
+]
+
+MODE_ALIASES = {
+    "behavior": "bfrb_behavior",
+    "geometry": "bfrb_geometry",
+    "bfrb": "bfrb_behavior",
+}
 
 # ==================== 安全的 json dumps（解决 numpy 类型问题） ====================
 def safe_json_dumps(data):
@@ -59,7 +77,6 @@ class VideoProcessingApp:
             'result_img': './runs/result.jpg'
         }
         self.recording = False
-        self.emotion_detector = None
         self.bfrb_detectors = {}  # BFRB 检测器缓存：key=(weight, face_weight, conf)
 
     def setup_routes(self):
@@ -79,7 +96,180 @@ class VideoProcessingApp:
 
     def file_names(self):
         items = [{'value': f, 'label': f} for f in os.listdir("./weights") if f.endswith('.pt')]
-        return json.dumps({'weight_items': items}, ensure_ascii=False)
+        return json.dumps({
+            'weight_items': items,
+            'analysis_modes': ANALYSIS_MODES,
+        }, ensure_ascii=False)
+
+    @staticmethod
+    def normalize_mode(value):
+        mode = MODE_ALIASES.get(str(value or '').strip(), str(value or '').strip())
+        valid_modes = {item["value"] for item in ANALYSIS_MODES}
+        return mode if mode in valid_modes else "emotion"
+
+    @staticmethod
+    def safe_weight_name(value, fallback):
+        name = str(value or fallback)
+        if os.path.basename(name) != name or not name.endswith('.pt'):
+            return fallback
+        return name if os.path.exists(f'./weights/{name}') else fallback
+
+    def get_emotion_detector(self, weight, conf):
+        weight = self.safe_weight_name(weight, 'emotion.pt')
+        # Keep one tracker per request. Reusing a tracker would leak track IDs from
+        # one user's image/video/camera session into the next session.
+        return EmotionDetector(
+            yolo_weights=f'./weights/{weight}',
+            conf=float(conf),
+        )
+
+    def build_analyzers(self, data):
+        """Create the model set selected by the shared image/video/camera mode."""
+        mode = self.normalize_mode(data.get('kind'))
+        conf = min(max(float(data.get('conf', 0.5)), 0.05), 0.95)
+        analyzers = {"mode": mode, "emotion": None, "behavior": None, "geometry": None}
+
+        if mode in ("combined", "emotion"):
+            requested_weight = data.get('weight') if mode == "emotion" else 'emotion.pt'
+            analyzers["emotion"] = self.get_emotion_detector(requested_weight, conf)
+        if mode in ("combined", "bfrb_behavior"):
+            _, analyzers["behavior"] = self.get_bfrb_detector('bfrb_behavior.pt', 'yolo26_face.pt', conf)
+        if mode in ("combined", "bfrb_geometry"):
+            _, analyzers["geometry"] = self.get_bfrb_detector('yolo26_hand_pose.pt', 'yolo26_face.pt', conf)
+        return analyzers
+
+    @staticmethod
+    def normalize_behavior_cues(result):
+        cues = []
+        for detection in result.get("detections", []):
+            if detection.get("behavior") == "hand_normal":
+                continue
+            cues.append({
+                "behavior": detection.get("behavior", "unknown"),
+                "cueType": detection.get("cue_type", detection.get("behavior", "未知线索")),
+                "confidence": float(detection.get("confidence", 0)),
+                "bbox": detection.get("bbox", []),
+                "evidenceType": "behavior-model",
+            })
+        return cues
+
+    @staticmethod
+    def normalize_geometry_cues(result):
+        cues = []
+        faces = result.get("faces", [])
+        hands = result.get("hands", [])
+        for contact in result.get("contacts", []):
+            hand_index = int(contact.get("hand_index", -1))
+            face_index = int(contact.get("face_index", -1))
+            hand = hands[hand_index] if 0 <= hand_index < len(hands) else {}
+            face = faces[face_index] if 0 <= face_index < len(faces) else {}
+            confidence = min(float(hand.get("confidence", 0)), float(face.get("confidence", 0)))
+            cues.append({
+                "behavior": f'geometry_{contact.get("region", "face")}',
+                "cueType": contact.get("cue_type", "手脸接触线索"),
+                "confidence": confidence,
+                "bbox": hand.get("bbox", []),
+                "evidenceType": "hand-face-geometry",
+                "geometry": {
+                    "iou": contact.get("iou", 0),
+                    "distance": contact.get("center_distance_norm", 0),
+                    "contactPoint": contact.get("contact_point", []),
+                    "faceBbox": face.get("bbox", []),
+                },
+            })
+        return cues
+
+    @staticmethod
+    def merge_bfrb_evidence(behavior_cues, geometry_cues):
+        """Use behavior detections as events and geometry as corroborating evidence."""
+        merged = []
+        geometry_by_type = {}
+        for cue in geometry_cues:
+            geometry_by_type.setdefault(cue["cueType"], []).append(cue)
+
+        covered_types = set()
+        for cue in behavior_cues:
+            item = dict(cue)
+            support = geometry_by_type.get(cue["cueType"], [])
+            if support:
+                strongest = max(support, key=lambda value: value.get("confidence", 0))
+                item["evidenceType"] = "behavior-model+hand-face-geometry"
+                item["geometry"] = strongest.get("geometry", {})
+                item["geometryConfidence"] = strongest.get("confidence", 0)
+                covered_types.add(cue["cueType"])
+            merged.append(item)
+
+        # Geometry remains useful when the behavior model misses a frame.
+        merged.extend(cue for cue in geometry_cues if cue["cueType"] not in covered_types)
+        return merged
+
+    @staticmethod
+    def draw_bfrb_evidence(frame, cues):
+        for cue in cues:
+            bbox = cue.get("bbox") or []
+            if len(bbox) != 4:
+                continue
+            x1, y1, x2, y2 = [int(value) for value in bbox]
+            is_supported = "+" in cue.get("evidenceType", "")
+            color = (70, 170, 70) if is_supported else (180, 100, 40)
+            cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+            confidence = float(cue.get("confidence", 0))
+            label = f'BFRB {confidence:.2f}'
+            cv2.putText(frame, label, (x1, max(y1 - 8, 16)), cv2.FONT_HERSHEY_SIMPLEX, 0.55, color, 2)
+        return frame
+
+    def analyze_frame(self, frame, analyzers, is_image=False, run_bfrb=True):
+        """Run one shared analysis pipeline without changing legacy emotion fields."""
+        annotated = frame.copy()
+        emotion = {"labels": [], "confidences": [], "bboxes": [], "trackIds": []}
+        behavior_result = {}
+        geometry_result = {}
+
+        if analyzers.get("emotion") is not None:
+            annotated, labels, confs, bboxes, track_ids = analyzers["emotion"].process_frame(
+                frame.copy(), is_image=is_image
+            )
+            emotion = {
+                "labels": labels,
+                "confidences": confs,
+                "bboxes": bboxes,
+                "trackIds": track_ids,
+            }
+
+        if run_bfrb and analyzers.get("behavior") is not None:
+            behavior_result = analyzers["behavior"].detect(frame.copy())
+        if run_bfrb and analyzers.get("geometry") is not None:
+            geometry_result = analyzers["geometry"].detect(frame.copy())
+
+        behavior_cues = self.normalize_behavior_cues(behavior_result)
+        geometry_cues = self.normalize_geometry_cues(geometry_result)
+        if analyzers["mode"] == "combined":
+            cues = self.merge_bfrb_evidence(behavior_cues, geometry_cues)
+        else:
+            cues = behavior_cues or geometry_cues
+
+        self.draw_bfrb_evidence(annotated, cues)
+        awareness_parts = []
+        if behavior_result.get("awareness_text"):
+            awareness_parts.append(behavior_result["awareness_text"])
+        if geometry_result.get("awareness_text") and geometry_result.get("contacts"):
+            awareness_parts.append("手脸空间关系也提供了辅助佐证。")
+
+        return annotated, {
+            "mode": analyzers["mode"],
+            "emotion": emotion,
+            "bfrb": {
+                "cue": bool(cues),
+                "cues": cues,
+                "behaviorDetections": behavior_result.get("detections", []),
+                "geometry": {
+                    "faces": geometry_result.get("faces", []),
+                    "hands": geometry_result.get("hands", []),
+                    "contacts": geometry_result.get("contacts", []),
+                },
+                "awarenessText": "".join(awareness_parts),
+            },
+        }
 
     # ====================== BFRB 手脸接触线索检测 ======================
     def get_bfrb_detector(self, weight, face_weight, conf):
@@ -150,21 +340,24 @@ class VideoProcessingApp:
 
     # ====================== 图片预测 ======================
     def predictImg(self):
-        data = request.get_json()
+        started_at = time.time()
+        data = request.get_json() or {}
         self.data = data
 
-        self.emotion_detector = EmotionDetector(
-            yolo_weights=f'./weights/{data["weight"]}',
-            conf=float(data["conf"])
-        )
+        analyzers = self.build_analyzers(data)
 
         img_path = './temp_img.jpg'
-        self.download(data["inputImg"], img_path)
+        self.download(data.get("inputImg", ""), img_path)
         img = cv2.imread(img_path)
         if img is None:
             return json.dumps({"status": 400, "message": "图片加载失败"}, ensure_ascii=False)
 
-        result_img, labels, confs, bboxes, track_ids = self.emotion_detector.process_frame(img, is_image=True)
+        result_img, analysis = self.analyze_frame(img, analyzers, is_image=True)
+        emotion = analysis["emotion"]
+        labels = emotion["labels"]
+        confs = emotion["confidences"]
+        bboxes = emotion["bboxes"]
+        track_ids = emotion["trackIds"]
 
         cv2.imwrite(self.paths['result_img'], result_img)
         uploaded_url = self.upload(self.paths['result_img'])
@@ -172,43 +365,52 @@ class VideoProcessingApp:
             os.remove(img_path)
 
         emotion_map = {'angry': '生气', 'happy': '高兴', 'neutral': '中性', 'sad': '悲伤'}
+        save_record = as_bool(data.get("keepRecord"), True)
         for i, (label, conf, bbox) in enumerate(zip(labels, confs, bboxes)):
+            if not save_record:
+                break
             tid = track_ids[i] if i < len(track_ids) and track_ids[i] is not None else f"img_{int(time.time())}_{i}"
             emotion_data = {
                 "emotionKind": emotion_map.get(label, label),
                 "confidence": conf,
-                "username": data["username"],
-                "startTime": data["startTime"],
+                "username": data.get("username", ""),
+                "startTime": data.get("startTime", ""),
                 "resultImg": uploaded_url,
                 "bbox": bbox
             }
             self.save_data(safe_json_dumps(emotion_data), 'http://localhost:9999/emotion')
 
-        return json.dumps({
-            "status": 200 if labels else 400,
-            "message": "预测成功" if labels else "未检测到表情",
+        has_signal = bool(labels or analysis["bfrb"]["cues"])
+        completed_without_signal = analyzers["mode"] != "emotion"
+        return safe_json_dumps({
+            "status": 200 if has_signal or completed_without_signal else 400,
+            "message": "综合感知完成" if has_signal else "分析完成，暂未检测到清晰的情绪或BFRB线索",
             "outImg": uploaded_url,
             "label": json.dumps(labels),
-            "confidence": json.dumps(confs)
-        }, ensure_ascii=False)
+            "confidence": json.dumps(confs),
+            "allTime": f"{time.time() - started_at:.2f}",
+            "personCount": len(labels),
+            "analysis": analysis,
+        })
 
     # ====================== 视频预测 ======================
     def predictVideo(self):
-        self.data = request.args.to_dict()
-        save_record = as_bool(self.data.get("saveRecord", self.data.get("keepRecord")), True)
-        keep_media = as_bool(self.data.get("keepMedia"), False)
-        self.emotion_detector = EmotionDetector(
-            yolo_weights=f'./weights/{self.data["weight"]}',
-            conf=float(self.data["conf"])
-        )
+        video_data = request.args.to_dict()
+        self.data = video_data
+        save_record = as_bool(video_data.get("saveRecord", video_data.get("keepRecord")), True)
+        keep_media = as_bool(video_data.get("keepMedia"), False)
+        analyzers = self.build_analyzers(video_data)
 
         recorded_ids = set()
-        self.download(self.data["inputVideo"], self.paths['download'])
+        self.download(video_data.get("inputVideo", ""), self.paths['download'])
         cap = cv2.VideoCapture(self.paths['download'])
         if not cap.isOpened():
             return Response("视频打开失败", status=400)
 
         fps = max(cap.get(cv2.CAP_PROP_FPS), 1)
+        bfrb_sample_interval = max(int(round(fps / 5)), 1)
+        event_aggregator = BfrbEventAggregator(fps=fps, min_hits=3, max_gap_seconds=0.5)
+        emotion_stats = {}
         w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         writer = cv2.VideoWriter(self.paths['video_output'], cv2.VideoWriter_fourcc(*'XVID'), fps, (w, h))
@@ -223,7 +425,26 @@ class VideoProcessingApp:
                 if not ret:
                     break
 
-                frame, labels, confs, bboxes, track_ids = self.emotion_detector.process_frame(frame)
+                run_bfrb = processed % bfrb_sample_interval == 0
+                frame, analysis = self.analyze_frame(frame, analyzers, run_bfrb=run_bfrb)
+                emotion = analysis["emotion"]
+                labels = emotion["labels"]
+                confs = emotion["confidences"]
+                bboxes = emotion["bboxes"]
+                track_ids = emotion["trackIds"]
+
+                for label, confidence in zip(labels, confs):
+                    item = emotion_stats.setdefault(label, {"count": 0, "confidences": []})
+                    item["count"] += 1
+                    item["confidences"].append(float(confidence))
+
+                if run_bfrb:
+                    event_aggregator.update(processed, analysis["bfrb"]["cues"])
+                    self.socketio.emit('bfrb_live', {'data': {
+                        "scene": "video",
+                        "frameSeconds": round(processed / fps, 2),
+                        "cues": analysis["bfrb"]["cues"],
+                    }})
 
                 emotion_map = {'angry': '生气', 'happy': '高兴', 'neutral': '中性', 'sad': '悲伤'}
                 for label, conf, bbox, tid in zip(labels, confs, bboxes, track_ids):
@@ -232,8 +453,8 @@ class VideoProcessingApp:
                         emotion_data = {
                             "emotionKind": emotion_map.get(label, label),
                             "confidence": conf,
-                            "username": self.data["username"],
-                            "startTime": self.data["startTime"],
+                            "username": video_data.get("username", ""),
+                            "startTime": video_data.get("startTime", ""),
                             "bbox": bbox
                         }
                         self.save_data(safe_json_dumps(emotion_data), 'http://localhost:9999/emotion')  # 使用安全序列化
@@ -250,30 +471,46 @@ class VideoProcessingApp:
             cap.release()
             writer.release()
 
+            bfrb_summary = event_aggregator.finish(processed)
+            emotion_summary = []
+            for label, values in emotion_stats.items():
+                confidences = values["confidences"]
+                emotion_summary.append({
+                    "label": label,
+                    "frameCount": values["count"],
+                    "averageConfidence": round(sum(confidences) / len(confidences), 3),
+                    "maxConfidence": round(max(confidences), 3),
+                })
+            emotion_summary.sort(key=lambda item: -item["frameCount"])
+            self.socketio.emit('analysis_result', {'data': {
+                "scene": "video",
+                "mode": analyzers["mode"],
+                "emotionSummary": emotion_summary,
+                "bfrbSummary": bfrb_summary,
+            }})
+
             for p in self.convert_avi_to_mp4(self.paths['video_output']):
                 self.socketio.emit('progress', {'data': p})
 
             url = self.upload(self.paths['output']) if keep_media else ""
             if not keep_media:
-                self.data["inputVideo"] = ""
-            self.data["outVideo"] = url or ""
+                video_data["inputVideo"] = ""
+            video_data["outVideo"] = url or ""
             if not save_record:
                 self.cleanup_files([self.paths['download'], self.paths['output'], self.paths['video_output']])
                 return
-            self.save_data(safe_json_dumps(self.data), 'http://localhost:9999/videoRecords')  # 安全序列化
+            self.save_data(safe_json_dumps(video_data), 'http://localhost:9999/videoRecords')  # 安全序列化
             self.cleanup_files([self.paths['download'], self.paths['output'], self.paths['video_output']])
 
         return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
     # ====================== 摄像头实时预测 ======================
     def predictCamera(self):
-        self.data = request.args.to_dict()
-        save_record = as_bool(self.data.get("saveRecord", self.data.get("keepRecord")), True)
-        keep_media = as_bool(self.data.get("keepMedia"), False)
-        self.emotion_detector = EmotionDetector(
-            yolo_weights=f'./weights/{self.data["weight"]}',
-            conf=float(self.data["conf"])
-        )
+        camera_data = request.args.to_dict()
+        self.data = camera_data
+        save_record = as_bool(camera_data.get("saveRecord", camera_data.get("keepRecord")), True)
+        keep_media = as_bool(camera_data.get("keepMedia"), False)
+        analyzers = self.build_analyzers(camera_data)
 
         recorded_ids = set()
         cap = cv2.VideoCapture(0)
@@ -281,18 +518,40 @@ class VideoProcessingApp:
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
         writer = cv2.VideoWriter(self.paths['camera_output'], cv2.VideoWriter_fourcc(*'XVID'), 20, (640, 480))
         self.recording = True
+        event_aggregator = BfrbEventAggregator(fps=20, min_hits=3, max_gap_seconds=0.5)
+        emotion_stats = {}
 
         def generate():
             nonlocal recorded_ids
             fps_counter = 0
             fps_start = time.time()
+            frame_index = 0
 
             while self.recording:
                 ret, frame = cap.read()
                 if not ret:
                     continue
 
-                frame, labels, confs, bboxes, track_ids = self.emotion_detector.process_frame(frame)
+                run_bfrb = frame_index % 4 == 0
+                frame, analysis = self.analyze_frame(frame, analyzers, run_bfrb=run_bfrb)
+                emotion = analysis["emotion"]
+                labels = emotion["labels"]
+                confs = emotion["confidences"]
+                bboxes = emotion["bboxes"]
+                track_ids = emotion["trackIds"]
+
+                for label, confidence in zip(labels, confs):
+                    item = emotion_stats.setdefault(label, {"count": 0, "confidences": []})
+                    item["count"] += 1
+                    item["confidences"].append(float(confidence))
+
+                if run_bfrb:
+                    event_aggregator.update(frame_index, analysis["bfrb"]["cues"])
+                    self.socketio.emit('bfrb_live', {'data': {
+                        "scene": "camera",
+                        "frameSeconds": round(frame_index / 20, 2),
+                        "cues": analysis["bfrb"]["cues"],
+                    }})
 
                 emotion_map = {'angry': '生气', 'happy': '高兴', 'neutral': '中性', 'sad': '悲伤'}
                 for label, conf, bbox, tid in zip(labels, confs, bboxes, track_ids):
@@ -302,8 +561,8 @@ class VideoProcessingApp:
                             "emotion_id": str(tid),
                             "emotionType": emotion_map.get(label, label),
                             "confidence": conf,
-                            "username": self.data["username"],
-                            "startTime": self.data["startTime"],
+                            "username": camera_data.get("username", ""),
+                            "startTime": camera_data.get("startTime", ""),
                             "bbox": bbox
                         }
                         self.save_data(safe_json_dumps(emotion_data), 'http://localhost:9999/emotion')  # 安全序列化
@@ -317,20 +576,38 @@ class VideoProcessingApp:
                     elapsed = time.time() - fps_start
                     fps = fps_counter / elapsed if elapsed > 0 else 0
                     self.socketio.emit('fps', {'data': f"{fps:.1f}"})
+                frame_index += 1
 
                 yield b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + jpeg.tobytes() + b'\r\n'
 
             cap.release()
             writer.release()
+            bfrb_summary = event_aggregator.finish(frame_index)
+            emotion_summary = []
+            for label, values in emotion_stats.items():
+                confidences = values["confidences"]
+                emotion_summary.append({
+                    "label": label,
+                    "frameCount": values["count"],
+                    "averageConfidence": round(sum(confidences) / len(confidences), 3),
+                    "maxConfidence": round(max(confidences), 3),
+                })
+            emotion_summary.sort(key=lambda item: -item["frameCount"])
+            self.socketio.emit('analysis_result', {'data': {
+                "scene": "camera",
+                "mode": analyzers["mode"],
+                "emotionSummary": emotion_summary,
+                "bfrbSummary": bfrb_summary,
+            }})
             for p in self.convert_avi_to_mp4(self.paths['camera_output']):
                 self.socketio.emit('progress', {'data': p})
 
             url = self.upload(self.paths['output']) if keep_media else ""
-            self.data["outVideo"] = url or ""
+            camera_data["outVideo"] = url or ""
             if not save_record:
                 self.cleanup_files([self.paths['output'], self.paths['camera_output']])
                 return
-            self.save_data(safe_json_dumps(self.data), 'http://localhost:9999/cameraRecords')
+            self.save_data(safe_json_dumps(camera_data), 'http://localhost:9999/cameraRecords')
             self.cleanup_files([self.paths['output'], self.paths['camera_output']])
 
         return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')

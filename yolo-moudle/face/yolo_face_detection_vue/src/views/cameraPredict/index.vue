@@ -34,8 +34,8 @@
 				</label>
 
 				<label>
-					<span>模型</span>
-					<el-select v-model="weight" placeholder="选择模型" size="large">
+					<span>模型方案</span>
+					<el-select v-model="weight" placeholder="选择模型方案" size="large">
 						<el-option v-for="item in state.weightItems" :key="item.value" :label="item.label" :value="item.value" />
 					</el-select>
 				</label>
@@ -93,6 +93,24 @@
 							<p>{{ resultCard.practice }}</p>
 						</div>
 					</div>
+					<div v-if="state.resultReady" class="analysis-summary">
+						<div class="summary-metrics">
+							<div><strong>{{ bfrbSummary.eventCount }}</strong><span>BFRB事件</span></div>
+							<div><strong>{{ bfrbSummary.totalDurationSeconds }}s</strong><span>累计持续</span></div>
+							<div><strong>{{ state.analysisResult?.emotionSummary?.length || 0 }}</strong><span>情绪线索类型</span></div>
+						</div>
+						<div v-if="bfrbSummary.events.length" class="event-list">
+							<div v-for="event in bfrbSummary.events.slice(0, 5)" :key="event.id" class="event-item">
+								<div>
+									<strong>{{ event.cueType }}</strong>
+									<span>{{ event.startSeconds }}s–{{ event.endSeconds }}s · 持续 {{ event.durationSeconds }}s</span>
+								</div>
+								<el-tag type="warning" effect="plain">最高 {{ confidencePercent(event.maxConfidence) }}%</el-tag>
+								<small>{{ evidenceLabel(event.evidenceType) }} · 关键帧 {{ event.keyFrameSeconds }}s</small>
+							</div>
+						</div>
+						<p v-else class="no-event">本次没有形成满足连续性条件的BFRB事件，零散单帧命中不会计入次数。</p>
+					</div>
 					<div class="save-note">
 						<span>{{ keepRecord ? '这次会保存到觉察记录' : '这次不会保存为觉察记录' }}</span>
 						<span>{{ keepMedia ? '记录里保留结果视频路径' : '记录里不保留结果视频路径' }}</span>
@@ -112,26 +130,29 @@ import { useUserInfo } from '/@/stores/userInfo';
 import { storeToRefs } from 'pinia';
 import { SocketService } from '/@/utils/socket';
 import { formatDate } from '/@/utils/formatTime';
+import { analysisModeItems, confidencePercent, evidenceLabel, getAnalysisModelOptions, type AnalysisResult, type BfrbCue } from '/@/utils/analysisModes';
 
 const stores = useUserInfo();
 const { userInfos } = storeToRefs(stores);
 
-const conf = ref(50);
-const kind = ref('emotion');
-const weight = ref('');
+const conf = ref(30);
+const kind = ref('combined');
+const weight = ref('combined');
 const cameraAccepted = ref(false);
 const keepRecord = ref(true);
 const keepMedia = ref(false);
 const recordSaved = ref(false);
 
 const state = reactive({
-	weightItems: [] as Array<{ value: string; label: string }>,
-	kindItems: [{ value: 'emotion', label: '情绪与身体信号感知' }],
+	weightItems: getAnalysisModelOptions('combined'),
+	kindItems: analysisModeItems,
 	videoPath: '',
 	percentage: 0,
 	showProgress: false,
 	cameraIsOpen: false,
 	resultReady: false,
+	analysisResult: null as AnalysisResult | null,
+	liveCues: [] as BfrbCue[],
 	form: {
 		username: '',
 		weight: '',
@@ -145,6 +166,12 @@ const state = reactive({
 
 const canStart = computed(() => cameraAccepted.value && !!weight.value);
 const socketService = new SocketService();
+const bfrbSummary = computed(() => state.analysisResult?.bfrbSummary || {
+	eventCount: 0,
+	totalDurationSeconds: 0,
+	events: [],
+	byBehavior: [],
+});
 
 const resultCard = computed(() => {
 	if (state.cameraIsOpen) {
@@ -155,9 +182,13 @@ const resultCard = computed(() => {
 		};
 	}
 	if (state.resultReady) {
+		const eventCount = bfrbSummary.value.eventCount;
+		const leadingEvent = bfrbSummary.value.byBehavior[0];
 		return {
-			summary: '这段实时感知已经停止并整理。它留下的是一份身心线索，帮助你理解刚才的状态变化。',
-			bodySignal: '可以回想刚才哪些动作更频繁，例如搓手、低头、咬指甲或抓挠皮肤，它们可能是在提醒你需要放松。',
+			summary: eventCount
+				? `实时感知形成了 ${eventCount} 个BFRB行为事件${leadingEvent ? `，主要线索是“${leadingEvent.cueType}”` : ''}。次数已经按连续事件合并。`
+				: '实时感知已经整理完成，没有形成满足连续性条件的BFRB事件；零散命中没有被当作行为次数。',
+			bodySignal: eventCount ? '可以结合事件时间和持续时长，回想当时手心、下颌、肩颈或呼吸是否更紧绷。' : '可以回想刚才身体是否整体较平稳，也允许模型暂时没有看清。',
 			practice: '给自己 60 秒：吸气时默念“我在这里”，呼气时默念“我可以慢一点”。然后再决定下一步。',
 		};
 	}
@@ -186,22 +217,21 @@ socketService.on('progress', (data: string) => {
 	}
 });
 
+socketService.on('bfrb_live', (data: any) => {
+	if (data?.scene === 'camera') state.liveCues = data.cues || [];
+});
+
+socketService.on('analysis_result', (data: AnalysisResult) => {
+	if (data?.scene !== 'camera') return;
+	state.analysisResult = data;
+	completeCameraReflection();
+});
+
 const formatTooltip = (val: number) => `${val}%`;
 
 const getData = () => {
-	request
-		.get('/api/flask/file_names')
-		.then((res) => {
-			if (res.code === 0 || res.code === '0') {
-				const data = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
-				state.weightItems = (data.weight_items || []).filter((item: any) => item.value.includes(kind.value) || item.value.includes('emotion'));
-				if (state.weightItems.length > 0) weight.value = state.weightItems[0].value;
-			}
-		})
-		.catch(() => {
-			state.weightItems = [{ value: 'emotion.pt', label: 'emotion.pt' }];
-			weight.value = 'emotion.pt';
-		});
+	state.weightItems = getAnalysisModelOptions(kind.value);
+	weight.value = state.weightItems[0].value;
 };
 
 const startCameraSense = async () => {
@@ -220,7 +250,7 @@ const startCameraSense = async () => {
 		}
 	);
 
-	state.form.weight = weight.value || 'emotion.pt';
+	state.form.weight = weight.value || 'combined';
 	state.form.kind = kind.value;
 	state.form.conf = conf.value / 100;
 	state.form.username = userInfos.value.userName;
@@ -232,6 +262,8 @@ const startCameraSense = async () => {
 	state.percentage = 0;
 	state.showProgress = false;
 	recordSaved.value = false;
+	state.analysisResult = null;
+	state.liveCues = [];
 
 	saveCameraConsent();
 	const queryParams = new URLSearchParams(state.form as any).toString();
@@ -244,7 +276,6 @@ const stopCameraSense = () => {
 		state.cameraIsOpen = false;
 		state.showProgress = true;
 		ElMessage.success('摄像头感知已停止，正在整理这次线索。');
-		completeCameraReflection();
 	});
 };
 
@@ -269,8 +300,8 @@ const completeCameraReflection = async () => {
 	await saveAwarenessRecord({
 		username: userInfos.value.userName,
 		sourceType: 'camera',
-		emotionLabel: '实时线索',
-		confidence: `线索阈值 ${conf.value}%`,
+		emotionLabel: bfrbSummary.value.eventCount ? `BFRB事件 ${bfrbSummary.value.eventCount} 次` : '实时综合线索',
+		confidence: bfrbSummary.value.events.length ? `最高置信度 ${confidencePercent(Math.max(...bfrbSummary.value.events.map((event) => event.maxConfidence)))}%` : `线索阈值 ${conf.value}%`,
 		bodySignal: resultCard.value.bodySignal,
 		gentleSummary: resultCard.value.summary,
 		suggestedPractice: resultCard.value.practice,
@@ -527,6 +558,74 @@ onUnmounted(() => {
 		color: #67594e;
 		line-height: 1.75;
 	}
+}
+
+.analysis-summary {
+	margin-top: 14px;
+	padding: 14px;
+	border: 1px solid rgba(92, 151, 111, 0.24);
+	border-radius: 8px;
+	background: #f7fbf6;
+}
+
+.summary-metrics {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 8px;
+
+	div {
+		display: grid;
+		gap: 4px;
+		padding: 10px;
+		border-radius: 8px;
+		background: #ffffff;
+	}
+
+	strong {
+		color: #477255;
+		font-size: 20px;
+	}
+
+	span {
+		color: #718078;
+		font-size: 12px;
+	}
+}
+
+.event-list {
+	display: grid;
+	gap: 8px;
+	margin-top: 12px;
+}
+
+.event-item {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	gap: 6px 10px;
+	padding: 10px;
+	border-radius: 8px;
+	background: #ffffff;
+
+	div {
+		display: grid;
+		gap: 4px;
+	}
+
+	span,
+	small {
+		color: #75695e;
+		font-size: 12px;
+	}
+
+	small {
+		grid-column: 1 / -1;
+	}
+}
+
+.no-event {
+	margin: 12px 0 0;
+	color: #66766d;
+	line-height: 1.7;
 }
 
 .save-note {

@@ -33,8 +33,8 @@
 					</el-select>
 				</div>
 				<div class="control-item">
-					<span>模型</span>
-					<el-select v-model="weight" size="large" placeholder="选择模型">
+					<span>模型方案</span>
+					<el-select v-model="weight" size="large" placeholder="选择模型方案">
 						<el-option v-for="item in state.weightItems" :key="item.value" :label="item.label" :value="item.value" />
 					</el-select>
 				</div>
@@ -112,6 +112,17 @@
 							</el-tag>
 						</div>
 
+						<div v-if="state.prediction.bfrbCues.length" class="bfrb-evidence">
+							<strong>BFRB行为佐证</strong>
+							<div class="evidence-tags">
+								<el-tag v-for="(cue, index) in state.prediction.bfrbCues" :key="`${cue.cueType}-${index}`" type="warning" effect="plain">
+									{{ cue.cueType }} · {{ confidencePercent(cue.confidence) }}%
+								</el-tag>
+							</div>
+							<p>{{ state.prediction.bfrbAwareness || '模型发现了值得留意的身体动作线索，仅作为自我觉察参考。' }}</p>
+							<small>{{ evidenceLabel(state.prediction.bfrbCues[0]?.evidenceType) }}</small>
+						</div>
+
 						<div class="closed-loop">
 							<div>
 								<span>我看见的线索</span>
@@ -142,9 +153,9 @@
 
 			<section class="body-signal-band">
 				<div>
-					<span class="eyebrow">下一步会继续完善</span>
-					<h2>动作与身体信号会接入同一套陪伴式反馈</h2>
-					<p>当咬指甲、搓手、抓挠皮肤等动作模型准备好后，这里会从“表情线索”扩展到“身体信号”。表达方式仍会保持陪伴感，而不是压迫感。</p>
+					<span class="eyebrow">多模型协作已经接入</span>
+					<h2>表情、BFRB行为与手脸几何共同提供参考</h2>
+					<p>综合模式会同时分析情绪表情、行为类别和手脸空间关系。几何结果用于佐证行为线索，所有结果仍然只用于觉察，不作为医学诊断。</p>
 				</div>
 				<div class="body-steps">
 					<span>看见身体信号</span>
@@ -166,21 +177,22 @@ import { saveAwarenessRecord, savePrivacyConsent } from '/@/api/healing';
 import { useUserInfo } from '/@/stores/userInfo';
 import { storeToRefs } from 'pinia';
 import { formatDate } from '/@/utils/formatTime';
+import { analysisModeItems, confidencePercent, evidenceLabel, getAnalysisModelOptions, type BfrbCue } from '/@/utils/analysisModes';
 
 const stores = useUserInfo();
 const { userInfos } = storeToRefs(stores);
 
 const imageUrl = ref('');
 const predictedImageUrl = ref('');
-const conf = ref(45);
-const weight = ref('emotion.pt');
-const kind = ref('emotion');
+const conf = ref(30);
+const weight = ref('combined');
+const kind = ref('combined');
 const privacyAccepted = ref(false);
 const keepRecord = ref(true);
 const keepMedia = ref(false);
 
 const state = reactive({
-	kindItems: [{ value: 'emotion', label: '情绪表情感知' }],
+	kindItems: analysisModeItems,
 	weightItems: [] as Array<{ value: string; label: string }>,
 	img: '',
 	loading: false,
@@ -190,6 +202,8 @@ const state = reactive({
 		confidences: [] as number[],
 		allTime: '',
 		personCount: 0,
+		bfrbCues: [] as BfrbCue[],
+		bfrbAwareness: '',
 	},
 	form: {
 		username: '',
@@ -218,11 +232,12 @@ const companionText = computed(() => {
 
 const resultCard = computed(() => {
 	const primary = state.prediction.labels[0] || '';
+	const primaryBfrb = state.prediction.bfrbCues[0];
 	const confidence = state.prediction.confidences[0] ? `${state.prediction.confidences[0].toFixed(0)}%` : '';
 	return {
-		title: primary ? `${getEmotionChinese(primary)}感被看见了` : '这一刻被轻轻看见了',
-		confidence,
-		summary: buildSummary(primary, confidence),
+		title: primary ? `${getEmotionChinese(primary)}感被看见了` : primaryBfrb ? `${primaryBfrb.cueType}被留意到了` : '这一刻被轻轻看见了',
+		confidence: confidence || (primaryBfrb ? `${confidencePercent(primaryBfrb.confidence)}%` : ''),
+		summary: buildSummary(primary, confidence, primaryBfrb),
 		bodySignal: buildBodySignal(primary),
 		practice: buildPractice(primary),
 	};
@@ -248,6 +263,8 @@ const handleUploadSuccess: UploadProps['onSuccess'] = (response, file) => {
 	state.resultReady = false;
 	state.prediction.labels = [];
 	state.prediction.confidences = [];
+	state.prediction.bfrbCues = [];
+	state.prediction.bfrbAwareness = '';
 	predictedImageUrl.value = '';
 	ElMessage.success('图片已放好，可以开始温柔感知。');
 };
@@ -257,22 +274,8 @@ const handleLocalPreview = (file: UploadFile) => {
 };
 
 const getModelData = () => {
-	request
-		.get('/api/flask/file_names')
-		.then((res) => {
-			if (res.code === '0' || res.code === 0) {
-				const data = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
-				const weights = data.weight_items || [];
-				state.weightItems = weights.filter((item: any) => item.value.includes(kind.value) || item.value.includes('emotion'));
-				if (state.weightItems.length > 0) weight.value = state.weightItems[0].value;
-			} else {
-				ElMessage.warning('暂时没有拿到模型列表，稍后可以再试一次。');
-			}
-		})
-		.catch(() => {
-			state.weightItems = [{ value: 'emotion.pt', label: 'emotion.pt' }];
-			weight.value = 'emotion.pt';
-		});
+	state.weightItems = getAnalysisModelOptions(kind.value);
+	weight.value = state.weightItems[0].value;
 };
 
 const startPredict = async () => {
@@ -289,7 +292,7 @@ const startPredict = async () => {
 	state.form = {
 		username: userInfos.value.userName,
 		inputImg: state.img,
-		weight: weight.value || 'emotion.pt',
+		weight: weight.value || 'combined',
 		conf: conf.value / 100,
 		kind: kind.value,
 		startTime: formatDate(new Date(), 'YYYY-mm-dd HH:MM:SS'),
@@ -320,6 +323,8 @@ const processPredictionResult = async (data: any) => {
 	state.prediction.confidences = normalizeConfidence(parsed.confidence);
 	state.prediction.allTime = parsed.allTime || '0';
 	state.prediction.personCount = parsed.personCount || state.prediction.labels.length;
+	state.prediction.bfrbCues = parsed.analysis?.bfrb?.cues || [];
+	state.prediction.bfrbAwareness = parsed.analysis?.bfrb?.awarenessText || '';
 	predictedImageUrl.value = parsed.outImg || '';
 	state.resultReady = true;
 
@@ -413,10 +418,14 @@ const getCompanionSentence = (emotion: string) => {
 	return textMap[emotion] || '我看见了一点情绪线索。我们先温柔地观察，不急着给它下结论。';
 };
 
-const buildSummary = (emotion: string, confidence: string) => {
+const buildSummary = (emotion: string, confidence: string, bfrbCue?: BfrbCue) => {
+	if (!emotion && bfrbCue) {
+		return `模型留意到“${bfrbCue.cueType}”，并给出了${evidenceLabel(bfrbCue.evidenceType)}。这是一条行为觉察线索，不代表医学诊断。`;
+	}
 	if (!emotion) return '这张图片里暂时没有形成清晰线索。没有关系，平静或模糊本身也可以被温柔看见。';
 	const prefix = confidence ? `模型看到的主要线索是“${getEmotionChinese(emotion)}”，清晰程度约 ${confidence}。` : `模型看到的主要线索是“${getEmotionChinese(emotion)}”。`;
-	return `${prefix} 这只是帮助你觉察当下状态的参考，不代表对你的定义。`;
+	const bfrbText = bfrbCue ? ` 同时留意到“${bfrbCue.cueType}”的身体动作线索。` : '';
+	return `${prefix}${bfrbText} 这些结果只用于帮助觉察当下状态，不代表对你的定义。`;
 };
 
 const buildBodySignal = (emotion: string) => {
@@ -458,6 +467,30 @@ onMounted(() => {
 	height: auto;
 	min-height: 100%;
 	overflow: visible;
+}
+
+.bfrb-evidence {
+	margin-top: 14px;
+	padding: 14px;
+	border: 1px solid rgba(201, 139, 66, 0.25);
+	border-radius: 8px;
+	background: #fffaf2;
+
+	p {
+		margin: 10px 0 6px;
+		line-height: 1.7;
+	}
+
+	small {
+		color: #8a6848;
+	}
+}
+
+.evidence-tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-top: 10px;
 }
 
 .image-sense-shell {
