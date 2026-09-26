@@ -72,6 +72,62 @@ CREATE TABLE IF NOT EXISTS awareness_records (
   INDEX idx_awareness_source_created (source_type, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS detection_analysis_records (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  session_id VARCHAR(64) NOT NULL UNIQUE,
+  awareness_record_id INT NULL,
+  username VARCHAR(64),
+  source_type VARCHAR(32) NOT NULL,
+  analysis_mode VARCHAR(32) NOT NULL,
+  model_configuration VARCHAR(512),
+  emotion_type_count INT DEFAULT 0,
+  bfrb_event_count INT DEFAULT 0,
+  bfrb_total_duration_seconds DECIMAL(12, 3) DEFAULT 0,
+  evidence_types VARCHAR(255),
+  complaint VARCHAR(2048),
+  additional_notes VARCHAR(2048),
+  aggregation_rules_json LONGTEXT,
+  input_media VARCHAR(1024),
+  output_media VARCHAR(1024),
+  keep_record TINYINT(1) DEFAULT 1,
+  keep_media TINYINT(1) DEFAULT 0,
+  detected_at TIMESTAMP NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_detection_username_created (username, created_at),
+  INDEX idx_detection_awareness (awareness_record_id),
+  INDEX idx_detection_source_created (source_type, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS detection_emotion_results (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  analysis_record_id INT NOT NULL,
+  emotion_type VARCHAR(64) NOT NULL,
+  frame_count INT DEFAULT 0,
+  average_confidence DECIMAL(8, 6) DEFAULT 0,
+  max_confidence DECIMAL(8, 6) DEFAULT 0,
+  INDEX idx_detection_emotion_record (analysis_record_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS detection_bfrb_events (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  analysis_record_id INT NOT NULL,
+  event_key VARCHAR(64),
+  behavior_code VARCHAR(128),
+  cue_type VARCHAR(128),
+  start_seconds DECIMAL(12, 3) DEFAULT 0,
+  end_seconds DECIMAL(12, 3) DEFAULT 0,
+  duration_seconds DECIMAL(12, 3) DEFAULT 0,
+  sample_count INT DEFAULT 0,
+  average_confidence DECIMAL(8, 6) DEFAULT 0,
+  max_confidence DECIMAL(8, 6) DEFAULT 0,
+  key_frame_seconds DECIMAL(12, 3) DEFAULT 0,
+  evidence_type VARCHAR(128),
+  key_bbox_json VARCHAR(1024),
+  geometry_json LONGTEXT,
+  INDEX idx_detection_bfrb_record (analysis_record_id),
+  INDEX idx_detection_bfrb_behavior (behavior_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS healing_conversations (
   id INT AUTO_INCREMENT PRIMARY KEY,
   username VARCHAR(64),

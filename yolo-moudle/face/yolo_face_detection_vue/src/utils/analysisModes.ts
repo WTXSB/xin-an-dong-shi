@@ -40,6 +40,9 @@ export interface BfrbEvent {
 export interface AnalysisResult {
 	scene?: 'image' | 'video' | 'camera';
 	mode?: string;
+	sessionId?: string;
+	analysisRecordId?: number;
+	structuredSaved?: boolean;
 	emotionSummary?: Array<{
 		label: string;
 		frameCount: number;
@@ -59,6 +62,11 @@ export interface AnalysisResult {
 		rules?: { note?: string };
 	};
 }
+
+export const createAnalysisSessionId = () => {
+	if (typeof globalThis.crypto?.randomUUID === 'function') return globalThis.crypto.randomUUID();
+	return `analysis-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+};
 
 export const confidencePercent = (value?: number) => {
 	const number = Number(value || 0);

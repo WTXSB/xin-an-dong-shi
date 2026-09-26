@@ -102,13 +102,60 @@
 							</div>
 						</div>
 
+						<div v-if="state.expandedAnalysis[item.id]" v-loading="state.analysisLoading[item.id]" class="structured-analysis">
+							<template v-if="state.analysisDetails[item.id]">
+								<div class="analysis-heading">
+									<div>
+										<span>完整分析结果</span>
+										<strong>{{ analysisModeName(state.analysisDetails[item.id].record.analysisMode) }}</strong>
+									</div>
+									<div class="analysis-metrics">
+										<span>情绪类型 {{ state.analysisDetails[item.id].emotionResults.length }}</span>
+										<span>BFRB事件 {{ state.analysisDetails[item.id].record.bfrbEventCount || 0 }}</span>
+										<span>累计 {{ state.analysisDetails[item.id].record.bfrbTotalDurationSeconds || 0 }} 秒</span>
+									</div>
+								</div>
+
+								<div v-if="state.analysisDetails[item.id].record.complaint || state.analysisDetails[item.id].record.additionalNotes" class="patient-notes">
+									<p v-if="state.analysisDetails[item.id].record.complaint"><span>主诉</span>{{ state.analysisDetails[item.id].record.complaint }}</p>
+									<p v-if="state.analysisDetails[item.id].record.additionalNotes"><span>补充说明</span>{{ state.analysisDetails[item.id].record.additionalNotes }}</p>
+								</div>
+
+								<div v-if="state.analysisDetails[item.id].emotionResults.length" class="emotion-results">
+									<div v-for="emotion in state.analysisDetails[item.id].emotionResults" :key="emotion.id || emotion.emotionType">
+										<strong>{{ emotion.emotionType }}</strong>
+										<span>{{ emotion.frameCount }} 次采样</span>
+										<span>平均 {{ confidenceText(emotion.averageConfidence) }}</span>
+										<span>最高 {{ confidenceText(emotion.maxConfidence) }}</span>
+									</div>
+								</div>
+
+								<div v-if="state.analysisDetails[item.id].bfrbEvents.length" class="event-details">
+									<div v-for="event in state.analysisDetails[item.id].bfrbEvents" :key="event.id || event.eventKey">
+										<div>
+											<strong>{{ event.cueType || event.behaviorCode }}</strong>
+											<span>{{ evidenceName(event.evidenceType) }}</span>
+										</div>
+										<p>{{ event.startSeconds }}s–{{ event.endSeconds }}s，持续 {{ event.durationSeconds }}s；关键帧 {{ event.keyFrameSeconds }}s；最高置信度 {{ confidenceText(event.maxConfidence) }}</p>
+									</div>
+								</div>
+								<p v-else class="no-events">本次没有形成满足连续性阈值的 BFRB 事件，零散命中未被重复计数。</p>
+							</template>
+							<p v-else-if="!state.analysisLoading[item.id]" class="no-events">这是一条旧版觉察记录，尚未关联结构化检测明细。</p>
+						</div>
+
 						<div class="record-foot">
 							<div class="privacy">
 								<span>{{ item.keepRecord ? '已保存记录' : '未保存记录' }}</span>
 								<span>{{ item.keepMedia ? '保留素材' : '不主动保留素材' }}</span>
 								<span>{{ item.privacyNote || '你可以随时删除这条记录。' }}</span>
 							</div>
-							<button type="button" class="delete-btn" @click="deleteRecord(item)">删除</button>
+							<div class="record-actions">
+								<button type="button" class="detail-btn" @click="toggleAnalysisDetail(item)">
+									{{ state.expandedAnalysis[item.id] ? '收起完整分析' : '查看完整分析' }}
+								</button>
+								<button type="button" class="delete-btn" @click="deleteRecord(item)">删除</button>
+							</div>
 						</div>
 					</div>
 				</article>
@@ -132,7 +179,7 @@
 import { computed, onMounted, reactive } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import request from '/@/utils/request';
-import { getAwarenessRecords } from '/@/api/healing';
+import { getAnalysisRecordByAwareness, getAwarenessRecords } from '/@/api/healing';
 import { useUserInfo } from '/@/stores/userInfo';
 import { storeToRefs } from 'pinia';
 
@@ -153,6 +200,38 @@ type AwarenessRecord = {
 	createdAt?: string;
 };
 
+type AnalysisDetail = {
+	record: {
+		id: number;
+		analysisMode?: string;
+		modelConfiguration?: string;
+		bfrbEventCount?: number;
+		bfrbTotalDurationSeconds?: number;
+		complaint?: string;
+		additionalNotes?: string;
+	};
+	emotionResults: Array<{
+		id?: number;
+		emotionType: string;
+		frameCount: number;
+		averageConfidence: number;
+		maxConfidence: number;
+	}>;
+	bfrbEvents: Array<{
+		id?: number;
+		eventKey?: string;
+		behaviorCode?: string;
+		cueType?: string;
+		startSeconds?: number;
+		endSeconds?: number;
+		durationSeconds?: number;
+		keyFrameSeconds?: number;
+		maxConfidence?: number;
+		evidenceType?: string;
+	}>;
+	behaviorStats: Array<Record<string, any>>;
+};
+
 const stores = useUserInfo();
 const { userInfos } = storeToRefs(stores);
 
@@ -167,6 +246,9 @@ const state = reactive({
 	loading: false,
 	records: [] as AwarenessRecord[],
 	total: 0,
+	analysisDetails: {} as Record<number, AnalysisDetail>,
+	expandedAnalysis: {} as Record<number, boolean>,
+	analysisLoading: {} as Record<number, boolean>,
 	params: {
 		pageNum: 1,
 		pageSize: 8,
@@ -217,14 +299,60 @@ const deleteRecord = async (item: AwarenessRecord) => {
 		cancelButtonText: '先保留',
 		type: 'warning',
 	});
+	const structured = await request.delete(`/api/analysisRecords/by-awareness/${item.id}`);
+	if (structured.code !== '0' && structured.code !== 0 && structured.code !== '404') {
+		ElMessage.warning(structured.msg || '完整分析结果暂时无法删除，请稍后再试。');
+		return;
+	}
 	const res = await request.delete(`/api/awarenessRecords/${item.id}`);
 	if (res.code === '0' || res.code === 0) {
+		delete state.analysisDetails[item.id];
+		delete state.expandedAnalysis[item.id];
 		ElMessage.success('已经帮你删掉这条记录。');
 		getRecords();
 	} else {
 		ElMessage.warning(res.msg || '删除暂时没有完成，稍后再试一次。');
 	}
 };
+
+const toggleAnalysisDetail = async (item: AwarenessRecord) => {
+	if (state.expandedAnalysis[item.id]) {
+		state.expandedAnalysis[item.id] = false;
+		return;
+	}
+	state.expandedAnalysis[item.id] = true;
+	if (state.analysisDetails[item.id]) return;
+	state.analysisLoading[item.id] = true;
+	try {
+		const res = await getAnalysisRecordByAwareness(item.id);
+		if (res.code === '0' || res.code === 0) {
+			state.analysisDetails[item.id] = res.data as AnalysisDetail;
+		}
+	} catch (error) {
+		ElMessage.warning('完整分析结果暂时没有连上，稍后再试一次。');
+	} finally {
+		state.analysisLoading[item.id] = false;
+	}
+};
+
+const analysisModeName = (mode?: string) => {
+	const labels: Record<string, string> = {
+		combined: '综合分析（情绪 + BFRB 双证据）',
+		emotion: '情绪表情识别',
+		bfrb_behavior: 'BFRB 行为直检',
+		bfrb_geometry: 'BFRB 手脸几何',
+	};
+	return labels[mode || ''] || '结构化检测';
+};
+
+const evidenceName = (evidence?: string) => {
+	if (evidence === 'behavior-model+hand-face-geometry') return '行为模型 + 手脸几何双证据';
+	if (evidence === 'hand-face-geometry') return '手脸几何证据';
+	if (evidence === 'behavior-model') return 'BFRB 行为模型证据';
+	return '辅助线索';
+};
+
+const confidenceText = (value?: number) => `${Math.round(Number(value || 0) * 1000) / 10}%`;
 
 const sourceName = (sourceType?: string) => {
 	const map: Record<string, string> = {
@@ -324,6 +452,7 @@ onMounted(() => {
 .refresh-btn,
 .search-btn,
 .filter-btn,
+.detail-btn,
 .delete-btn {
 	border: none;
 	border-radius: 8px;
@@ -532,6 +661,133 @@ onMounted(() => {
 	border-top: 1px dashed rgba(174, 133, 91, 0.2);
 }
 
+.structured-analysis {
+	margin-top: 16px;
+	padding: 16px;
+	border: 1px solid rgba(143, 191, 159, 0.32);
+	border-radius: 8px;
+	background: #f7fbf7;
+}
+
+.analysis-heading {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+
+	span,
+	strong {
+		display: block;
+	}
+
+	span {
+		color: #708071;
+		font-size: 12px;
+	}
+
+	strong {
+		margin-top: 5px;
+		color: #42604d;
+	}
+}
+
+.analysis-metrics,
+.record-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.analysis-metrics span {
+	padding: 6px 9px;
+	border-radius: 999px;
+	background: #e8f4ea;
+	color: #50705b;
+}
+
+.patient-notes {
+	display: grid;
+	gap: 8px;
+	margin-top: 14px;
+
+	p {
+		margin: 0;
+		color: #62594f;
+		line-height: 1.7;
+	}
+
+	span {
+		margin-right: 10px;
+		color: #8a654a;
+		font-weight: 800;
+	}
+}
+
+.emotion-results {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	gap: 10px;
+	margin-top: 14px;
+
+	div {
+		display: grid;
+		gap: 4px;
+		padding: 12px;
+		border-radius: 8px;
+		background: #ffffff;
+	}
+
+	strong {
+		color: #58473c;
+	}
+
+	span {
+		color: #7b7068;
+		font-size: 12px;
+	}
+}
+
+.event-details {
+	display: grid;
+	gap: 10px;
+	margin-top: 14px;
+
+	> div {
+		padding: 12px;
+		border-left: 3px solid #8fbf9f;
+		border-radius: 6px;
+		background: #ffffff;
+	}
+
+	> div > div {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+	}
+
+	strong {
+		color: #4d5f51;
+	}
+
+	span,
+	p {
+		color: #776e67;
+		font-size: 12px;
+	}
+
+	p {
+		margin: 8px 0 0;
+		line-height: 1.7;
+	}
+}
+
+.no-events {
+	margin: 14px 0 0;
+	color: #7b7068;
+	line-height: 1.7;
+}
+
 .privacy {
 	display: flex;
 	flex-wrap: wrap;
@@ -551,6 +807,12 @@ onMounted(() => {
 	padding: 9px 14px;
 	background: #f8e9e3;
 	color: #a45e58;
+}
+
+.detail-btn {
+	padding: 9px 14px;
+	background: #e8f4ea;
+	color: #4e745a;
 }
 
 .pagination {
@@ -575,6 +837,7 @@ onMounted(() => {
 	}
 
 	.hero,
+	.analysis-heading,
 	.record-foot {
 		align-items: flex-start;
 		flex-direction: column;

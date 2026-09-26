@@ -6,6 +6,7 @@ import sys
 import cv2
 import requests
 import time
+import uuid
 import numpy as np  # 必须导入，用于后面类型判断
 from flask import Flask, Response, request
 from ultralytics import YOLO
@@ -271,6 +272,150 @@ class VideoProcessingApp:
             },
         }
 
+    @staticmethod
+    def build_emotion_summary(labels, confidences):
+        stats = {}
+        for label, confidence in zip(labels or [], confidences or []):
+            item = stats.setdefault(str(label), {"count": 0, "confidences": []})
+            item["count"] += 1
+            item["confidences"].append(float(confidence))
+        summary = []
+        for label, values in stats.items():
+            values_confidence = values["confidences"]
+            summary.append({
+                "label": label,
+                "frameCount": values["count"],
+                "averageConfidence": round(sum(values_confidence) / len(values_confidence), 3),
+                "maxConfidence": round(max(values_confidence), 3),
+            })
+        summary.sort(key=lambda item: -item["frameCount"])
+        return summary
+
+    @staticmethod
+    def build_image_bfrb_summary(cues):
+        events = []
+        totals = {}
+        for index, cue in enumerate(cues or [], start=1):
+            confidence = float(cue.get("confidence") or 0)
+            cue_type = str(cue.get("cueType") or cue.get("behavior") or "未知线索")
+            event = {
+                "id": f"image-bfrb-{index}",
+                "behavior": str(cue.get("behavior") or cue_type),
+                "cueType": cue_type,
+                "startSeconds": 0,
+                "endSeconds": 0,
+                "durationSeconds": 0,
+                "sampleCount": 1,
+                "averageConfidence": round(confidence, 3),
+                "maxConfidence": round(confidence, 3),
+                "keyFrameSeconds": 0,
+                "evidenceType": str(cue.get("evidenceType") or "unknown"),
+                "keyBbox": cue.get("bbox") or [],
+                "geometry": cue.get("geometry") or {},
+            }
+            events.append(event)
+            item = totals.setdefault(cue_type, {"count": 0, "maxConfidence": 0})
+            item["count"] += 1
+            item["maxConfidence"] = max(item["maxConfidence"], confidence)
+        return {
+            "eventCount": len(events),
+            "totalDurationSeconds": 0,
+            "events": events,
+            "byBehavior": [
+                {
+                    "cueType": cue_type,
+                    "count": values["count"],
+                    "totalDurationSeconds": 0,
+                    "maxConfidence": round(values["maxConfidence"], 3),
+                }
+                for cue_type, values in totals.items()
+            ],
+            "rules": {
+                "note": "图片为单帧观察，记录可见线索，不计算行为持续时长。"
+            },
+        }
+
+    @staticmethod
+    def model_configuration(mode):
+        return {
+            "combined": "emotion.pt + bfrb_behavior.pt + yolo26_hand_pose.pt + yolo26_face.pt",
+            "emotion": "emotion.pt",
+            "bfrb_behavior": "bfrb_behavior.pt",
+            "bfrb_geometry": "yolo26_hand_pose.pt + yolo26_face.pt",
+        }.get(mode, "emotion.pt")
+
+    def save_structured_analysis(self, data, source_type, mode, emotion_summary, bfrb_summary,
+                                 input_media="", output_media=""):
+        """Persist a complete result without making inference depend on persistence."""
+        session_id = str(data.get("sessionId") or uuid.uuid4())
+        data["sessionId"] = session_id
+        keep_record = as_bool(data.get("saveRecord", data.get("keepRecord")), True)
+        keep_media = as_bool(data.get("keepMedia"), False)
+        events = []
+        for event in (bfrb_summary or {}).get("events", []):
+            events.append({
+                "eventKey": event.get("id"),
+                "behaviorCode": event.get("behavior"),
+                "cueType": event.get("cueType"),
+                "startSeconds": event.get("startSeconds", 0),
+                "endSeconds": event.get("endSeconds", 0),
+                "durationSeconds": event.get("durationSeconds", 0),
+                "sampleCount": event.get("sampleCount", 0),
+                "averageConfidence": event.get("averageConfidence", 0),
+                "maxConfidence": event.get("maxConfidence", 0),
+                "keyFrameSeconds": event.get("keyFrameSeconds", 0),
+                "evidenceType": event.get("evidenceType", "unknown"),
+                "keyBboxJson": safe_json_dumps(event.get("keyBbox") or []),
+                "geometryJson": safe_json_dumps(event.get("geometry") or {}),
+            })
+        payload = {
+            "sessionId": session_id,
+            "username": data.get("username", ""),
+            "sourceType": source_type,
+            "analysisMode": mode,
+            "modelConfiguration": self.model_configuration(mode),
+            "complaint": data.get("complaint", ""),
+            "additionalNotes": data.get("additionalNotes", ""),
+            "aggregationRulesJson": safe_json_dumps((bfrb_summary or {}).get("rules") or {}),
+            "inputMedia": input_media if keep_media else "",
+            "outputMedia": output_media if keep_media else "",
+            "keepRecord": keep_record,
+            "keepMedia": keep_media,
+            "emotionResults": [
+                {
+                    "emotionType": item.get("label", "unknown"),
+                    "frameCount": item.get("frameCount", 0),
+                    "averageConfidence": item.get("averageConfidence", 0),
+                    "maxConfidence": item.get("maxConfidence", 0),
+                }
+                for item in (emotion_summary or [])
+            ],
+            "bfrbEvents": events,
+        }
+        try:
+            native_payload = json.loads(safe_json_dumps(payload))
+            response = requests.post(
+                "http://localhost:9999/analysisRecords",
+                json=native_payload,
+                timeout=8,
+            )
+            response.raise_for_status()
+            result = response.json()
+            result_data = result.get("data") or {}
+            record = result_data.get("record") or {}
+            return {
+                "sessionId": session_id,
+                "analysisRecordId": record.get("id"),
+                "structuredSaved": bool(result.get("code") == "0" and result_data.get("saved")),
+            }
+        except Exception as error:
+            print("结构化检测结果保存失败，已保留原有识别流程:", error)
+            return {
+                "sessionId": session_id,
+                "analysisRecordId": None,
+                "structuredSaved": False,
+            }
+
     # ====================== BFRB 手脸接触线索检测 ======================
     def get_bfrb_detector(self, weight, face_weight, conf):
         """BFRB 检测器懒加载缓存，避免每次请求重复加载模型。
@@ -380,6 +525,18 @@ class VideoProcessingApp:
             }
             self.save_data(safe_json_dumps(emotion_data), 'http://localhost:9999/emotion')
 
+        emotion_summary = self.build_emotion_summary(labels, confs)
+        bfrb_summary = self.build_image_bfrb_summary(analysis["bfrb"]["cues"])
+        persistence = self.save_structured_analysis(
+            data,
+            "image",
+            analyzers["mode"],
+            emotion_summary,
+            bfrb_summary,
+            input_media=data.get("inputImg", ""),
+            output_media=uploaded_url or "",
+        )
+
         has_signal = bool(labels or analysis["bfrb"]["cues"])
         completed_without_signal = analyzers["mode"] != "emotion"
         return safe_json_dumps({
@@ -391,6 +548,9 @@ class VideoProcessingApp:
             "allTime": f"{time.time() - started_at:.2f}",
             "personCount": len(labels),
             "analysis": analysis,
+            "emotionSummary": emotion_summary,
+            "bfrbSummary": bfrb_summary,
+            **persistence,
         })
 
     # ====================== 视频预测 ======================
@@ -482,17 +642,28 @@ class VideoProcessingApp:
                     "maxConfidence": round(max(confidences), 3),
                 })
             emotion_summary.sort(key=lambda item: -item["frameCount"])
+            for p in self.convert_avi_to_mp4(self.paths['video_output']):
+                if p < 100:
+                    self.socketio.emit('progress', {'data': p})
+
+            url = self.upload(self.paths['output']) if keep_media else ""
+            persistence = self.save_structured_analysis(
+                video_data,
+                "video",
+                analyzers["mode"],
+                emotion_summary,
+                bfrb_summary,
+                input_media=video_data.get("inputVideo", ""),
+                output_media=url or "",
+            )
             self.socketio.emit('analysis_result', {'data': {
                 "scene": "video",
                 "mode": analyzers["mode"],
                 "emotionSummary": emotion_summary,
                 "bfrbSummary": bfrb_summary,
+                **persistence,
             }})
-
-            for p in self.convert_avi_to_mp4(self.paths['video_output']):
-                self.socketio.emit('progress', {'data': p})
-
-            url = self.upload(self.paths['output']) if keep_media else ""
+            self.socketio.emit('progress', {'data': 100})
             if not keep_media:
                 video_data["inputVideo"] = ""
             video_data["outVideo"] = url or ""
@@ -593,17 +764,28 @@ class VideoProcessingApp:
                     "maxConfidence": round(max(confidences), 3),
                 })
             emotion_summary.sort(key=lambda item: -item["frameCount"])
+            for p in self.convert_avi_to_mp4(self.paths['camera_output']):
+                if p < 100:
+                    self.socketio.emit('camera_progress', {'data': p})
+
+            url = self.upload(self.paths['output']) if keep_media else ""
+            camera_data["outVideo"] = url or ""
+            persistence = self.save_structured_analysis(
+                camera_data,
+                "camera",
+                analyzers["mode"],
+                emotion_summary,
+                bfrb_summary,
+                output_media=url or "",
+            )
             self.socketio.emit('analysis_result', {'data': {
                 "scene": "camera",
                 "mode": analyzers["mode"],
                 "emotionSummary": emotion_summary,
                 "bfrbSummary": bfrb_summary,
+                **persistence,
             }})
-            for p in self.convert_avi_to_mp4(self.paths['camera_output']):
-                self.socketio.emit('progress', {'data': p})
-
-            url = self.upload(self.paths['output']) if keep_media else ""
-            camera_data["outVideo"] = url or ""
+            self.socketio.emit('camera_progress', {'data': 100})
             if not save_record:
                 self.cleanup_files([self.paths['output'], self.paths['camera_output']])
                 return

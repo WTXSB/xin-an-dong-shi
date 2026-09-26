@@ -202,11 +202,11 @@ export const dynamicRoutes: Array<RouteRecordRaw> = [
 					{
 						path: '/imgRecord',
 						name: 'imgRecord',
-						component: () => import('/@/views/imgRecord/index.vue'),
+						redirect: '/trashRecords',
 						meta: {
 							title: '图片觉察记录',
 							isLink: '',
-							isHide: false,
+							isHide: true,
 							isKeepAlive: true,
 							isAffix: false,
 							isIframe: false,
@@ -217,33 +217,33 @@ export const dynamicRoutes: Array<RouteRecordRaw> = [
 					{
 						path: '/videoRecord',
 						name: 'videoRecord',
-						component: () => import('/@/views/videoRecord/index.vue'),
+						redirect: '/trashRecords',
 						meta: {
 							title: '视频觉察记录',
 							isLink: '',
-							isHide: false,
+							isHide: true,
 							isKeepAlive: true,
 							isAffix: false,
 							isIframe: false,
 							roles: ['admin', 'common', 'others'],
 							icon: 'iconfontjs icon-spjl',
 						},
+					},
+					{
+						path: '/cameraRecord',
+						name: 'cameraRecord',
+						redirect: '/trashRecords',
+						meta: {
+							title: '摄像头觉察记录',
+							isLink: '',
+							isHide: true,
+							isKeepAlive: true,
+							isAffix: false,
+							isIframe: false,
+							roles: ['admin', 'common', 'others'],
+							icon: 'iconfontjs icon-sxtjl',
+						},
 					}
-					// {
-					// 	path: '/cameraRecord',
-					// 	name: 'cameraRecord',
-					// 	component: () => import('/@/views/cameraRecord/index.vue'),
-					// 	meta: {
-					// 		title: '摄像识别记录',
-					// 		isLink: '',
-					// 		isHide: false,
-					// 		isKeepAlive: true,
-					// 		isAffix: false,
-					// 		isIframe: false,
-					// 		roles: ['admin', 'common', 'others'],
-					// 		icon: 'iconfontjs icon-sxtjl',
-					// 	},
-					// }
 				]
 			},
 			

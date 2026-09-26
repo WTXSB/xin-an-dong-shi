@@ -173,11 +173,11 @@ import type { UploadFile, UploadProps } from 'element-plus';
 import { ElMessage } from 'element-plus';
 import { ChatLineRound, Picture, Plus, RefreshRight, VideoPlay } from '@element-plus/icons-vue';
 import request from '/@/utils/request';
-import { saveAwarenessRecord, savePrivacyConsent } from '/@/api/healing';
+import { linkAnalysisRecord, saveAwarenessRecord, savePrivacyConsent } from '/@/api/healing';
 import { useUserInfo } from '/@/stores/userInfo';
 import { storeToRefs } from 'pinia';
 import { formatDate } from '/@/utils/formatTime';
-import { analysisModeItems, confidencePercent, evidenceLabel, getAnalysisModelOptions, type BfrbCue } from '/@/utils/analysisModes';
+import { analysisModeItems, confidencePercent, createAnalysisSessionId, evidenceLabel, getAnalysisModelOptions, type BfrbCue } from '/@/utils/analysisModes';
 
 const stores = useUserInfo();
 const { userInfos } = storeToRefs(stores);
@@ -214,6 +214,9 @@ const state = reactive({
 		startTime: '',
 		keepRecord: true,
 		keepMedia: false,
+		sessionId: '',
+		complaint: '',
+		additionalNotes: '',
 	},
 });
 
@@ -298,6 +301,9 @@ const startPredict = async () => {
 		startTime: formatDate(new Date(), 'YYYY-mm-dd HH:MM:SS'),
 		keepRecord: keepRecord.value,
 		keepMedia: keepMedia.value,
+		sessionId: createAnalysisSessionId(),
+		complaint: state.form.complaint,
+		additionalNotes: state.form.additionalNotes,
 	};
 
 	saveImageConsent();
@@ -348,7 +354,7 @@ const saveImageConsent = () => {
 const saveCurrentAwarenessRecord = async (parsed: any) => {
 	const primary = state.prediction.labels[0] || '';
 	const confidence = state.prediction.confidences[0] ? `${state.prediction.confidences[0].toFixed(0)}%` : '';
-	await saveAwarenessRecord({
+	const saved: any = await saveAwarenessRecord({
 		username: userInfos.value.userName,
 		sourceType: 'image',
 		emotionLabel: primary,
@@ -362,6 +368,11 @@ const saveCurrentAwarenessRecord = async (parsed: any) => {
 		keepMedia: keepMedia.value,
 		privacyNote: keepMedia.value ? '你选择在记录中保留图片路径，之后可以在觉察记录中删除。' : '你选择不在觉察记录中保留图片路径，只留下温柔摘要。',
 	});
+	const awarenessRecordId = Number(saved?.data?.id || 0);
+	const analysisRecordId = Number(parsed?.analysisRecordId || 0);
+	if (analysisRecordId && awarenessRecordId) {
+		await linkAnalysisRecord(analysisRecordId, awarenessRecordId);
+	}
 };
 
 const loadSampleReflection = () => {

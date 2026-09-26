@@ -11,3 +11,11 @@ export function savePrivacyConsent(data: Record<string, any>) {
 export function getAwarenessRecords(params: Record<string, any>) {
 	return request.get('/api/awarenessRecords', { params });
 }
+
+export function linkAnalysisRecord(analysisRecordId: number, awarenessRecordId: number) {
+	return request.put(`/api/analysisRecords/${analysisRecordId}/awareness/${awarenessRecordId}`);
+}
+
+export function getAnalysisRecordByAwareness(awarenessRecordId: number) {
+	return request.get(`/api/analysisRecords/by-awareness/${awarenessRecordId}`);
+}

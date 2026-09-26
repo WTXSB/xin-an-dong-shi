@@ -145,13 +145,13 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { saveAwarenessRecord, savePrivacyConsent } from '/@/api/healing';
+import { linkAnalysisRecord, saveAwarenessRecord, savePrivacyConsent } from '/@/api/healing';
 import { useUserInfo } from '/@/stores/userInfo';
 import { storeToRefs } from 'pinia';
 import type { UploadProps } from 'element-plus';
 import { SocketService } from '/@/utils/socket';
 import { formatDate } from '/@/utils/formatTime';
-import { analysisModeItems, confidencePercent, evidenceLabel, getAnalysisModelOptions, type AnalysisResult, type BfrbCue } from '/@/utils/analysisModes';
+import { analysisModeItems, confidencePercent, createAnalysisSessionId, evidenceLabel, getAnalysisModelOptions, type AnalysisResult, type BfrbCue } from '/@/utils/analysisModes';
 
 const stores = useUserInfo();
 const { userInfos } = storeToRefs(stores);
@@ -183,6 +183,9 @@ const state = reactive({
 		startTime: '',
 		saveRecord: 'true',
 		keepMedia: 'false',
+		sessionId: '',
+		complaint: '',
+		additionalNotes: '',
 	},
 });
 
@@ -297,6 +300,7 @@ const startVideoSense = async () => {
 	state.form.startTime = formatDate(new Date(), 'YYYY-mm-dd HH:MM:SS');
 	state.form.saveRecord = keepRecord.value ? 'true' : 'false';
 	state.form.keepMedia = keepMedia.value ? 'true' : 'false';
+	state.form.sessionId = createAnalysisSessionId();
 	state.processing = true;
 	state.resultReady = false;
 	state.percentage = 0;
@@ -330,7 +334,7 @@ const completeVideoReflection = async () => {
 	state.percentage = 100;
 	if (!keepRecord.value || recordSaved.value) return;
 	recordSaved.value = true;
-	await saveAwarenessRecord({
+	const saved: any = await saveAwarenessRecord({
 		username: userInfos.value.userName,
 		sourceType: 'video',
 		emotionLabel: bfrbSummary.value.eventCount ? `BFRB事件 ${bfrbSummary.value.eventCount} 次` : '动态综合线索',
@@ -344,6 +348,11 @@ const completeVideoReflection = async () => {
 		keepMedia: keepMedia.value,
 		privacyNote: keepMedia.value ? '你选择在记录中保留视频输入路径；结果视频路径由本地处理服务按需保存。' : '你选择不在觉察记录中保留视频路径，只留下温柔摘要。',
 	});
+	const awarenessRecordId = Number(saved?.data?.id || 0);
+	const analysisRecordId = Number(state.analysisResult?.analysisRecordId || 0);
+	if (analysisRecordId && awarenessRecordId) {
+		await linkAnalysisRecord(analysisRecordId, awarenessRecordId);
+	}
 };
 
 onMounted(() => {

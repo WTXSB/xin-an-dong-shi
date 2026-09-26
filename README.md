@@ -81,6 +81,11 @@
 - 图片、视频、摄像头结果可以保存为「觉察记录」。
 - 记录中保留的是温柔摘要、身体提醒、小练习与用户选择，而不是冷硬结论。
 - 支持不保存素材路径，只保存文字摘要。
+- 新增结构化检测会话，分表保存情绪统计与 BFRB 事件明细。
+- 保存分析模式、模型组合、事件起止时间、持续时长、关键帧、置信度和证据类型。
+- 使用 `sessionId` 防止视频流重连导致重复落库。
+- 觉察记录可在原页面展开完整分析，刷新后从后端恢复相同结果。
+- 删除觉察记录时，同步删除关联的结构化结果。
 
 ### 7. 隐私授权记录
 
@@ -181,10 +186,12 @@ deployment-recommendation-tencent-cloud.docx
 | `yolo-moudle/face/yolo_face_detection_vue/src/views/imgPredict/index.vue` | 图片感知页面 |
 | `yolo-moudle/face/yolo_face_detection_vue/src/views/videoPredict/index.vue` | 视频感知页面 |
 | `yolo-moudle/face/yolo_face_detection_vue/src/views/cameraPredict/index.vue` | 摄像头感知页面 |
+| `yolo-moudle/face/yolo_face_detection_vue/src/views/trashRecords/index.vue` | 觉察记录与完整分析回看 |
 | `yolo-moudle/face/yolo_face_detection_vue/src/views/smartChat/index.vue` | 安心对话页面 |
 | `yolo-moudle/face/yolo_face_detection_vue/src/components/AnXiaoNingFloat/index.vue` | 安小宁悬浮球 |
 | `yolo-moudle/face/yolo_face_detection_springboot/src/main/java/com/example/Ece/controller/AiChatController.java` | DeepSeek 后端代理 |
 | `yolo-moudle/face/yolo_face_detection_springboot/src/main/java/com/example/Ece/controller/AwarenessRecordController.java` | 觉察记录接口 |
+| `yolo-moudle/face/yolo_face_detection_springboot/src/main/java/com/example/Ece/controller/DetectionAnalysisRecordController.java` | 结构化检测结果保存、查询与关联接口 |
 | `yolo-moudle/face/yolo_face_detection_flask/facetry.py` | YOLO 图片、视频、摄像头推理服务 |
 
 ## 隐私与表达原则
@@ -199,17 +206,18 @@ deployment-recommendation-tencent-cloud.docx
 ## 已验证
 
 - 前端 `npm run build` 通过。
-- Spring Boot `mvnw compile` 通过。
+- Spring Boot `mvn test` 通过（3 项测试）。
 - Flask YOLO `py_compile` 通过。
 - `/flask/file_names` 可返回 `emotion.pt`。
 - `/ai/chat` 已接入 DeepSeek，返回 `provider = deepseek`。
 - 图片、视频、摄像头页面均已通过浏览器基础检查。
+- 图片与视频链路已通过结构化落库、幂等、刷新回查与隐私不保存验证。
 
 ## 后续优化建议
 
 - 将 H2 Demo 数据正式迁移到 MySQL。
 - 补充对话历史管理与删除功能。
 - 给安心对话增加流式输出体验。
-- 视频/摄像头结果进一步解析 YOLO 标签与置信度，生成更具体的觉察摘要。
+- 在结构化检测记录基础上增加预诊报告预览、AI 辅助摘要与 PDF 导出。
 - 心灵 SPA 导引继续接入更可靠的真实地图与资源数据。
 - 腾讯云部署时拆分主站与 YOLO 推理服务，避免小规格服务器资源紧张。

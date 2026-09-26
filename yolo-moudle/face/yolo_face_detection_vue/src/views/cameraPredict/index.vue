@@ -46,13 +46,15 @@
 				</label>
 
 				<el-button class="primary-button" :disabled="!canStart || state.cameraIsOpen" @click="startCameraSense">开始温柔感知</el-button>
-				<el-button class="soft-button" :disabled="!state.cameraIsOpen" @click="stopCameraSense">停止并整理</el-button>
+				<el-button class="soft-button" :disabled="!state.cameraIsOpen || state.isStopping" @click="stopCameraSense">
+					{{ state.isStopping ? '正在整理…' : '停止并整理' }}
+				</el-button>
 			</section>
 
 			<section class="status-row">
 				<div class="status-card">
 					<strong>当前状态</strong>
-					<p>{{ state.cameraIsOpen ? '正在温柔感知中，你可以随时停止。' : '摄像头尚未开启。' }}</p>
+					<p>{{ state.isStopping ? '采集已停止，正在整理并保存本次线索…' : state.cameraIsOpen ? '正在温柔感知中，你可以随时停止。' : '摄像头尚未开启。' }}</p>
 				</div>
 				<div class="status-card">
 					<strong>整理进度</strong>
@@ -125,12 +127,12 @@
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import request from '/@/utils/request';
-import { saveAwarenessRecord, savePrivacyConsent } from '/@/api/healing';
+import { linkAnalysisRecord, saveAwarenessRecord, savePrivacyConsent } from '/@/api/healing';
 import { useUserInfo } from '/@/stores/userInfo';
 import { storeToRefs } from 'pinia';
 import { SocketService } from '/@/utils/socket';
 import { formatDate } from '/@/utils/formatTime';
-import { analysisModeItems, confidencePercent, evidenceLabel, getAnalysisModelOptions, type AnalysisResult, type BfrbCue } from '/@/utils/analysisModes';
+import { analysisModeItems, confidencePercent, createAnalysisSessionId, evidenceLabel, getAnalysisModelOptions, type AnalysisResult, type BfrbCue } from '/@/utils/analysisModes';
 
 const stores = useUserInfo();
 const { userInfos } = storeToRefs(stores);
@@ -150,6 +152,7 @@ const state = reactive({
 	percentage: 0,
 	showProgress: false,
 	cameraIsOpen: false,
+	isStopping: false,
 	resultReady: false,
 	analysisResult: null as AnalysisResult | null,
 	liveCues: [] as BfrbCue[],
@@ -161,6 +164,9 @@ const state = reactive({
 		startTime: '',
 		saveRecord: 'true',
 		keepMedia: 'false',
+		sessionId: '',
+		complaint: '',
+		additionalNotes: '',
 	},
 });
 
@@ -207,14 +213,11 @@ socketService.on('message', (data: string) => {
 	if (data) ElMessage.success(data);
 });
 
-socketService.on('progress', (data: string) => {
+socketService.on('camera_progress', (data: string) => {
 	const value = Math.round(Number(data));
 	if (Number.isNaN(value)) return;
 	state.percentage = value;
 	state.showProgress = value < 100;
-	if (value >= 100) {
-		completeCameraReflection();
-	}
 });
 
 socketService.on('bfrb_live', (data: any) => {
@@ -257,8 +260,10 @@ const startCameraSense = async () => {
 	state.form.startTime = formatDate(new Date(), 'YYYY-mm-dd HH:MM:SS');
 	state.form.saveRecord = keepRecord.value ? 'true' : 'false';
 	state.form.keepMedia = keepMedia.value ? 'true' : 'false';
+	state.form.sessionId = createAnalysisSessionId();
 	state.resultReady = false;
 	state.cameraIsOpen = true;
+	state.isStopping = false;
 	state.percentage = 0;
 	state.showProgress = false;
 	recordSaved.value = false;
@@ -271,12 +276,21 @@ const startCameraSense = async () => {
 	ElMessage.success('摄像头感知已开始，你可以随时停止。');
 };
 
-const stopCameraSense = () => {
-	request.get('/api/flask/stopCamera').finally(() => {
-		state.cameraIsOpen = false;
-		state.showProgress = true;
-		ElMessage.success('摄像头感知已停止，正在整理这次线索。');
-	});
+const stopCameraSense = async () => {
+	if (state.isStopping) return;
+	state.isStopping = true;
+	state.showProgress = true;
+	state.percentage = Math.max(state.percentage, 1);
+	try {
+		await request.get('/flask/stopCamera');
+		// 保留流式图像节点，直到 Flask 完成汇总并发回 analysis_result。
+		// 如果此处立即设为 false，浏览器会断开流，后端就无法执行落库收尾。
+		ElMessage.success('摄像头采集已停止，正在整理并保存记录。');
+	} catch (error) {
+		state.isStopping = false;
+		state.showProgress = false;
+		ElMessage.error('摄像头暂时无法停止，请稍后重试。');
+	}
 };
 
 const saveCameraConsent = () => {
@@ -292,25 +306,43 @@ const saveCameraConsent = () => {
 };
 
 const completeCameraReflection = async () => {
+	state.cameraIsOpen = false;
+	state.isStopping = false;
+	state.videoPath = '';
 	state.resultReady = true;
 	state.showProgress = false;
 	state.percentage = 100;
-	if (!keepRecord.value || recordSaved.value) return;
+	if (!keepRecord.value) {
+		ElMessage.success('本次分析已完成，已按你的选择不保存觉察记录。');
+		return;
+	}
+	if (recordSaved.value) return;
 	recordSaved.value = true;
-	await saveAwarenessRecord({
-		username: userInfos.value.userName,
-		sourceType: 'camera',
-		emotionLabel: bfrbSummary.value.eventCount ? `BFRB事件 ${bfrbSummary.value.eventCount} 次` : '实时综合线索',
-		confidence: bfrbSummary.value.events.length ? `最高置信度 ${confidencePercent(Math.max(...bfrbSummary.value.events.map((event) => event.maxConfidence)))}%` : `线索阈值 ${conf.value}%`,
-		bodySignal: resultCard.value.bodySignal,
-		gentleSummary: resultCard.value.summary,
-		suggestedPractice: resultCard.value.practice,
-		inputMedia: '',
-		outputMedia: '',
-		keepRecord: keepRecord.value,
-		keepMedia: keepMedia.value,
-		privacyNote: keepMedia.value ? '你选择保留结果视频路径；路径由本地处理服务按需写入原始记录。' : '你选择不在觉察记录中保留结果视频路径，只留下温柔摘要。',
-	});
+	try {
+		const saved: any = await saveAwarenessRecord({
+			username: userInfos.value.userName,
+			sourceType: 'camera',
+			emotionLabel: bfrbSummary.value.eventCount ? `BFRB事件 ${bfrbSummary.value.eventCount} 次` : '实时综合线索',
+			confidence: bfrbSummary.value.events.length ? `最高置信度 ${confidencePercent(Math.max(...bfrbSummary.value.events.map((event) => event.maxConfidence)))}%` : `线索阈值 ${conf.value}%`,
+			bodySignal: resultCard.value.bodySignal,
+			gentleSummary: resultCard.value.summary,
+			suggestedPractice: resultCard.value.practice,
+			inputMedia: '',
+			outputMedia: '',
+			keepRecord: keepRecord.value,
+			keepMedia: keepMedia.value,
+			privacyNote: keepMedia.value ? '你选择保留结果视频路径；路径由本地处理服务按需写入原始记录。' : '你选择不在觉察记录中保留结果视频路径，只留下温柔摘要。',
+		});
+		const awarenessRecordId = Number(saved?.data?.id || 0);
+		const analysisRecordId = Number(state.analysisResult?.analysisRecordId || 0);
+		if (analysisRecordId && awarenessRecordId) {
+			await linkAnalysisRecord(analysisRecordId, awarenessRecordId);
+		}
+		ElMessage.success('本次摄像头觉察已保存，可在“觉察记录”中查看。');
+	} catch (error) {
+		recordSaved.value = false;
+		ElMessage.error('分析已完成，但觉察记录保存失败，请保留当前页面并重试。');
+	}
 };
 
 onMounted(() => {

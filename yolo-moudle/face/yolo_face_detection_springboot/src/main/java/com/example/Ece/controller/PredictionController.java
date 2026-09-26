@@ -30,6 +30,9 @@ public class PredictionController {
         private String conf;
         private Boolean keepRecord;
         private Boolean keepMedia;
+        private String sessionId;
+        private String complaint;
+        private String additionalNotes;
 
         public String getUsername() {
             return username;
@@ -93,6 +96,30 @@ public class PredictionController {
 
         public void setKeepMedia(Boolean keepMedia) {
             this.keepMedia = keepMedia;
+        }
+
+        public String getSessionId() {
+            return sessionId;
+        }
+
+        public void setSessionId(String sessionId) {
+            this.sessionId = sessionId;
+        }
+
+        public String getComplaint() {
+            return complaint;
+        }
+
+        public void setComplaint(String complaint) {
+            this.complaint = complaint;
+        }
+
+        public String getAdditionalNotes() {
+            return additionalNotes;
+        }
+
+        public void setAdditionalNotes(String additionalNotes) {
+            this.additionalNotes = additionalNotes;
         }
     }
 
