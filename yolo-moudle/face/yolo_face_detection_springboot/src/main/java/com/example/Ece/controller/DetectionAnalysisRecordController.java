@@ -9,10 +9,12 @@ import com.example.Ece.dto.DetectionAnalysisPayload;
 import com.example.Ece.entity.DetectionAnalysisRecord;
 import com.example.Ece.entity.DetectionBfrbEvent;
 import com.example.Ece.entity.DetectionEmotionResult;
+import com.example.Ece.entity.PreVisitReportSummary;
 import com.example.Ece.mapper.AwarenessRecordMapper;
 import com.example.Ece.mapper.DetectionAnalysisRecordMapper;
 import com.example.Ece.mapper.DetectionBfrbEventMapper;
 import com.example.Ece.mapper.DetectionEmotionResultMapper;
+import com.example.Ece.mapper.PreVisitReportSummaryMapper;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,6 +41,8 @@ public class DetectionAnalysisRecordController {
     DetectionAnalysisRecordMapper analysisRecordMapper;
     @Resource
     DetectionEmotionResultMapper emotionResultMapper;
+    @Resource
+    PreVisitReportSummaryMapper reportSummaryMapper;
     @Resource
     DetectionBfrbEventMapper bfrbEventMapper;
     @Resource
@@ -180,6 +184,8 @@ public class DetectionAnalysisRecordController {
     }
 
     private void deleteAnalysisRecord(int id) {
+        reportSummaryMapper.delete(Wrappers.<PreVisitReportSummary>lambdaQuery()
+                .eq(PreVisitReportSummary::getAnalysisRecordId, id));
         bfrbEventMapper.delete(Wrappers.<DetectionBfrbEvent>lambdaQuery()
                 .eq(DetectionBfrbEvent::getAnalysisRecordId, id));
         emotionResultMapper.delete(Wrappers.<DetectionEmotionResult>lambdaQuery()

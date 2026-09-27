@@ -107,6 +107,20 @@ export const dynamicRoutes: Array<RouteRecordRaw> = [
 					icon: 'iconfont icon-chewei-01',
 				},
 			},
+			{
+				path: '/preVisitReport/:awarenessRecordId',
+				name: 'preVisitReport',
+				component: () => import('/@/views/preVisitReport/index.vue'),
+				meta: {
+					title: '预诊参考报告',
+					isLink: '',
+					isHide: true,
+					isKeepAlive: false,
+					isAffix: false,
+					isIframe: false,
+					roles: ['admin', 'common', 'others'],
+				},
+			},
 			// {
 			// 	path: '/trashArea',
 			// 	name: 'trashArea',

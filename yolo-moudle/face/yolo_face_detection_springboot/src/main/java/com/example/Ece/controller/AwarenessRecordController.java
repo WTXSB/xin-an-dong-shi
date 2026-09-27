@@ -6,7 +6,9 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.Ece.common.Result;
 import com.example.Ece.entity.AwarenessRecord;
+import com.example.Ece.entity.PreVisitReportSummary;
 import com.example.Ece.mapper.AwarenessRecordMapper;
+import com.example.Ece.mapper.PreVisitReportSummaryMapper;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -19,6 +21,8 @@ import java.util.Map;
 public class AwarenessRecordController {
     @Resource
     AwarenessRecordMapper awarenessRecordMapper;
+    @Resource
+    PreVisitReportSummaryMapper reportSummaryMapper;
 
     @GetMapping
     public Result<?> findPage(@RequestParam(defaultValue = "1") Integer pageNum,
@@ -73,6 +77,8 @@ public class AwarenessRecordController {
 
     @DeleteMapping("/{id}")
     public Result<?> delete(@PathVariable int id) {
+        reportSummaryMapper.delete(Wrappers.<PreVisitReportSummary>lambdaQuery()
+                .eq(PreVisitReportSummary::getAwarenessRecordId, id));
         awarenessRecordMapper.deleteById(id);
         return Result.success();
     }

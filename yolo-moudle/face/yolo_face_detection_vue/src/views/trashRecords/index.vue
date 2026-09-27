@@ -151,6 +151,7 @@
 								<span>{{ item.privacyNote || '你可以随时删除这条记录。' }}</span>
 							</div>
 							<div class="record-actions">
+								<button type="button" class="report-btn" @click="openReport(item)">生成预诊报告</button>
 								<button type="button" class="detail-btn" @click="toggleAnalysisDetail(item)">
 									{{ state.expandedAnalysis[item.id] ? '收起完整分析' : '查看完整分析' }}
 								</button>
@@ -177,6 +178,7 @@
 
 <script setup lang="ts" name="AwarenessRecords">
 import { computed, onMounted, reactive } from 'vue';
+import { useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import request from '/@/utils/request';
 import { getAnalysisRecordByAwareness, getAwarenessRecords } from '/@/api/healing';
@@ -234,6 +236,7 @@ type AnalysisDetail = {
 
 const stores = useUserInfo();
 const { userInfos } = storeToRefs(stores);
+const router = useRouter();
 
 const sourceOptions = [
 	{ label: '全部', value: '' },
@@ -291,6 +294,10 @@ const changeSource = (sourceType: string) => {
 	state.params.sourceType = sourceType;
 	state.params.pageNum = 1;
 	getRecords();
+};
+
+const openReport = (item: AwarenessRecord) => {
+	router.push({ name: 'preVisitReport', params: { awarenessRecordId: item.id } });
 };
 
 const deleteRecord = async (item: AwarenessRecord) => {
@@ -401,13 +408,31 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .awareness-page {
-	min-height: 100vh;
+	min-height: 100%;
 	background: #fbf6ef;
 	color: #3f3b35;
+	overflow: visible;
+}
+
+.awareness-page.layout-padding {
+	position: relative;
+	display: block;
+	height: auto;
+	min-height: 100%;
+	overflow: visible;
 }
 
 .awareness-shell {
 	padding: 22px;
+	min-height: 100%;
+}
+
+.awareness-shell.layout-padding-auto,
+.awareness-shell.layout-padding-view {
+	display: block;
+	height: auto;
+	min-height: 100%;
+	overflow: visible;
 }
 
 .hero,
@@ -452,6 +477,7 @@ onMounted(() => {
 .refresh-btn,
 .search-btn,
 .filter-btn,
+.report-btn,
 .detail-btn,
 .delete-btn {
 	border: none;
@@ -813,6 +839,12 @@ onMounted(() => {
 	padding: 9px 14px;
 	background: #e8f4ea;
 	color: #4e745a;
+}
+
+.report-btn {
+	padding: 9px 14px;
+	background: #c98f5c;
+	color: #ffffff;
 }
 
 .pagination {

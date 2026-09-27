@@ -25,6 +25,12 @@
 				</div>
 			</section>
 
+			<PreVisitNotes
+				v-model:complaint="state.form.complaint"
+				v-model:additional-notes="state.form.additionalNotes"
+				:disabled="state.cameraIsOpen || state.isStopping"
+			/>
+
 			<section class="controls">
 				<label>
 					<span>感知类型</span>
@@ -117,6 +123,10 @@
 						<span>{{ keepRecord ? '这次会保存到觉察记录' : '这次不会保存为觉察记录' }}</span>
 						<span>{{ keepMedia ? '记录里保留结果视频路径' : '记录里不保留结果视频路径' }}</span>
 					</div>
+					<div v-if="savedAwarenessRecordId" class="report-entry">
+						<el-button type="primary" @click="openPreVisitReport">生成预诊报告</el-button>
+						<span>报告基于停止后保存的情绪与BFRB结构化结果。</span>
+					</div>
 				</article>
 			</section>
 		</div>
@@ -125,6 +135,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import request from '/@/utils/request';
 import { linkAnalysisRecord, saveAwarenessRecord, savePrivacyConsent } from '/@/api/healing';
@@ -133,9 +144,11 @@ import { storeToRefs } from 'pinia';
 import { SocketService } from '/@/utils/socket';
 import { formatDate } from '/@/utils/formatTime';
 import { analysisModeItems, confidencePercent, createAnalysisSessionId, evidenceLabel, getAnalysisModelOptions, type AnalysisResult, type BfrbCue } from '/@/utils/analysisModes';
+import PreVisitNotes from '/@/components/preVisitNotes/index.vue';
 
 const stores = useUserInfo();
 const { userInfos } = storeToRefs(stores);
+const router = useRouter();
 
 const conf = ref(30);
 const kind = ref('combined');
@@ -144,6 +157,7 @@ const cameraAccepted = ref(false);
 const keepRecord = ref(true);
 const keepMedia = ref(false);
 const recordSaved = ref(false);
+const savedAwarenessRecordId = ref(0);
 
 const state = reactive({
 	weightItems: getAnalysisModelOptions('combined'),
@@ -267,6 +281,7 @@ const startCameraSense = async () => {
 	state.percentage = 0;
 	state.showProgress = false;
 	recordSaved.value = false;
+	savedAwarenessRecordId.value = 0;
 	state.analysisResult = null;
 	state.liveCues = [];
 
@@ -336,13 +351,19 @@ const completeCameraReflection = async () => {
 		const awarenessRecordId = Number(saved?.data?.id || 0);
 		const analysisRecordId = Number(state.analysisResult?.analysisRecordId || 0);
 		if (analysisRecordId && awarenessRecordId) {
-			await linkAnalysisRecord(analysisRecordId, awarenessRecordId);
+			const linked: any = await linkAnalysisRecord(analysisRecordId, awarenessRecordId);
+			if (linked.code === '0' || linked.code === 0) savedAwarenessRecordId.value = awarenessRecordId;
 		}
 		ElMessage.success('本次摄像头觉察已保存，可在“觉察记录”中查看。');
 	} catch (error) {
 		recordSaved.value = false;
 		ElMessage.error('分析已完成，但觉察记录保存失败，请保留当前页面并重试。');
 	}
+};
+
+const openPreVisitReport = () => {
+	if (!savedAwarenessRecordId.value) return;
+	router.push({ name: 'preVisitReport', params: { awarenessRecordId: savedAwarenessRecordId.value } });
 };
 
 onMounted(() => {
@@ -673,6 +694,15 @@ onUnmounted(() => {
 		color: #75563f;
 		font-size: 12px;
 	}
+}
+
+.report-entry {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-top: 14px;
+
+	span { color: #8b7b6e; font-size: 12px; line-height: 1.6; }
 }
 
 :deep(.el-slider__bar) {

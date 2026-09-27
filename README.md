@@ -21,7 +21,7 @@
 | 前端 | Vue 3 + Vite + Element Plus | 温柔风 UI、识别入口、觉察记录、安心对话、安小宁悬浮球 |
 | 后端 | Spring Boot + MyBatis Plus | 用户、文件上传、觉察记录、隐私授权、DeepSeek 后端代理 |
 | 推理服务 | Flask + Ultralytics YOLO + PyTorch | 图片、视频、摄像头感知 |
-| 本地演示数据库 | H2 Demo Profile | 便于本地快速体验核心功能 |
+| 本地演示数据库 | H2 Demo Profile | 文件型持久化，重启 Spring Boot 后保留觉察记录 |
 | 生产数据库方案 | MySQL | 腾讯云部署时使用 |
 | AI 对话 | DeepSeek Chat Completions | 安小宁陪伴式对话 |
 
@@ -162,7 +162,7 @@ $env:DEEPSEEK_API_URL = "https://api.deepseek.com/chat/completions"
 
 ## 数据库与部署方向
 
-本地演示阶段使用 H2 Demo Profile，便于快速体验三端功能。
+本地演示阶段使用文件型 H2 Demo Profile，数据保存在 Spring Boot 目录的 `data/yolo-demo.mv.db`，重启后仍可回看觉察记录和结构化分析。测试环境使用独立的内存 H2，不会写入演示数据。
 
 腾讯云部署建议：
 

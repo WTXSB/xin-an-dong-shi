@@ -25,6 +25,12 @@
 				</div>
 			</section>
 
+			<PreVisitNotes
+				v-model:complaint="state.form.complaint"
+				v-model:additional-notes="state.form.additionalNotes"
+				:disabled="state.loading"
+			/>
+
 			<section class="control-band">
 				<div class="control-item">
 					<span>感知类型</span>
@@ -142,6 +148,10 @@
 							<span>{{ keepRecord ? '这次会保存到觉察记录' : '这次不会保存为觉察记录' }}</span>
 							<span>{{ keepMedia ? '记录里保留图片路径' : '记录里不保留图片路径' }}</span>
 						</div>
+						<div v-if="savedAwarenessRecordId" class="report-entry">
+							<el-button type="primary" @click="openPreVisitReport">生成预诊报告</el-button>
+							<span>使用本次已保存的结构化分析生成，可刷新后从觉察记录再次打开。</span>
+						</div>
 					</div>
 					<div v-else class="empty-state">
 						<el-icon><ChatLineRound /></el-icon>
@@ -169,6 +179,7 @@
 
 <script setup lang="ts" name="emotionRecognition">
 import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import type { UploadFile, UploadProps } from 'element-plus';
 import { ElMessage } from 'element-plus';
 import { ChatLineRound, Picture, Plus, RefreshRight, VideoPlay } from '@element-plus/icons-vue';
@@ -178,9 +189,11 @@ import { useUserInfo } from '/@/stores/userInfo';
 import { storeToRefs } from 'pinia';
 import { formatDate } from '/@/utils/formatTime';
 import { analysisModeItems, confidencePercent, createAnalysisSessionId, evidenceLabel, getAnalysisModelOptions, type BfrbCue } from '/@/utils/analysisModes';
+import PreVisitNotes from '/@/components/preVisitNotes/index.vue';
 
 const stores = useUserInfo();
 const { userInfos } = storeToRefs(stores);
+const router = useRouter();
 
 const imageUrl = ref('');
 const predictedImageUrl = ref('');
@@ -190,6 +203,7 @@ const kind = ref('combined');
 const privacyAccepted = ref(false);
 const keepRecord = ref(true);
 const keepMedia = ref(false);
+const savedAwarenessRecordId = ref(0);
 
 const state = reactive({
 	kindItems: analysisModeItems,
@@ -269,6 +283,7 @@ const handleUploadSuccess: UploadProps['onSuccess'] = (response, file) => {
 	state.prediction.bfrbCues = [];
 	state.prediction.bfrbAwareness = '';
 	predictedImageUrl.value = '';
+	savedAwarenessRecordId.value = 0;
 	ElMessage.success('图片已放好，可以开始温柔感知。');
 };
 
@@ -292,6 +307,7 @@ const startPredict = async () => {
 	}
 
 	state.loading = true;
+	savedAwarenessRecordId.value = 0;
 	state.form = {
 		username: userInfos.value.userName,
 		inputImg: state.img,
@@ -371,17 +387,24 @@ const saveCurrentAwarenessRecord = async (parsed: any) => {
 	const awarenessRecordId = Number(saved?.data?.id || 0);
 	const analysisRecordId = Number(parsed?.analysisRecordId || 0);
 	if (analysisRecordId && awarenessRecordId) {
-		await linkAnalysisRecord(analysisRecordId, awarenessRecordId);
+		const linked: any = await linkAnalysisRecord(analysisRecordId, awarenessRecordId);
+		if (linked.code === '0' || linked.code === 0) savedAwarenessRecordId.value = awarenessRecordId;
 	}
 };
 
 const loadSampleReflection = () => {
+	savedAwarenessRecordId.value = 0;
 	state.prediction.labels = ['sad'];
 	state.prediction.confidences = [78];
 	state.prediction.allTime = '0.12';
 	state.prediction.personCount = 1;
 	state.resultReady = true;
 	predictedImageUrl.value = imageUrl.value;
+};
+
+const openPreVisitReport = () => {
+	if (!savedAwarenessRecordId.value) return;
+	router.push({ name: 'preVisitReport', params: { awarenessRecordId: savedAwarenessRecordId.value } });
 };
 
 const normalizeLabels = (labels: any) => {
@@ -839,6 +862,19 @@ onMounted(() => {
 		background: #f4e6d3;
 		color: #75563f;
 		font-size: 12px;
+	}
+}
+
+.report-entry {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-top: 14px;
+
+	span {
+		color: #8b7b6e;
+		font-size: 12px;
+		line-height: 1.6;
 	}
 }
 

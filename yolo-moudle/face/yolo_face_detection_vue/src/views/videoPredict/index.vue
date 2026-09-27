@@ -25,6 +25,12 @@
 				</div>
 			</section>
 
+			<PreVisitNotes
+				v-model:complaint="state.form.complaint"
+				v-model:additional-notes="state.form.additionalNotes"
+				:disabled="state.processing"
+			/>
+
 			<section class="controls">
 				<label>
 					<span>感知类型</span>
@@ -136,6 +142,10 @@
 						<span>{{ keepRecord ? '这次会保存到觉察记录' : '这次不会保存为觉察记录' }}</span>
 						<span>{{ keepMedia ? '记录里保留视频路径' : '记录里不保留视频路径' }}</span>
 					</div>
+					<div v-if="savedAwarenessRecordId" class="report-entry">
+						<el-button type="primary" @click="openPreVisitReport">生成预诊报告</el-button>
+						<span>报告基于本次保存的情绪与BFRB结构化结果。</span>
+					</div>
 				</article>
 			</section>
 		</div>
@@ -144,6 +154,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { linkAnalysisRecord, saveAwarenessRecord, savePrivacyConsent } from '/@/api/healing';
 import { useUserInfo } from '/@/stores/userInfo';
@@ -152,9 +163,11 @@ import type { UploadProps } from 'element-plus';
 import { SocketService } from '/@/utils/socket';
 import { formatDate } from '/@/utils/formatTime';
 import { analysisModeItems, confidencePercent, createAnalysisSessionId, evidenceLabel, getAnalysisModelOptions, type AnalysisResult, type BfrbCue } from '/@/utils/analysisModes';
+import PreVisitNotes from '/@/components/preVisitNotes/index.vue';
 
 const stores = useUserInfo();
 const { userInfos } = storeToRefs(stores);
+const router = useRouter();
 
 const conf = ref(30);
 const kind = ref('combined');
@@ -163,6 +176,7 @@ const privacyAccepted = ref(false);
 const keepRecord = ref(true);
 const keepMedia = ref(false);
 const recordSaved = ref(false);
+const savedAwarenessRecordId = ref(0);
 
 const state = reactive({
 	weightItems: getAnalysisModelOptions('combined'),
@@ -265,6 +279,7 @@ const handleVideoSuccess: UploadProps['onSuccess'] = (response) => {
 	state.resultReady = false;
 	state.videoPath = '';
 	recordSaved.value = false;
+	savedAwarenessRecordId.value = 0;
 	ElMessage.success('视频已放好，可以开始温柔感知。');
 };
 
@@ -306,6 +321,7 @@ const startVideoSense = async () => {
 	state.percentage = 0;
 	state.showProgress = true;
 	recordSaved.value = false;
+	savedAwarenessRecordId.value = 0;
 	state.analysisResult = null;
 	state.liveCues = [];
 
@@ -351,8 +367,14 @@ const completeVideoReflection = async () => {
 	const awarenessRecordId = Number(saved?.data?.id || 0);
 	const analysisRecordId = Number(state.analysisResult?.analysisRecordId || 0);
 	if (analysisRecordId && awarenessRecordId) {
-		await linkAnalysisRecord(analysisRecordId, awarenessRecordId);
+		const linked: any = await linkAnalysisRecord(analysisRecordId, awarenessRecordId);
+		if (linked.code === '0' || linked.code === 0) savedAwarenessRecordId.value = awarenessRecordId;
 	}
+};
+
+const openPreVisitReport = () => {
+	if (!savedAwarenessRecordId.value) return;
+	router.push({ name: 'preVisitReport', params: { awarenessRecordId: savedAwarenessRecordId.value } });
 };
 
 onMounted(() => {
@@ -683,6 +705,15 @@ onUnmounted(() => {
 		color: #75563f;
 		font-size: 12px;
 	}
+}
+
+.report-entry {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-top: 14px;
+
+	span { color: #8b7b6e; font-size: 12px; line-height: 1.6; }
 }
 
 :deep(.el-slider__bar) {

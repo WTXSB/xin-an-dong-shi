@@ -139,6 +139,23 @@ CREATE TABLE IF NOT EXISTS healing_conversations (
   INDEX idx_healing_username_created (username, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS previsit_report_summaries (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  awareness_record_id INT NOT NULL UNIQUE,
+  analysis_record_id INT NOT NULL,
+  provider VARCHAR(64) NOT NULL,
+  model_name VARCHAR(128),
+  prompt_version VARCHAR(64) NOT NULL,
+  objective_summary TEXT,
+  clinician_questions_json TEXT,
+  visit_preparation_json TEXT,
+  safety_note VARCHAR(1024),
+  generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_previsit_summary_analysis (analysis_record_id),
+  INDEX idx_previsit_summary_generated (generated_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS privacy_consents (
   id INT AUTO_INCREMENT PRIMARY KEY,
   username VARCHAR(64),

@@ -1,16 +1,4 @@
-DROP TABLE IF EXISTS user;
-DROP TABLE IF EXISTS imgrecords;
-DROP TABLE IF EXISTS videorecords;
-DROP TABLE IF EXISTS camerarecords;
-DROP TABLE IF EXISTS emotionrecords;
-DROP TABLE IF EXISTS awareness_records;
-DROP TABLE IF EXISTS detection_bfrb_events;
-DROP TABLE IF EXISTS detection_emotion_results;
-DROP TABLE IF EXISTS detection_analysis_records;
-DROP TABLE IF EXISTS healing_conversations;
-DROP TABLE IF EXISTS privacy_consents;
-
-CREATE TABLE user (
+CREATE TABLE IF NOT EXISTS user (
   id INT AUTO_INCREMENT PRIMARY KEY,
   username VARCHAR(64) NOT NULL UNIQUE,
   password VARCHAR(128) NOT NULL,
@@ -23,7 +11,7 @@ CREATE TABLE user (
   time TIMESTAMP
 );
 
-CREATE TABLE imgrecords (
+CREATE TABLE IF NOT EXISTS imgrecords (
   id INT AUTO_INCREMENT PRIMARY KEY,
   weight VARCHAR(128),
   input_img VARCHAR(1024),
@@ -37,7 +25,7 @@ CREATE TABLE imgrecords (
   start_time VARCHAR(64)
 );
 
-CREATE TABLE videorecords (
+CREATE TABLE IF NOT EXISTS videorecords (
   id INT AUTO_INCREMENT PRIMARY KEY,
   weight VARCHAR(128),
   input_video VARCHAR(1024),
@@ -48,7 +36,7 @@ CREATE TABLE videorecords (
   start_time VARCHAR(64)
 );
 
-CREATE TABLE camerarecords (
+CREATE TABLE IF NOT EXISTS camerarecords (
   id INT AUTO_INCREMENT PRIMARY KEY,
   weight VARCHAR(128),
   out_video VARCHAR(1024),
@@ -58,14 +46,14 @@ CREATE TABLE camerarecords (
   start_time VARCHAR(64)
 );
 
-CREATE TABLE emotionrecords (
+CREATE TABLE IF NOT EXISTS emotionrecords (
   id INT AUTO_INCREMENT PRIMARY KEY,
   emotion_kind VARCHAR(64),
   txt VARCHAR(1024),
   start_time TIMESTAMP
 );
 
-CREATE TABLE awareness_records (
+CREATE TABLE IF NOT EXISTS awareness_records (
   id INT AUTO_INCREMENT PRIMARY KEY,
   username VARCHAR(64),
   source_type VARCHAR(32) NOT NULL,
@@ -82,7 +70,7 @@ CREATE TABLE awareness_records (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE detection_analysis_records (
+CREATE TABLE IF NOT EXISTS detection_analysis_records (
   id INT AUTO_INCREMENT PRIMARY KEY,
   session_id VARCHAR(64) NOT NULL UNIQUE,
   awareness_record_id INT,
@@ -105,7 +93,7 @@ CREATE TABLE detection_analysis_records (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE detection_emotion_results (
+CREATE TABLE IF NOT EXISTS detection_emotion_results (
   id INT AUTO_INCREMENT PRIMARY KEY,
   analysis_record_id INT NOT NULL,
   emotion_type VARCHAR(64) NOT NULL,
@@ -114,7 +102,7 @@ CREATE TABLE detection_emotion_results (
   max_confidence DECIMAL(8, 6) DEFAULT 0
 );
 
-CREATE TABLE detection_bfrb_events (
+CREATE TABLE IF NOT EXISTS detection_bfrb_events (
   id INT AUTO_INCREMENT PRIMARY KEY,
   analysis_record_id INT NOT NULL,
   event_key VARCHAR(64),
@@ -132,7 +120,7 @@ CREATE TABLE detection_bfrb_events (
   geometry_json CLOB
 );
 
-CREATE TABLE healing_conversations (
+CREATE TABLE IF NOT EXISTS healing_conversations (
   id INT AUTO_INCREMENT PRIMARY KEY,
   username VARCHAR(64),
   provider VARCHAR(64),
@@ -142,7 +130,22 @@ CREATE TABLE healing_conversations (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE privacy_consents (
+CREATE TABLE IF NOT EXISTS previsit_report_summaries (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  awareness_record_id INT NOT NULL UNIQUE,
+  analysis_record_id INT NOT NULL,
+  provider VARCHAR(64) NOT NULL,
+  model_name VARCHAR(128),
+  prompt_version VARCHAR(64) NOT NULL,
+  objective_summary CLOB,
+  clinician_questions_json CLOB,
+  visit_preparation_json CLOB,
+  safety_note VARCHAR(1024),
+  generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS privacy_consents (
   id INT AUTO_INCREMENT PRIMARY KEY,
   username VARCHAR(64),
   scene VARCHAR(64) NOT NULL,

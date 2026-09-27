@@ -38,6 +38,11 @@ coverage/
 target/
 *.class
 
+# Local persistent demo database
+yolo-moudle/face/yolo_face_detection_springboot/data/
+*.mv.db
+*.trace.db
+
 # IDE and operating-system files
 .idea/
 .vscode/
