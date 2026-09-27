@@ -1,475 +1,318 @@
 <template>
-	<div class="home-page">
-		<section class="home-hero">
-			<div class="hero-content">
-				<p class="eyebrow">心安动识</p>
+	<div class="home-showcase">
+		<section
+			class="carousel-shell"
+			@mouseenter="autoplay = false"
+			@mouseleave="autoplay = true"
+			@touchstart="onTouchStart"
+			@touchend="onTouchEnd"
+		>
+			<el-carousel
+				ref="carouselRef"
+				class="hero-carousel"
+				height="calc(100vh - 82px)"
+				:interval="5000"
+				:autoplay="autoplay"
+				:pause-on-hover="true"
+				arrow="always"
+				indicator-position="none"
+				@change="onSlideChange"
+			>
+				<el-carousel-item v-for="slide in slides" :key="slide.src">
+					<img class="hero-image" :src="slide.src" :alt="slide.alt" />
+				</el-carousel-item>
+			</el-carousel>
+
+			<div class="hero-shade" aria-hidden="true"></div>
+			<div class="hero-copy">
+				<p class="hero-kicker">心安动识 · MINDEASE</p>
 				<h1>看见焦虑，遇见安宁</h1>
-				<p>
-					用已经训练好的视觉模型看见表情线索，再把它转化成温柔的自我觉察、正念练习和疗愈建议。科技在背后工作，陪伴在你身边发生。
+				<p class="hero-description">
+					用温柔的科技看见情绪与身体线索，让每一次觉察，都成为更靠近自己的开始。
 				</p>
 				<div class="hero-actions">
-					<el-button class="primary-action" :icon="View" @click="$router.push('/imgPredict')">进入温柔感知</el-button>
-					<el-button class="secondary-action" :icon="ChatLineRound" @click="$router.push('/smartChat')">和安小宁聊聊</el-button>
+					<el-button class="primary-action" @click="$router.push('/imgPredict')">开始温柔感知</el-button>
+					<el-button class="secondary-action" @click="$router.push('/aboutProduct')">了解心安动识</el-button>
 				</div>
 			</div>
-			<div class="flower-panel">
-				<div class="flower-visual">
-					<div class="petal petal-one"></div>
-					<div class="petal petal-two"></div>
-					<div class="petal petal-three"></div>
-					<div class="petal petal-four"></div>
-					<div class="flower-core">安</div>
-				</div>
-				<h2>今日情绪之花</h2>
-				<p>不急着盛开也没关系。愿意觉察，就是在给自己浇水。</p>
-			</div>
-		</section>
 
-		<section class="quick-grid">
-			<article class="quick-card" @click="$router.push('/imgPredict')">
-				<el-icon><View /></el-icon>
-				<h3>温柔感知</h3>
-				<p>上传图片，获得一份柔和的情绪线索与陪伴式建议。</p>
-			</article>
-			<article class="quick-card" @click="$router.push('/smartChat')">
-				<el-icon><ChatLineRound /></el-icon>
-				<h3>安心对话</h3>
-				<p>把当下的心情说出来，先被接住，再慢慢找到下一步。</p>
-			</article>
-			<article class="quick-card" @click="$router.push('/dataView')">
-				<el-icon><TrendCharts /></el-icon>
-				<h3>情绪画像</h3>
-				<p>用柔和的趋势看见变化，不把任何一次波动当作失败。</p>
-			</article>
-			<article class="quick-card">
-				<el-icon><Sunny /></el-icon>
-				<h3>正念片刻</h3>
-				<p>预留 3 分钟呼吸、身体扫描和睡前放松，下一阶段接入。</p>
-			</article>
-		</section>
-
-		<section class="care-layout">
-			<div class="care-main">
-				<span class="eyebrow">今日疗愈推荐</span>
-				<h2>先让身体知道：现在是安全的</h2>
-				<div class="practice-list">
-					<div class="practice-item">
-						<strong>4-4-6 呼吸</strong>
-						<span>吸气 4 秒，停 4 秒，呼气 6 秒。让节奏慢慢降下来。</span>
-					</div>
-					<div class="practice-item">
-						<strong>肩颈松开</strong>
-						<span>把肩膀轻轻向后绕三圈，告诉身体不必一直用力。</span>
-					</div>
-					<div class="practice-item">
-						<strong>写一句事实</strong>
-						<span>只写“我现在感觉到……”，不解释，不责备。</span>
-					</div>
-				</div>
-			</div>
-			<div class="care-side">
-				<span class="eyebrow">产品原则</span>
-				<ul>
-					<li>陪伴而非打扰</li>
-					<li>理解与接住</li>
-					<li>引导而非说教</li>
-					<li>觉察先于改变</li>
-				</ul>
-			</div>
-		</section>
-
-		<section class="metrics-band">
-			<div class="metric-item">
-				<strong>{{ statistics.users }}</strong>
-				<span>位体验者</span>
-			</div>
-			<div class="metric-item">
-				<strong>{{ statistics.records }}</strong>
-				<span>次情绪觉察</span>
-			</div>
-			<div class="metric-item">
-				<strong>3</strong>
-				<span>个疗愈方向</span>
-			</div>
-			<div class="metric-item">
-				<strong>0</strong>
-				<span>贴标签表达</span>
+			<div class="slide-dots" aria-label="轮播图切换">
+				<button
+					v-for="(_, index) in slides"
+					:key="index"
+					type="button"
+					:class="{ active: activeIndex === index }"
+					:aria-label="`查看第 ${index + 1} 张图片`"
+					@click="carouselRef?.setActiveItem(index)"
+				></button>
 			</div>
 		</section>
 	</div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { ChatLineRound, Sunny, TrendCharts, View } from '@element-plus/icons-vue';
-import request from '/@/utils/request';
+import { ref } from 'vue';
+import heroJournal from '/@/assets/home-carousel/hero-journal.webp';
+import heroMeadow from '/@/assets/home-carousel/hero-meadow.webp';
+import heroCompanionship from '/@/assets/home-carousel/hero-companionship.webp';
+import heroSeaside from '/@/assets/home-carousel/hero-seaside.webp';
 
-const statistics = ref({
-	users: 68,
-	records: 325,
-});
+const carouselRef = ref<any>();
+const activeIndex = ref(0);
+const touchStartX = ref(0);
+const autoplay = ref(true);
 
-const params = {
-	search: '',
-	pageNum: 1,
-	pageSize: 10,
+const slides = [
+	{ src: heroJournal, alt: '晨光中安静书写，给情绪留出被看见的空间' },
+	{ src: heroMeadow, alt: '在晨光草地上慢慢行走，感受呼吸与身体' },
+	{ src: heroCompanionship, alt: '在温暖的陪伴中表达心情，感受被认真倾听' },
+	{ src: heroSeaside, alt: '迎着海边晨光安静远望，重新找回内心节奏' },
+];
+
+const onSlideChange = (index: number) => {
+	activeIndex.value = index;
 };
 
-const getTableData = () => {
-	request
-		.get('/api/user', {
-			params,
-		})
-		.then((res) => {
-			if (res.code == 0) statistics.value.users = res.data.total;
-		})
-		.catch(() => undefined);
+const onTouchStart = (event: TouchEvent) => {
+	autoplay.value = false;
+	touchStartX.value = event.changedTouches[0]?.clientX || 0;
 };
 
-const getPlateData = () => {
-	request
-		.get('/api/imgRecords', {
-			params,
-		})
-		.then((res) => {
-			if (res.code == 0) statistics.value.records = res.data.total;
-		})
-		.catch(() => undefined);
+const onTouchEnd = (event: TouchEvent) => {
+	const distance = (event.changedTouches[0]?.clientX || 0) - touchStartX.value;
+	if (Math.abs(distance) >= 48) {
+		if (distance > 0) carouselRef.value?.prev();
+		else carouselRef.value?.next();
+	}
+	autoplay.value = true;
 };
-
-const getVideoData = () => {
-	request
-		.get('/api/videoRecords', {
-			params,
-		})
-		.then((res) => {
-			if (res.code == 0) statistics.value.records = statistics.value.records + res.data.total;
-		})
-		.catch(() => undefined);
-};
-
-onMounted(() => {
-	getTableData();
-	getPlateData();
-	getVideoData();
-});
 </script>
 
 <style scoped lang="scss">
-.home-page {
-	min-height: 100vh;
-	padding: 22px;
+.home-showcase {
+	min-height: 100%;
+	padding: 16px;
+	background: #f8f4ec;
+	font-family: 'MindEase WenKai', 'KaiTi', serif;
+}
+
+.carousel-shell {
+	position: relative;
+	min-height: 560px;
+	overflow: hidden;
+	border-radius: 22px;
+	background: #dfe8df;
+	box-shadow: 0 22px 58px rgba(50, 72, 61, 0.16);
+}
+
+.hero-carousel,
+.hero-carousel :deep(.el-carousel__container),
+.hero-carousel :deep(.el-carousel__item) {
+	min-height: 560px;
+}
+
+.hero-image {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	object-position: center;
+	transform: scale(1.002);
+}
+
+.hero-shade {
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+	pointer-events: none;
 	background:
-		linear-gradient(135deg, rgba(244, 250, 248, 0.96), rgba(252, 248, 241, 0.95)),
-		linear-gradient(90deg, rgba(123, 200, 164, 0.18), rgba(74, 144, 217, 0.12));
-	color: #263238;
+		linear-gradient(90deg, rgba(24, 52, 44, 0.7) 0%, rgba(39, 63, 53, 0.48) 30%, rgba(52, 67, 57, 0.08) 64%, transparent 100%),
+		linear-gradient(0deg, rgba(15, 36, 30, 0.2), transparent 42%);
 }
 
-.home-hero {
-	display: grid;
-	grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
-	gap: 18px;
-	align-items: stretch;
+.hero-copy {
+	position: absolute;
+	left: clamp(42px, 6vw, 102px);
+	top: 50%;
+	z-index: 3;
+	width: min(610px, 48vw);
+	color: #fffef9;
+	transform: translateY(-50%);
+	text-shadow: 0 3px 22px rgba(16, 42, 34, 0.28);
 }
 
-.hero-content,
-.flower-panel,
-.quick-card,
-.care-main,
-.care-side,
-.metrics-band {
-	border: 1px solid rgba(91, 124, 121, 0.14);
-	background: rgba(255, 255, 255, 0.84);
-	border-radius: 8px;
-	box-shadow: 0 12px 30px rgba(54, 88, 86, 0.08);
+.hero-kicker {
+	margin: 0 0 18px;
+	font-family: 'MindEase WenKai', 'KaiTi', serif;
+	font-size: 15px;
+	font-weight: 700;
+	letter-spacing: 0.22em;
+	opacity: 0.9;
 }
 
-.hero-content {
-	padding: 36px;
-
-	h1 {
-		margin: 8px 0 14px;
-		font-size: 40px;
-		line-height: 1.15;
-		color: #1f3d3a;
-		letter-spacing: 0;
-	}
-
-	p {
-		max-width: 780px;
-		margin: 0;
-		font-size: 17px;
-		line-height: 1.9;
-		color: #61716f;
-	}
+h1 {
+	margin: 0;
+	font-family: 'MindEase Art', 'STXingkai', 'KaiTi', cursive;
+	font-size: clamp(58px, 6vw, 92px);
+	font-weight: 400;
+	line-height: 1.18;
+	letter-spacing: 0.06em;
 }
 
-.eyebrow {
-	display: inline-flex;
-	color: #4f8f76;
-	font-size: 13px;
-	font-weight: 800;
+.hero-description {
+	max-width: 560px;
+	margin: 24px 0 0;
+	font-size: 19px;
+	line-height: 1.9;
+	letter-spacing: 0.06em;
+	opacity: 0.94;
 }
 
 .hero-actions {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 12px;
-	margin-top: 26px;
+	gap: 14px;
+	margin-top: 34px;
 }
 
 .primary-action,
 .secondary-action {
-	height: 42px;
-	border-radius: 8px;
+	height: 48px;
+	padding: 0 27px;
+	border-radius: 999px;
+	font-family: 'MindEase WenKai', 'KaiTi', serif;
+	font-size: 16px;
 	font-weight: 700;
+	letter-spacing: 0.04em;
 }
 
 .primary-action {
-	border: none;
-	background: #5cae8a;
-	color: #ffffff;
+	border-color: #fff8e9;
+	background: #fff8e9;
+	color: #315f4f;
+}
+
+.primary-action:hover {
+	border-color: #ffffff;
+	background: #ffffff;
+	color: #254d40;
 }
 
 .secondary-action {
-	border-color: rgba(92, 174, 138, 0.42);
-	color: #3f8268;
-	background: #f8fcfa;
+	border-color: rgba(255, 255, 255, 0.72);
+	background: rgba(255, 255, 255, 0.12);
+	color: #ffffff;
+	backdrop-filter: blur(8px);
 }
 
-.flower-panel {
-	padding: 28px;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	text-align: center;
-
-	h2 {
-		margin: 18px 0 8px;
-		color: #243f3c;
-		font-size: 22px;
-	}
-
-	p {
-		margin: 0;
-		color: #647572;
-		line-height: 1.8;
-	}
+.secondary-action:hover {
+	border-color: #ffffff;
+	background: rgba(255, 255, 255, 0.22);
+	color: #ffffff;
 }
 
-.flower-visual {
-	position: relative;
-	width: 168px;
-	aspect-ratio: 1;
-	display: grid;
-	place-items: center;
-}
-
-.petal,
-.flower-core {
+.slide-dots {
 	position: absolute;
-	border-radius: 50%;
-}
+	left: 50%;
+	bottom: 24px;
+	z-index: 4;
+	display: flex;
+	gap: 9px;
+	transform: translateX(-50%);
 
-.petal {
-	width: 80px;
-	height: 106px;
-	background: linear-gradient(180deg, #b9e4d2, #78c9a5);
-	opacity: 0.86;
-	transform-origin: 50% 84%;
-}
-
-.petal-one {
-	transform: translateY(-28px);
-}
-
-.petal-two {
-	transform: rotate(90deg) translateY(-28px);
-	background: linear-gradient(180deg, #c8e5f4, #8ec5e8);
-}
-
-.petal-three {
-	transform: rotate(180deg) translateY(-28px);
-	background: linear-gradient(180deg, #ffe2bf, #f3bf7a);
-}
-
-.petal-four {
-	transform: rotate(270deg) translateY(-28px);
-	background: linear-gradient(180deg, #e7dafa, #c0a4e8);
-}
-
-.flower-core {
-	width: 72px;
-	height: 72px;
-	display: grid;
-	place-items: center;
-	background: #ffffff;
-	color: #316353;
-	font-size: 26px;
-	font-weight: 900;
-	box-shadow: 0 8px 22px rgba(54, 88, 86, 0.12);
-}
-
-.quick-grid {
-	display: grid;
-	grid-template-columns: repeat(4, minmax(0, 1fr));
-	gap: 16px;
-	margin-top: 18px;
-}
-
-.quick-card {
-	min-height: 170px;
-	padding: 20px;
-	cursor: pointer;
-	transition: transform 0.2s ease, box-shadow 0.2s ease;
-
-	.el-icon {
-		width: 42px;
-		height: 42px;
-		border-radius: 8px;
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		background: #f1faf6;
-		color: #4f9b7b;
-		font-size: 22px;
+	button {
+		width: 9px;
+		height: 9px;
+		padding: 0;
+		border: 1px solid rgba(255, 255, 255, 0.8);
+		border-radius: 999px;
+		background: rgba(255, 255, 255, 0.38);
+		cursor: pointer;
+		transition: width 0.25s ease, background 0.25s ease;
 	}
 
-	h3 {
-		margin: 16px 0 8px;
-		color: #243f3c;
-		font-size: 18px;
+	button.active {
+		width: 30px;
+		background: #fff9ec;
+	}
+}
+
+:deep(.el-carousel__arrow) {
+	width: 44px;
+	height: 44px;
+	background: rgba(255, 255, 255, 0.82);
+	color: #365e51;
+	box-shadow: 0 8px 24px rgba(34, 63, 53, 0.18);
+}
+
+@media (max-width: 1000px) {
+	.home-showcase {
+		padding: 0;
 	}
 
-	p {
-		margin: 0;
-		color: #667775;
+	.carousel-shell {
+		border-radius: 0;
+	}
+
+	.hero-copy {
+		left: 34px;
+		width: min(620px, 72vw);
+	}
+}
+
+@media (max-width: 640px) {
+	.carousel-shell,
+	.hero-carousel,
+	.hero-carousel :deep(.el-carousel__container),
+	.hero-carousel :deep(.el-carousel__item) {
+		min-height: 620px;
+	}
+
+	.hero-image {
+		object-position: 66% center;
+	}
+
+	.hero-shade {
+		background:
+			linear-gradient(90deg, rgba(24, 52, 44, 0.74), rgba(35, 59, 49, 0.4) 72%, rgba(35, 59, 49, 0.2)),
+			linear-gradient(0deg, rgba(15, 36, 30, 0.34), transparent 55%);
+	}
+
+	.hero-copy {
+		left: 24px;
+		right: 24px;
+		top: 48%;
+		width: auto;
+	}
+
+	.hero-kicker {
+		font-size: 12px;
+	}
+
+	h1 {
+		font-size: clamp(44px, 14vw, 62px);
+		line-height: 1.24;
+	}
+
+	.hero-description {
+		font-size: 16px;
 		line-height: 1.75;
 	}
 
-	&:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 16px 34px rgba(54, 88, 86, 0.1);
-	}
-}
-
-.care-layout {
-	display: grid;
-	grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.6fr);
-	gap: 18px;
-	margin-top: 18px;
-}
-
-.care-main,
-.care-side {
-	padding: 24px;
-}
-
-.care-main {
-	h2 {
-		margin: 8px 0 18px;
-		font-size: 24px;
-		color: #243f3c;
-	}
-}
-
-.practice-list {
-	display: grid;
-	grid-template-columns: repeat(3, minmax(0, 1fr));
-	gap: 12px;
-}
-
-.practice-item {
-	padding: 16px;
-	border-radius: 8px;
-	background: #f7fbf9;
-
-	strong {
-		display: block;
-		margin-bottom: 8px;
-		color: #376d59;
-	}
-
-	span {
-		color: #657674;
-		line-height: 1.7;
-	}
-}
-
-.care-side {
-	ul {
-		list-style: none;
-		margin: 14px 0 0;
-		padding: 0;
-		display: grid;
+	.hero-actions {
 		gap: 10px;
+		margin-top: 26px;
 	}
 
-	li {
-		padding: 12px 14px;
-		border-radius: 8px;
-		background: #f8fbff;
-		color: #45656f;
-		font-weight: 700;
-	}
-}
-
-.metrics-band {
-	display: grid;
-	grid-template-columns: repeat(4, minmax(0, 1fr));
-	gap: 1px;
-	margin-top: 18px;
-	padding: 0;
-	overflow: hidden;
-}
-
-.metric-item {
-	padding: 20px;
-	background: rgba(255, 255, 255, 0.6);
-	text-align: center;
-
-	strong {
-		display: block;
-		font-size: 28px;
-		color: #2e6653;
+	.primary-action,
+	.secondary-action {
+		height: 44px;
+		padding: 0 20px;
+		font-size: 14px;
 	}
 
-	span {
-		color: #667775;
-	}
-}
-
-@media (max-width: 1180px) {
-	.home-hero,
-	.care-layout {
-		grid-template-columns: 1fr;
-	}
-
-	.quick-grid,
-	.practice-list,
-	.metrics-band {
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-	}
-}
-
-@media (max-width: 720px) {
-	.home-page {
-		padding: 14px;
-	}
-
-	.hero-content {
-		padding: 24px;
-
-		h1 {
-			font-size: 30px;
-		}
-	}
-
-	.quick-grid,
-	.practice-list,
-	.metrics-band {
-		grid-template-columns: 1fr;
+	:deep(.el-carousel__arrow) {
+		display: none;
 	}
 }
 </style>

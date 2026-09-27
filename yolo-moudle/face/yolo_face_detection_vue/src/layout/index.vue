@@ -23,17 +23,18 @@ const { themeConfig } = storeToRefs(storesThemeConfig);
 
 // 窗口大小改变时(适配移动端)
 const onLayoutResize = () => {
-	if (!Local.get('oldLayout')) Local.set('oldLayout', themeConfig.value.layout);
+	Local.set('oldLayout', 'transverse');
+	themeConfig.value.layout = 'transverse';
 	const clientWidth = document.body.clientWidth;
 	if (clientWidth < 1000) {
 		themeConfig.value.isCollapse = false;
 		mittBus.emit('layoutMobileResize', {
-			layout: 'defaults',
+			layout: 'transverse',
 			clientWidth,
 		});
 	} else {
 		mittBus.emit('layoutMobileResize', {
-			layout: Local.get('oldLayout') ? Local.get('oldLayout') : themeConfig.value.layout,
+			layout: 'transverse',
 			clientWidth,
 		});
 	}

@@ -132,7 +132,8 @@ const signInSuccess = (isNoPower: boolean | undefined) => {
 			router.push('/');
 		}
 		ElMessage.success(`${currentTime.value}，${t('message.signInText')}`);
-		NextLoading.start();
+		// 动态路由初始化已经可能启动全局 Loading，避免重复创建遮罩后只移除一层。
+		if (window.nextLoading === undefined) NextLoading.start();
 	}
 };
 

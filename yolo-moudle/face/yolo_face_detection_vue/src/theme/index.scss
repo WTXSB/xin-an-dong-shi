@@ -1,3 +1,15 @@
+@font-face {
+	font-family: 'MindEase Art';
+	src: url('../assets/fonts/MaShanZheng-Regular.ttf') format('truetype');
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'MindEase WenKai';
+	src: url('../assets/fonts/LXGWWenKaiLite-Regular.ttf') format('truetype');
+	font-display: swap;
+}
+
 @import './app.scss';
 @import 'common/transition.scss';
 @import './other.scss';

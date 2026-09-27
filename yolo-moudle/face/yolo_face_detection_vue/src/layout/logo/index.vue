@@ -37,15 +37,17 @@ const onThemeConfigChange = () => {
 
 <style scoped lang="scss">
 .layout-logo {
-	width: 220px;
+	width: 176px;
 	height: 50px;
 	display: flex;
 	align-items: center;
-	justify-content: center;
+	justify-content: flex-start;
+	padding-left: 18px;
 	box-shadow: rgb(0 21 41 / 2%) 0px 1px 4px;
 	color: #6d4c36;
-	font-size: 16px;
-	font-weight: 800;
+	font-family: 'MindEase Art';
+	font-size: 22px;
+	font-weight: 400;
 	cursor: pointer;
 	animation: logoAnimation 0.3s ease-in-out;
 	span {
@@ -130,5 +132,15 @@ const onThemeConfigChange = () => {
 	border-radius: 50%;
 	background: #7a5a43;
 	box-shadow: 0 0 0 3px rgba(255, 248, 239, 0.72);
+}
+
+@media (max-width: 1000px) {
+	.layout-logo { width: auto; padding-left: 0; font-size: 20px; box-shadow: none; }
+	.soft-logo-mark { width: 30px; height: 30px; margin-right: 8px; }
+	.soft-logo-heart { left: 8px; top: 9px; width: 13px; height: 13px; }
+	.soft-logo-heart::before, .soft-logo-heart::after { width: 13px; height: 13px; }
+	.soft-logo-heart::before { left: -6px; }
+	.soft-logo-heart::after { top: -6px; }
+	.soft-logo-dot { right: 5px; bottom: 5px; }
 }
 </style>

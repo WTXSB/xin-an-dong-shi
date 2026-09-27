@@ -1,9 +1,29 @@
 <template>
 	<div class="layout-navbars-breadcrumb-index">
 		<Logo v-if="setIsShowLogo" />
-		<Breadcrumb />
-		<Horizontal :menuList="state.menuList" v-if="isLayoutTransverse" />
+		<Horizontal v-if="isLayoutTransverse" class="desktop-navigation" :menu-list="state.menuList" />
+		<button class="mobile-menu-button" type="button" aria-label="打开导航菜单" @click="state.drawerOpen = true">
+			<el-icon><ele-Menu /></el-icon>
+		</button>
 		<User />
+
+		<el-drawer v-model="state.drawerOpen" class="mobile-nav-drawer" direction="ltr" size="82%" :with-header="false">
+			<div class="drawer-brand">
+				<span class="drawer-mark">心</span>
+				<div><strong>心安动识</strong><small>让每一次感知都被温柔接住</small></div>
+			</div>
+			<el-menu router :default-active="route.path" @select="state.drawerOpen = false">
+				<template v-for="item in state.menuList" :key="item.path">
+					<el-sub-menu v-if="item.children && item.children.length" :index="item.path">
+						<template #title><SvgIcon :name="item.meta.icon" /><span>{{ item.meta.title }}</span></template>
+						<SubItem :chil="item.children" />
+					</el-sub-menu>
+					<el-menu-item v-else :index="item.path">
+						<SvgIcon :name="item.meta.icon" /><span>{{ item.meta.title }}</span>
+					</el-menu-item>
+				</template>
+			</el-menu>
+		</el-drawer>
 	</div>
 </template>
 
@@ -15,85 +35,42 @@ import { useRoutesList } from '/@/stores/routesList';
 import { useThemeConfig } from '/@/stores/themeConfig';
 import mittBus from '/@/utils/mitt';
 
-// 引入组件
-const Breadcrumb = defineAsyncComponent(() => import('/@/layout/navBars/breadcrumb/breadcrumb.vue'));
 const User = defineAsyncComponent(() => import('/@/layout/navBars/breadcrumb/user.vue'));
 const Logo = defineAsyncComponent(() => import('/@/layout/logo/index.vue'));
 const Horizontal = defineAsyncComponent(() => import('/@/layout/navMenu/horizontal.vue'));
+const SubItem = defineAsyncComponent(() => import('/@/layout/navMenu/subItem.vue'));
 
-// 定义变量内容
 const stores = useRoutesList();
 const storesThemeConfig = useThemeConfig();
 const { themeConfig } = storeToRefs(storesThemeConfig);
 const { routesList } = storeToRefs(stores);
 const route = useRoute();
-const state = reactive({
-	menuList: [] as RouteItems,
-});
+const state = reactive({ menuList: [] as RouteItems, drawerOpen: false });
+const menuOrder = ['/homePage', '/aboutProduct', '/diseaseDetection', '/dataView', '/trashMap', '/trashRecords', '/smartChat'];
 
-// 设置 logo 显示/隐藏
-const setIsShowLogo = computed(() => {
-	let { isShowLogo, layout } = themeConfig.value;
-	return (isShowLogo && layout === 'classic') || (isShowLogo && layout === 'transverse');
-});
-// 设置是否显示横向导航菜单
-const isLayoutTransverse = computed(() => {
-	let { layout, isClassicSplitMenu } = themeConfig.value;
-	return layout === 'transverse' || (isClassicSplitMenu && layout === 'classic');
-});
-// 设置/过滤路由（非静态路由/是否显示在菜单中）
+const setIsShowLogo = computed(() => themeConfig.value.isShowLogo && themeConfig.value.layout === 'transverse');
+const isLayoutTransverse = computed(() => themeConfig.value.layout === 'transverse');
+
+const filterRoutesFun = <T extends RouteItem>(arr: T[]): T[] =>
+	arr.filter((item: T) => !item.meta?.isHide).map((item: T) => {
+		const copied = Object.assign({}, item);
+		if (copied.children) copied.children = filterRoutesFun(copied.children);
+		return copied;
+	});
+
 const setFilterRoutes = () => {
-	let { layout, isClassicSplitMenu } = themeConfig.value;
-	if (layout === 'classic' && isClassicSplitMenu) {
-		state.menuList = delClassicChildren(filterRoutesFun(routesList.value));
-		const resData = setSendClassicChildren(route.path);
-		mittBus.emit('setSendClassicChildren', resData);
-	} else {
-		state.menuList = filterRoutesFun(routesList.value);
-	}
-};
-// 设置了分割菜单时，删除底下 children
-const delClassicChildren = <T extends ChilType>(arr: T[]): T[] => {
-	arr.map((v: T) => {
-		if (v.children) delete v.children;
+	state.menuList = filterRoutesFun(routesList.value).sort((a, b) => {
+		const aIndex = menuOrder.indexOf(a.path);
+		const bIndex = menuOrder.indexOf(b.path);
+		return (aIndex < 0 ? 99 : aIndex) - (bIndex < 0 ? 99 : bIndex);
 	});
-	return arr;
 };
-// 路由过滤递归函数
-const filterRoutesFun = <T extends RouteItem>(arr: T[]): T[] => {
-	return arr
-		.filter((item: T) => !item.meta?.isHide)
-		.map((item: T) => {
-			item = Object.assign({}, item);
-			if (item.children) item.children = filterRoutesFun(item.children);
-			return item;
-		});
-};
-// 传送当前子级数据到菜单中
-const setSendClassicChildren = (path: string) => {
-	const currentPathSplit = path.split('/');
-	let currentData: MittMenu = { children: [] };
-	filterRoutesFun(routesList.value).map((v: RouteItem, k: number) => {
-		if (v.path === `/${currentPathSplit[1]}`) {
-			v['k'] = k;
-			currentData['item'] = { ...v };
-			currentData['children'] = [{ ...v }];
-			if (v.children) currentData['children'] = v.children;
-		}
-	});
-	return currentData;
-};
-// 页面加载时
+
 onMounted(() => {
 	setFilterRoutes();
-	mittBus.on('getBreadcrumbIndexSetFilterRoutes', () => {
-		setFilterRoutes();
-	});
+	mittBus.on('getBreadcrumbIndexSetFilterRoutes', setFilterRoutes);
 });
-// 页面卸载时
-onUnmounted(() => {
-	mittBus.off('getBreadcrumbIndexSetFilterRoutes', () => {});
-});
+onUnmounted(() => mittBus.off('getBreadcrumbIndexSetFilterRoutes', setFilterRoutes));
 </script>
 
 <style scoped lang="scss">
@@ -101,7 +78,29 @@ onUnmounted(() => {
 	height: 50px;
 	display: flex;
 	align-items: center;
-	background: var(--next-bg-topBar);
-	border-bottom: 1px solid var(--next-border-color-light);
+	background: rgba(255, 253, 248, 0.96);
+	border-bottom: 1px solid rgba(126, 155, 133, 0.18);
+	box-shadow: 0 6px 24px rgba(84, 102, 86, 0.06);
+}
+.mobile-menu-button { display: none; }
+.drawer-brand {
+	display: flex; align-items: center; gap: 12px; padding: 26px 20px 22px; color: #58483b;
+	.drawer-mark { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 50%; background: #edf6ee; color: #64856c; font-family: 'MindEase Art'; font-size: 24px; }
+	strong { display: block; font-family: 'MindEase Art'; font-size: 24px; font-weight: 400; }
+	small { display: block; margin-top: 3px; color: #9a8979; font-size: 12px; }
+}
+:global(.mobile-nav-drawer .el-drawer__body) { padding: 0; background: #fffdf8; }
+:global(.mobile-nav-drawer .el-menu) { border-right: 0; background: transparent; }
+:global(.mobile-nav-drawer .el-menu-item),
+:global(.mobile-nav-drawer .el-sub-menu__title) { height: 54px; color: #66584b; font-size: 16px; }
+:global(.mobile-nav-drawer .el-menu-item.is-active) { color: #63836b; background: #edf5ec; }
+
+@media (max-width: 1000px) {
+	.layout-navbars-breadcrumb-index { justify-content: space-between; padding: 0 12px; }
+	.desktop-navigation { display: none; }
+	.mobile-menu-button {
+		display: grid; place-items: center; order: 2; width: 38px; height: 38px; margin-left: auto;
+		border: 0; border-radius: 12px; background: #edf5ec; color: #607a65; font-size: 20px; cursor: pointer;
+	}
 }
 </style>

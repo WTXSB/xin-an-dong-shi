@@ -52,7 +52,7 @@ export const dynamicRoutes: Array<RouteRecordRaw> = [
 				name: 'homePage',
 				component: () => import('/@/views/homePage/index.vue'),
 				meta: {
-					title: '心灵首页',
+					title: '首页',
 					isLink: '',
 					isHide: false,
 					isKeepAlive: true,
@@ -60,6 +60,21 @@ export const dynamicRoutes: Array<RouteRecordRaw> = [
 					isIframe: false,
 					roles: ['admin', 'common', 'others'],
 					icon: 'iconfontjs icon-sy',
+				},
+			},
+			{
+				path: '/aboutProduct',
+				name: 'aboutProduct',
+				component: () => import('/@/views/aboutProduct/index.vue'),
+				meta: {
+					title: '关于产品',
+					isLink: '',
+					isHide: false,
+					isKeepAlive: true,
+					isAffix: false,
+					isIframe: false,
+					roles: ['admin', 'common', 'others'],
+					icon: 'iconfont icon-guanyu',
 				},
 			},
 			{
@@ -82,7 +97,7 @@ export const dynamicRoutes: Array<RouteRecordRaw> = [
 				name: 'trashMap',
 				component: () => import('/@/views/trashMap/index.vue'),
 				meta: {
-					title: '心灵SPA导引',
+					title: '心灵 SPA',
 					isLink: '',
 					isHide: false,
 					isKeepAlive: true,
@@ -283,7 +298,7 @@ export const dynamicRoutes: Array<RouteRecordRaw> = [
 				meta: {
 					title: '用户管理',
 					isLink: '',
-					isHide: false,
+					isHide: true,
 					isKeepAlive: true,
 					isAffix: false,
 					isIframe: false,
@@ -298,7 +313,7 @@ export const dynamicRoutes: Array<RouteRecordRaw> = [
 				meta: {
 					title: '个人中心',
 					isLink: '',
-					isHide: false,
+					isHide: true,
 					isKeepAlive: true,
 					isAffix: false,
 					isIframe: false,

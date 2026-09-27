@@ -97,6 +97,7 @@
 					</div>
 				</div>
 			</div>
+			<EmotionTrendCard class="trend-section" />
 		</div>
 	</div>
 </template>
@@ -109,6 +110,7 @@ import request from '/@/utils/request';
 import { useUserInfo } from '/@/stores/userInfo';
 import { storeToRefs } from 'pinia';
 import { Plus, Check, User, Lock, UserFilled, Message, Phone } from '@element-plus/icons-vue';
+import EmotionTrendCard from '/@/components/EmotionTrendCard/index.vue';
 
 const imageUrl = ref('');
 const uploadFile = ref<UploadInstance>();
@@ -216,18 +218,16 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .personal-container {
-	height: calc(100vh - 60px);
-	padding-top: 32px;
-	background-color: #f5f7fa;
-	overflow: hidden;
+	min-height: 100%;
+	padding: 32px 24px 48px;
+	background: linear-gradient(145deg, #f8f5ed 0%, #f1f6ef 58%, #faf2e9 100%);
+	overflow: visible;
 
 	.personal-wrapper {
-		height: 100%;
 		max-width: 1200px;
 		margin: 0 auto;
 		
 		.content-wrapper {
-			height: calc(100% - 32px);
 			display: grid;
 			grid-template-columns: 320px 1fr;
 			gap: 32px;
@@ -395,6 +395,10 @@ onMounted(() => {
 				}
 			}
 		}
+
+		.trend-section {
+			margin-top: 32px;
+		}
 	}
 }
 
@@ -407,7 +411,7 @@ onMounted(() => {
 				grid-template-columns: 1fr;
 				gap: 24px;
 
-				.info-card {
+				.right-section .info-card {
 					padding: 24px;
 
 					.info-form {
@@ -418,6 +422,8 @@ onMounted(() => {
 					}
 				}
 			}
+
+			.trend-section { margin-top: 24px; }
 		}
 	}
 }

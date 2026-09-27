@@ -69,8 +69,18 @@ onMounted(() => {
 		});
 		// 获取缓存中的布局配置
 		if (Local.get('themeConfig')) {
-			storesThemeConfig.setThemeConfig({ themeConfig: Local.get('themeConfig') });
+			const cachedTheme = {
+				...Local.get('themeConfig'),
+				layout: 'transverse',
+				isTagsview: false,
+				isShowLogo: true,
+			};
+			Local.set('themeConfig', cachedTheme);
+			Local.set('oldLayout', 'transverse');
+			storesThemeConfig.setThemeConfig({ themeConfig: cachedTheme });
 			document.documentElement.style.cssText = Local.get('themeConfigStyle');
+		} else {
+			Local.set('oldLayout', 'transverse');
 		}
 		// 获取缓存中的全屏配置
 		if (Session.get('isTagsViewCurrenFull')) {
