@@ -1,5 +1,6 @@
 <template>
 	<div
+		v-if="shouldShow"
 		class="anxiaoning-float"
 		:class="{ dragging: dragState.dragging }"
 		:style="{ left: `${position.x}px`, top: `${position.y}px` }"
@@ -61,6 +62,7 @@
 
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
+import { useRoute } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import request from '/@/utils/request';
 import { useUserInfo } from '/@/stores/userInfo';
@@ -78,6 +80,8 @@ const EDGE_PADDING = 14;
 
 const stores = useUserInfo();
 const { userInfos } = storeToRefs(stores);
+const route = useRoute();
+const shouldShow = computed(() => route.path !== '/smartChat');
 const opened = ref(false);
 const input = ref('');
 const loading = ref(false);
