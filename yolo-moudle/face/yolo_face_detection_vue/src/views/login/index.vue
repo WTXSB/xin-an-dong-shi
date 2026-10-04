@@ -11,6 +11,10 @@
 				<span>理解与接住</span>
 				<span>觉察先于改变</span>
 			</div>
+			<div class="brand-companions" aria-hidden="true">
+				<div class="companion-sun"></div>
+				<img src="/@/assets/companion/login-hamster-rabbit.png" alt="" />
+			</div>
 		</section>
 
 		<section class="login-box">
@@ -176,16 +180,16 @@ const goRegister = () => {
 	gap: 28px;
 	padding: 42px;
 	background:
-		linear-gradient(135deg, rgba(244, 250, 248, 0.94), rgba(252, 248, 241, 0.95)),
-		linear-gradient(90deg, rgba(123, 200, 164, 0.18), rgba(74, 144, 217, 0.12));
+		radial-gradient(circle at 12% 14%, rgba(255, 211, 98, .34), transparent 27%),
+		linear-gradient(135deg, rgba(255, 253, 246, .97), rgba(255, 245, 218, .96));
 }
 
 .brand-panel,
 .login-box {
-	border: 1px solid rgba(91, 124, 121, 0.14);
-	background: rgba(255, 255, 255, 0.84);
-	border-radius: 8px;
-	box-shadow: 0 18px 40px rgba(54, 88, 86, 0.1);
+	border: 1px solid rgba(164, 109, 60, .15);
+	background: rgba(255, 254, 248, .9);
+	border-radius: 28px;
+	box-shadow: 0 22px 54px rgba(133, 82, 39, .12);
 }
 
 .brand-panel {
@@ -194,20 +198,40 @@ const goRegister = () => {
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
+	position: relative;
+	overflow: hidden;
+}
+
+.brand-panel::after {
+	content: '';
+	position: absolute;
+	right: -70px;
+	bottom: -110px;
+	width: 560px;
+	height: 360px;
+	border-radius: 50% 50% 0 0;
+	background: radial-gradient(circle at 50% 40%, rgba(255, 226, 128, .42), rgba(255, 247, 216, .1) 68%, transparent 72%);
+	pointer-events: none;
 }
 
 .eyebrow {
-	color: #4f8f76;
+	color: #bd6e40;
 	font-size: 14px;
 	font-weight: 800;
+	position: relative;
+	z-index: 2;
 }
 
 .brand-panel h1 {
 	margin: 12px 0 18px;
-	color: #1f3d3a;
+	color: #4b372d;
+	font-family: 'MindEase Art';
+	font-weight: 400;
 	font-size: 44px;
 	line-height: 1.15;
 	letter-spacing: 0;
+	position: relative;
+	z-index: 2;
 }
 
 .brand-copy {
@@ -216,6 +240,8 @@ const goRegister = () => {
 	color: #61716f;
 	font-size: 17px;
 	line-height: 1.9;
+	position: relative;
+	z-index: 2;
 }
 
 .principles {
@@ -223,14 +249,46 @@ const goRegister = () => {
 	flex-wrap: wrap;
 	gap: 12px;
 	margin-top: 28px;
+	position: relative;
+	z-index: 2;
 }
 
 .principles span {
 	padding: 10px 14px;
 	border-radius: 8px;
-	background: #f2faf6;
-	color: #3f8268;
+	background: #fff1c4;
+	color: #9f5a35;
 	font-weight: 700;
+}
+
+.brand-companions {
+	position: absolute;
+	right: 22px;
+	bottom: 14px;
+	width: min(43%, 430px);
+	z-index: 1;
+	pointer-events: none;
+	filter: drop-shadow(0 16px 18px rgba(153, 100, 42, .14));
+}
+
+.brand-companions img {
+	display: block;
+	width: 100%;
+	height: auto;
+	position: relative;
+	z-index: 2;
+}
+
+.companion-sun {
+	position: absolute;
+	left: 50%;
+	top: 45%;
+	width: 78%;
+	aspect-ratio: 1;
+	border-radius: 50%;
+	transform: translate(-50%, -50%);
+	background: rgba(255, 232, 134, .34);
+	filter: blur(1px);
 }
 
 .login-box {
@@ -243,7 +301,7 @@ const goRegister = () => {
 
 .title h2 {
 	margin: 0 0 8px;
-	color: #243f3c;
+	color: #4b372d;
 	font-size: 26px;
 	letter-spacing: 0;
 }
@@ -258,14 +316,14 @@ const goRegister = () => {
 	margin-bottom: 22px;
 	padding: 16px;
 	border-radius: 8px;
-	background: #f7fbf9;
-	border: 1px solid rgba(92, 174, 138, 0.14);
+	background: #fff8e3;
+	border: 1px solid rgba(200, 119, 66, .14);
 }
 
 .quote-card span {
 	display: inline-flex;
 	margin-bottom: 8px;
-	color: #4f8f76;
+	color: #bd6e40;
 	font-size: 13px;
 	font-weight: 800;
 }
@@ -289,11 +347,11 @@ const goRegister = () => {
 	border-radius: 8px;
 	padding: 10px 12px;
 	background: #f8fcfa;
-	box-shadow: 0 0 0 1px rgba(92, 174, 138, 0.16);
+	box-shadow: 0 0 0 1px rgba(191, 111, 62, .18);
 }
 
 :deep(.custom-input .el-input__wrapper.is-focus) {
-	box-shadow: 0 0 0 1px #5cae8a;
+	box-shadow: 0 0 0 1px #c97543;
 	background: #ffffff;
 }
 
@@ -302,14 +360,14 @@ const goRegister = () => {
 	height: 42px;
 	border-radius: 8px;
 	border: none;
-	background: #5cae8a;
+	background: #c97543;
 	color: #ffffff;
 	font-size: 16px;
 	font-weight: 700;
 }
 
 .login-btn:hover {
-	background: #4f9f7c;
+	background: #a95d34;
 	color: #ffffff;
 }
 
@@ -321,7 +379,7 @@ const goRegister = () => {
 }
 
 .entry-actions :deep(.el-button) {
-	color: #4f8f76;
+	color: #a95d34;
 	font-weight: 700;
 }
 
@@ -329,13 +387,13 @@ const goRegister = () => {
 	margin-top: 18px;
 	padding: 12px 14px;
 	border-radius: 8px;
-	background: #f7fbf9;
+	background: #fff6d7;
 	color: #647572;
 	text-align: center;
 }
 
 .demo-tip strong {
-	color: #2f6653;
+	color: #9c5733;
 }
 
 @media (max-width: 960px) {
@@ -346,11 +404,18 @@ const goRegister = () => {
 
 	.brand-panel {
 		min-height: auto;
-		padding: 32px;
+		padding: 32px 32px 210px;
 	}
 
 	.brand-panel h1 {
 		font-size: 34px;
+	}
+
+	.brand-companions {
+		right: 50%;
+		bottom: 8px;
+		width: min(74%, 360px);
+		transform: translateX(50%);
 	}
 
 	.login-box {

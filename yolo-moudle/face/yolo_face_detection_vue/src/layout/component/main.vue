@@ -51,7 +51,7 @@ const setMainHeight = computed(() => {
 	if (isTagsViewCurrenFull.value) return '0px';
 	const { isTagsview, layout } = themeConfig.value;
 	if (isTagsview && layout !== 'classic') return '85px';
-	else return '51px';
+	else return document.body.clientWidth < 1000 ? '61px' : '67px';
 });
 // 页面加载前
 onMounted(() => {

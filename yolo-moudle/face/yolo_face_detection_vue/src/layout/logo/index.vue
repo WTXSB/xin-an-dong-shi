@@ -37,16 +37,16 @@ const onThemeConfigChange = () => {
 
 <style scoped lang="scss">
 .layout-logo {
-	width: 176px;
-	height: 50px;
+	width: 188px;
+	height: 66px;
 	display: flex;
 	align-items: center;
 	justify-content: flex-start;
-	padding-left: 18px;
-	box-shadow: rgb(0 21 41 / 2%) 0px 1px 4px;
-	color: #6d4c36;
+	padding-left: 0;
+	box-shadow: none;
+	color: #5d4030;
 	font-family: 'MindEase Art';
-	font-size: 22px;
+	font-size: 24px;
 	font-weight: 400;
 	cursor: pointer;
 	animation: logoAnimation 0.3s ease-in-out;
@@ -81,8 +81,8 @@ const onThemeConfigChange = () => {
 	height: 34px;
 	margin-right: 10px;
 	border-radius: 50%;
-	background: linear-gradient(145deg, #8fcfa7, #f4c978);
-	box-shadow: 0 8px 18px rgba(109, 76, 54, 0.16);
+	background: linear-gradient(145deg, #ffd976, #f0ae5d);
+	box-shadow: 0 8px 18px rgba(167, 100, 45, 0.18), inset 0 0 0 5px rgba(255, 251, 230, .56);
 	flex: 0 0 auto;
 }
 
@@ -130,7 +130,7 @@ const onThemeConfigChange = () => {
 	width: 7px;
 	height: 7px;
 	border-radius: 50%;
-	background: #7a5a43;
+	background: #a65e38;
 	box-shadow: 0 0 0 3px rgba(255, 248, 239, 0.72);
 }
 

@@ -220,7 +220,7 @@ onMounted(() => {
 .personal-container {
 	min-height: 100%;
 	padding: 32px 24px 48px;
-	background: linear-gradient(145deg, #f8f5ed 0%, #f1f6ef 58%, #faf2e9 100%);
+	background: radial-gradient(circle at 9% 8%, rgba(255, 219, 119, .24), transparent 24%), linear-gradient(145deg, #fffdf7 0%, #fff8e9 58%, #f8f5e8 100%);
 	overflow: visible;
 
 	.personal-wrapper {
@@ -234,12 +234,13 @@ onMounted(() => {
 
 			.left-section {
 				.avatar-card {
-					background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-					border-radius: 16px;
+					background: linear-gradient(145deg, #fffef9 0%, #fff7df 100%);
+					border: 1px solid rgba(164, 112, 64, .14);
+					border-radius: 26px;
 					padding: 40px 32px;
 					text-align: center;
 					height: fit-content;
-					box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+					box-shadow: 0 16px 42px rgba(136, 88, 42, .1);
 
 					.avatar-wrapper {
 						margin-bottom: 24px;
@@ -291,17 +292,17 @@ onMounted(() => {
 
 					.welcome-text {
 						font-size: 20px;
-						color: #2c3e50;
+						color: #4d392e;
 						margin: 0 0 16px;
 						font-weight: 600;
 					}
 
 					.user-role {
 						font-size: 15px;
-						color: #409eff;
+						color: #a95d34;
 						font-weight: 500;
 						padding: 8px 20px;
-						background: rgba(64, 158, 255, 0.1);
+						background: #fff0bd;
 						border-radius: 20px;
 						display: inline-block;
 					}
@@ -310,14 +311,15 @@ onMounted(() => {
 
 			.right-section {
 				.info-card {
-					background: #ffffff;
-					border-radius: 16px;
+					background: #fffef9;
+					border: 1px solid rgba(164, 112, 64, .14);
+					border-radius: 26px;
 					padding: 40px;
-					box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+					box-shadow: 0 16px 42px rgba(136, 88, 42, .1);
 
 					.section-title {
 						font-size: 24px;
-						color: #2c3e50;
+						color: #4d392e;
 						margin: 0 0 32px;
 						font-weight: 600;
 					}
@@ -333,7 +335,7 @@ onMounted(() => {
 
 								.el-form-item__label {
 									font-weight: 500;
-									color: #2c3e50;
+									color: #5e4a3d;
 								}
 
 								.el-input__wrapper {
@@ -345,7 +347,7 @@ onMounted(() => {
 
 									&:hover,
 									&.is-focus {
-										box-shadow: 0 0 0 1px #409eff inset;
+										box-shadow: 0 0 0 1px #c97543 inset;
 									}
 
 									.el-input__prefix {
@@ -361,11 +363,11 @@ onMounted(() => {
 											box-shadow: 0 0 0 1px #e4e7ed inset !important;
 											
 											&:hover {
-												box-shadow: 0 0 0 1px #409eff inset !important;
+											box-shadow: 0 0 0 1px #c97543 inset !important;
 											}
 											
 											&.is-focus {
-												box-shadow: 0 0 0 1px #409eff inset !important;
+												box-shadow: 0 0 0 1px #c97543 inset !important;
 											}
 										}
 									}
@@ -381,13 +383,13 @@ onMounted(() => {
 								padding: 12px 36px;
 								font-size: 15px;
 								border-radius: 8px;
-								background: linear-gradient(135deg, #409eff, #36a2f1);
+								background: linear-gradient(135deg, #cf7a46, #b76036);
 								border: none;
 								transition: all 0.3s ease;
 
 								&:hover {
 									transform: translateY(-2px);
-									box-shadow: 0 6px 16px rgba(64, 158, 255, 0.4);
+									box-shadow: 0 8px 20px rgba(183, 96, 54, .28);
 								}
 							}
 						}

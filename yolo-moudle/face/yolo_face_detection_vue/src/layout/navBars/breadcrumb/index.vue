@@ -75,32 +75,34 @@ onUnmounted(() => mittBus.off('getBreadcrumbIndexSetFilterRoutes', setFilterRout
 
 <style scoped lang="scss">
 .layout-navbars-breadcrumb-index {
-	height: 50px;
+	height: 66px;
 	display: flex;
 	align-items: center;
-	background: rgba(255, 253, 248, 0.96);
-	border-bottom: 1px solid rgba(126, 155, 133, 0.18);
-	box-shadow: 0 6px 24px rgba(84, 102, 86, 0.06);
+	padding: 0 clamp(10px, 1.7vw, 28px);
+	background: rgba(255, 254, 248, 0.94);
+	border-bottom: 1px solid rgba(151, 107, 66, 0.14);
+	box-shadow: 0 8px 30px rgba(127, 87, 46, 0.07);
+	backdrop-filter: blur(18px);
 }
 .mobile-menu-button { display: none; }
 .drawer-brand {
 	display: flex; align-items: center; gap: 12px; padding: 26px 20px 22px; color: #58483b;
-	.drawer-mark { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 50%; background: #edf6ee; color: #64856c; font-family: 'MindEase Art'; font-size: 24px; }
+	.drawer-mark { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 50%; background: #fff0b8; color: #b56538; font-family: 'MindEase Art'; font-size: 24px; }
 	strong { display: block; font-family: 'MindEase Art'; font-size: 24px; font-weight: 400; }
 	small { display: block; margin-top: 3px; color: #9a8979; font-size: 12px; }
 }
-:global(.mobile-nav-drawer .el-drawer__body) { padding: 0; background: #fffdf8; }
+:global(.mobile-nav-drawer .el-drawer__body) { padding: 0; background: #fffdf7; }
 :global(.mobile-nav-drawer .el-menu) { border-right: 0; background: transparent; }
 :global(.mobile-nav-drawer .el-menu-item),
 :global(.mobile-nav-drawer .el-sub-menu__title) { height: 54px; color: #66584b; font-size: 16px; }
-:global(.mobile-nav-drawer .el-menu-item.is-active) { color: #63836b; background: #edf5ec; }
+:global(.mobile-nav-drawer .el-menu-item.is-active) { color: #a95d34; background: #fff1c4; }
 
 @media (max-width: 1000px) {
-	.layout-navbars-breadcrumb-index { justify-content: space-between; padding: 0 12px; }
+	.layout-navbars-breadcrumb-index { justify-content: space-between; height: 60px; padding: 0 12px; }
 	.desktop-navigation { display: none; }
 	.mobile-menu-button {
 		display: grid; place-items: center; order: 2; width: 38px; height: 38px; margin-left: auto;
-		border: 0; border-radius: 12px; background: #edf5ec; color: #607a65; font-size: 20px; cursor: pointer;
+		border: 1px solid rgba(185, 119, 57, 0.12); border-radius: 14px; background: #fff1c4; color: #a55f38; font-size: 20px; cursor: pointer;
 	}
 }
 </style>

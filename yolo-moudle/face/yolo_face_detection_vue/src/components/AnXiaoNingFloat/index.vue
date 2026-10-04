@@ -8,53 +8,14 @@
 		<button
 			class="float-core"
 			type="button"
-			:aria-label="`打开${selectedPet.name}陪伴对话`"
-			:title="`拖动${selectedPet.name}，或点击打开安心对话`"
+			aria-label="打开安小宁陪伴对话"
+			title="拖动我，或点击打开安小宁"
 			@click="togglePanel"
 			@pointerdown="startDrag"
-			@pointerenter="greetPet"
 		>
-			<span class="pet-sprite" :style="spriteStyle" aria-hidden="true"></span>
+			<span class="breath-ring"></span>
+			<span class="face">安</span>
 		</button>
-
-		<button
-			class="pet-switch"
-			type="button"
-			aria-label="更换陪伴桌宠"
-			title="更换陪伴桌宠"
-			@click.stop="togglePetPicker"
-			@pointerdown.stop
-		>
-			换
-		</button>
-
-		<section v-if="petPickerOpen" :class="['pet-picker', panelPlacement]" @pointerdown.stop>
-			<header class="pet-picker-header">
-				<div>
-					<strong>选择陪伴伙伴</strong>
-					<p>选择会保存在当前浏览器</p>
-				</div>
-				<button type="button" aria-label="关闭桌宠选择" @click="petPickerOpen = false">×</button>
-			</header>
-
-			<div class="pet-options">
-				<button
-					v-for="pet in PETS"
-					:key="pet.id"
-					type="button"
-					:class="['pet-option', { selected: pet.id === selectedPet.id }]"
-					:aria-pressed="pet.id === selectedPet.id"
-					@click="selectPet(pet.id)"
-				>
-					<span class="pet-option-preview" :style="petPreviewStyle(pet)" aria-hidden="true"></span>
-					<span>
-						<strong>{{ pet.name }}</strong>
-						<small>{{ pet.description }}</small>
-					</span>
-					<i v-if="pet.id === selectedPet.id" aria-hidden="true">✓</i>
-				</button>
-			</div>
-		</section>
 
 		<section v-if="opened" :class="['chat-panel', panelPlacement]">
 			<header>
@@ -100,7 +61,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import request from '/@/utils/request';
@@ -114,32 +75,14 @@ type Message = {
 };
 
 const STORAGE_KEY = 'anxiaoning-float-position';
-const PET_STORAGE_KEY = 'anxiaoning-selected-pet';
-const FLOAT_SIZE = 82;
+const FLOAT_SIZE = 64;
 const EDGE_PADDING = 14;
-const PET_FRAME_COUNT = 6;
-const PET_FRAME_DURATIONS = [260, 130, 130, 180, 130, 130] as const;
-
-const PETS = [
-	{ id: 'bird', name: '小啾', description: '轻快活泼的小鸟', idleSprite: '/pets/pet-bird-idle.webp' },
-	{ id: 'dog', name: '小安', description: '温暖陪伴的小狗', idleSprite: '/pets/pet-dog-idle.webp' },
-	{ id: 'deer', name: '小鹿', description: '安静治愈的小鹿', idleSprite: '/pets/pet-deer-idle.webp' },
-] as const;
 
 const stores = useUserInfo();
 const { userInfos } = storeToRefs(stores);
 const route = useRoute();
 const shouldShow = computed(() => route.path !== '/smartChat');
 const opened = ref(false);
-const petPickerOpen = ref(false);
-const selectedPetId = ref<(typeof PETS)[number]['id']>('dog');
-const selectedPet = computed(() => PETS.find((pet) => pet.id === selectedPetId.value) || PETS[1]);
-const idleFrame = ref(0);
-const spriteStyle = computed(() => ({
-	backgroundImage: `url(${selectedPet.value.idleSprite})`,
-	backgroundPosition: `${idleFrame.value * (100 / (PET_FRAME_COUNT - 1))}% center`,
-}));
-const petPreviewStyle = (pet: (typeof PETS)[number]) => ({ backgroundImage: `url(${pet.idleSprite})` });
 const input = ref('');
 const loading = ref(false);
 const saveConversation = ref(true);
@@ -154,9 +97,6 @@ const dragState = reactive({
 	offsetX: 0,
 	offsetY: 0,
 });
-
-let petIdleTimer: number | undefined;
-let petFrameTimer: number | undefined;
 
 const messages = ref<Message[]>([
 	{
@@ -179,68 +119,7 @@ const togglePanel = () => {
 		dragState.moved = false;
 		return;
 	}
-	petPickerOpen.value = false;
 	opened.value = !opened.value;
-};
-
-const togglePetPicker = () => {
-	opened.value = false;
-	petPickerOpen.value = !petPickerOpen.value;
-};
-
-const selectPet = (petId: (typeof PETS)[number]['id']) => {
-	selectedPetId.value = petId;
-	localStorage.setItem(PET_STORAGE_KEY, petId);
-	petPickerOpen.value = false;
-	idleFrame.value = 0;
-	scheduleNextPetAnimation(true);
-	ElMessage.success(`已切换为${selectedPet.value.name}`);
-};
-
-const clearPetAnimationTimers = () => {
-	if (petIdleTimer !== undefined) {
-		window.clearTimeout(petIdleTimer);
-		petIdleTimer = undefined;
-	}
-	if (petFrameTimer !== undefined) {
-		window.clearTimeout(petFrameTimer);
-		petFrameTimer = undefined;
-	}
-};
-
-const hasReducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
-
-const playPetAnimation = () => {
-	clearPetAnimationTimers();
-	if (hasReducedMotion()) {
-		idleFrame.value = 0;
-		return;
-	}
-	let frameIndex = 0;
-	idleFrame.value = frameIndex;
-	const advance = () => {
-		frameIndex += 1;
-		if (frameIndex >= PET_FRAME_COUNT) {
-			idleFrame.value = 0;
-			scheduleNextPetAnimation();
-			return;
-		}
-		idleFrame.value = frameIndex;
-		petFrameTimer = window.setTimeout(advance, PET_FRAME_DURATIONS[frameIndex]);
-	};
-	petFrameTimer = window.setTimeout(advance, PET_FRAME_DURATIONS[0]);
-};
-
-const scheduleNextPetAnimation = (soon = false) => {
-	clearPetAnimationTimers();
-	if (!shouldShow.value || hasReducedMotion()) return;
-	const delay = soon ? 1200 + Math.random() * 1000 : 4200 + Math.random() * 3600;
-	petIdleTimer = window.setTimeout(playPetAnimation, delay);
-};
-
-const greetPet = () => {
-	if (dragState.dragging || hasReducedMotion()) return;
-	playPetAnimation();
 };
 
 const ask = (text: string) => {
@@ -324,10 +203,16 @@ const stopDrag = () => {
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
 const updateViewport = () => {
+	const stayAtRightEdge = position.x >= viewport.width - FLOAT_SIZE - 80;
+	const stayAtBottomEdge = position.y >= viewport.height - FLOAT_SIZE - 80;
 	viewport.width = window.innerWidth;
 	viewport.height = window.innerHeight;
-	position.x = clamp(position.x, EDGE_PADDING, viewport.width - FLOAT_SIZE - EDGE_PADDING);
-	position.y = clamp(position.y, EDGE_PADDING, viewport.height - FLOAT_SIZE - EDGE_PADDING);
+	position.x = stayAtRightEdge
+		? viewport.width - FLOAT_SIZE - 24
+		: clamp(position.x, EDGE_PADDING, viewport.width - FLOAT_SIZE - EDGE_PADDING);
+	position.y = stayAtBottomEdge
+		? viewport.height - FLOAT_SIZE - 28
+		: clamp(position.y, EDGE_PADDING, viewport.height - FLOAT_SIZE - EDGE_PADDING);
 };
 
 const savePosition = () => {
@@ -353,28 +238,12 @@ const restorePosition = () => {
 	position.y = viewport.height - FLOAT_SIZE - 28;
 };
 
-const restorePet = () => {
-	const savedPet = localStorage.getItem(PET_STORAGE_KEY);
-	if (PETS.some((pet) => pet.id === savedPet)) {
-		selectedPetId.value = savedPet as (typeof PETS)[number]['id'];
-	}
-};
-
 onMounted(() => {
-	restorePet();
 	restorePosition();
-	scheduleNextPetAnimation(true);
 	window.addEventListener('resize', updateViewport);
 });
 
-watch(shouldShow, (visible) => {
-	idleFrame.value = 0;
-	if (visible) scheduleNextPetAnimation(true);
-	else clearPetAnimationTimers();
-});
-
 onBeforeUnmount(() => {
-	clearPetAnimationTimers();
 	window.removeEventListener('resize', updateViewport);
 	window.removeEventListener('pointermove', onDrag);
 	window.removeEventListener('pointerup', stopDrag);
@@ -385,8 +254,8 @@ onBeforeUnmount(() => {
 .anxiaoning-float {
 	position: fixed;
 	z-index: 3000;
-	width: 82px;
-	height: 82px;
+	width: 64px;
+	height: 64px;
 }
 
 .anxiaoning-float.dragging {
@@ -395,15 +264,13 @@ onBeforeUnmount(() => {
 
 .float-core {
 	position: relative;
-	display: block;
-	width: 82px;
-	height: 82px;
-	padding: 0;
-	overflow: hidden;
+	width: 64px;
+	height: 64px;
 	border: none;
-	border-radius: 0;
-	background: transparent;
-	box-shadow: none;
+	border-radius: 50%;
+	background: linear-gradient(145deg, #7fc9a5, #f3c77d);
+	box-shadow: 0 14px 30px rgba(112, 132, 94, 0.28);
+	color: #ffffff;
 	cursor: grab;
 	touch-action: none;
 }
@@ -412,55 +279,29 @@ onBeforeUnmount(() => {
 	cursor: grabbing;
 }
 
-.pet-sprite {
-	display: block;
-	width: 76px;
-	height: 82px;
-	margin: 0 auto;
-	background-repeat: no-repeat;
-	background-size: 600% 100%;
-	pointer-events: none;
-	will-change: background-position;
+.breath-ring {
+	position: absolute;
+	inset: -8px;
+	border-radius: 50%;
+	border: 1px solid rgba(127, 201, 165, 0.42);
+	animation: breathe 2.8s ease-in-out infinite;
 }
 
-.pet-switch {
-	position: absolute;
-	top: -9px;
-	right: -9px;
-	z-index: 4;
+.face {
+	position: relative;
 	display: grid;
 	place-items: center;
-	width: 30px;
-	height: 30px;
-	padding: 0;
-	border: 2px solid #ffffff;
-	border-radius: 50%;
-	background: #5d9b82;
-	box-shadow: 0 6px 14px rgba(54, 88, 75, 0.25);
-	color: #ffffff;
-	font-size: 12px;
+	width: 100%;
+	height: 100%;
+	font-size: 24px;
 	font-weight: 800;
-	cursor: pointer;
-	opacity: 0;
-	transform: scale(0.84);
-	transition: opacity 0.18s ease, transform 0.18s ease, background 0.18s ease;
 }
 
-.anxiaoning-float:hover .pet-switch,
-.pet-switch:focus-visible {
-	opacity: 1;
-	transform: scale(1);
-}
-
-.pet-switch:hover {
-	background: #4d8b72;
-}
-
-.chat-panel,
-.pet-picker {
+.chat-panel {
 	position: absolute;
+	width: min(360px, calc(100vw - 32px));
 	border: 1px solid rgba(83, 132, 124, 0.16);
-	border-radius: 16px;
+	border-radius: 8px;
 	background: rgba(255, 255, 255, 0.97);
 	box-shadow: 0 20px 50px rgba(45, 74, 70, 0.16);
 	overflow: hidden;
@@ -468,20 +309,12 @@ onBeforeUnmount(() => {
 	user-select: text;
 }
 
-.chat-panel {
-	width: min(360px, calc(100vw - 32px));
-}
-
-.pet-picker {
-	width: min(292px, calc(100vw - 32px));
-}
-
 .panel-above {
-	bottom: 98px;
+	bottom: 78px;
 }
 
 .panel-below {
-	top: 98px;
+	top: 78px;
 }
 
 .panel-left {
@@ -490,96 +323,6 @@ onBeforeUnmount(() => {
 
 .panel-right {
 	left: 0;
-}
-
-.pet-picker-header {
-	display: flex;
-	justify-content: space-between;
-	align-items: flex-start;
-	padding: 15px 16px 12px;
-	background: linear-gradient(135deg, #f2faf6, #fffaf0);
-}
-
-.pet-picker-header strong {
-	color: #294d44;
-	font-size: 15px;
-}
-
-.pet-picker-header p {
-	margin: 3px 0 0;
-	color: #758780;
-	font-size: 12px;
-}
-
-.pet-picker-header button {
-	border: none;
-	background: transparent;
-	color: #66807b;
-	font-size: 22px;
-	cursor: pointer;
-}
-
-.pet-options {
-	display: grid;
-	gap: 8px;
-	padding: 12px;
-}
-
-.pet-option {
-	display: grid;
-	grid-template-columns: 52px 1fr 24px;
-	gap: 10px;
-	align-items: center;
-	width: 100%;
-	padding: 8px;
-	border: 1px solid rgba(83, 132, 124, 0.14);
-	border-radius: 12px;
-	background: #ffffff;
-	color: #38564f;
-	text-align: left;
-	cursor: pointer;
-	transition: border-color 0.2s ease, background 0.2s ease;
-}
-
-.pet-option:hover,
-.pet-option.selected {
-	border-color: rgba(93, 155, 130, 0.48);
-	background: #f3faf6;
-}
-
-.pet-option-preview {
-	display: block !important;
-	width: 52px;
-	height: 52px;
-	background-repeat: no-repeat;
-	background-position: 0 center;
-	background-size: 600% 100%;
-	pointer-events: none;
-}
-
-.pet-option span {
-	display: grid;
-	gap: 3px;
-}
-
-.pet-option strong {
-	font-size: 14px;
-}
-
-.pet-option small {
-	color: #7d8d87;
-	font-size: 12px;
-}
-
-.pet-option i {
-	display: grid;
-	place-items: center;
-	width: 22px;
-	height: 22px;
-	border-radius: 50%;
-	background: #5d9b82;
-	color: #ffffff;
-	font-style: normal;
 }
 
 .chat-panel header {
@@ -735,10 +478,16 @@ onBeforeUnmount(() => {
 	cursor: not-allowed;
 }
 
-@media (hover: none) {
-	.pet-switch {
-		opacity: 1;
-		transform: scale(1);
+@keyframes breathe {
+	0%,
+	100% {
+		transform: scale(0.94);
+		opacity: 0.42;
+	}
+
+	50% {
+		transform: scale(1.08);
+		opacity: 0.86;
 	}
 }
 </style>

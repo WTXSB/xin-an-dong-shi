@@ -24,6 +24,7 @@
 			</el-carousel>
 
 			<div class="hero-shade" aria-hidden="true"></div>
+			<img class="companion-illustration" :src="gentleCompanions" alt="" aria-hidden="true" />
 			<div class="hero-copy">
 				<p class="hero-kicker">心安动识 · MINDEASE</p>
 				<h1>看见焦虑，遇见安宁</h1>
@@ -56,6 +57,7 @@ import heroJournal from '/@/assets/home-carousel/hero-journal.webp';
 import heroMeadow from '/@/assets/home-carousel/hero-meadow.webp';
 import heroCompanionship from '/@/assets/home-carousel/hero-companionship.webp';
 import heroSeaside from '/@/assets/home-carousel/hero-seaside.webp';
+import gentleCompanions from '/@/assets/companion/gentle-companions.png';
 
 const carouselRef = ref<any>();
 const activeIndex = ref(0);
@@ -91,8 +93,10 @@ const onTouchEnd = (event: TouchEvent) => {
 <style scoped lang="scss">
 .home-showcase {
 	min-height: 100%;
-	padding: 16px;
-	background: #f8f4ec;
+	padding: 22px;
+	background:
+		radial-gradient(circle at 8% 13%, rgba(255, 218, 120, .25), transparent 25%),
+		linear-gradient(180deg, #fffdf7 0%, #fff8e7 100%);
 	font-family: 'MindEase WenKai', 'KaiTi', serif;
 }
 
@@ -100,9 +104,10 @@ const onTouchEnd = (event: TouchEvent) => {
 	position: relative;
 	min-height: 560px;
 	overflow: hidden;
-	border-radius: 22px;
-	background: #dfe8df;
-	box-shadow: 0 22px 58px rgba(50, 72, 61, 0.16);
+	border: 1px solid rgba(178, 111, 53, .13);
+	border-radius: 30px;
+	background: linear-gradient(135deg, #ffe39c 0%, #fff2c4 54%, #fff8df 100%);
+	box-shadow: 0 24px 64px rgba(142, 88, 38, 0.14);
 }
 
 .hero-carousel,
@@ -118,6 +123,8 @@ const onTouchEnd = (event: TouchEvent) => {
 	object-fit: cover;
 	object-position: center;
 	transform: scale(1.002);
+	opacity: .38;
+	filter: saturate(.72) sepia(.12) contrast(.92);
 }
 
 .hero-shade {
@@ -126,8 +133,20 @@ const onTouchEnd = (event: TouchEvent) => {
 	z-index: 2;
 	pointer-events: none;
 	background:
-		linear-gradient(90deg, rgba(24, 52, 44, 0.7) 0%, rgba(39, 63, 53, 0.48) 30%, rgba(52, 67, 57, 0.08) 64%, transparent 100%),
-		linear-gradient(0deg, rgba(15, 36, 30, 0.2), transparent 42%);
+		linear-gradient(90deg, rgba(255, 235, 173, .96) 0%, rgba(255, 241, 195, .9) 34%, rgba(255, 245, 213, .46) 61%, rgba(255, 250, 232, .2) 100%),
+		linear-gradient(0deg, rgba(225, 151, 79, .08), transparent 45%);
+}
+
+.companion-illustration {
+	position: absolute;
+	right: clamp(22px, 5vw, 90px);
+	bottom: clamp(14px, 2.4vw, 42px);
+	z-index: 3;
+	width: min(42vw, 610px);
+	max-height: 76%;
+	object-fit: contain;
+	pointer-events: none;
+	filter: drop-shadow(0 18px 20px rgba(154, 94, 44, .16));
 }
 
 .hero-copy {
@@ -136,9 +155,9 @@ const onTouchEnd = (event: TouchEvent) => {
 	top: 50%;
 	z-index: 3;
 	width: min(610px, 48vw);
-	color: #fffef9;
+	color: #4a3528;
 	transform: translateY(-50%);
-	text-shadow: 0 3px 22px rgba(16, 42, 34, 0.28);
+	text-shadow: 0 2px 18px rgba(255, 252, 236, .65);
 }
 
 .hero-kicker {
@@ -147,7 +166,8 @@ const onTouchEnd = (event: TouchEvent) => {
 	font-size: 15px;
 	font-weight: 700;
 	letter-spacing: 0.22em;
-	opacity: 0.9;
+	color: #a65d34;
+	opacity: 1;
 }
 
 h1 {
@@ -165,7 +185,8 @@ h1 {
 	font-size: 19px;
 	line-height: 1.9;
 	letter-spacing: 0.06em;
-	opacity: 0.94;
+	color: #6e5547;
+	opacity: 1;
 }
 
 .hero-actions {
@@ -187,28 +208,29 @@ h1 {
 }
 
 .primary-action {
-	border-color: #fff8e9;
-	background: #fff8e9;
-	color: #315f4f;
+	border-color: #bd6d3f;
+	background: #bd6d3f;
+	color: #fffaf0;
+	box-shadow: 0 12px 26px rgba(178, 96, 48, .22);
 }
 
 .primary-action:hover {
-	border-color: #ffffff;
-	background: #ffffff;
-	color: #254d40;
+	border-color: #a65c35;
+	background: #a65c35;
+	color: #ffffff;
 }
 
 .secondary-action {
-	border-color: rgba(255, 255, 255, 0.72);
-	background: rgba(255, 255, 255, 0.12);
-	color: #ffffff;
+	border-color: rgba(153, 91, 53, .36);
+	background: rgba(255, 254, 247, .58);
+	color: #7a4b32;
 	backdrop-filter: blur(8px);
 }
 
 .secondary-action:hover {
-	border-color: #ffffff;
-	background: rgba(255, 255, 255, 0.22);
-	color: #ffffff;
+	border-color: rgba(153, 91, 53, .5);
+	background: rgba(255, 255, 255, .82);
+	color: #663d29;
 }
 
 .slide-dots {
@@ -224,25 +246,25 @@ h1 {
 		width: 9px;
 		height: 9px;
 		padding: 0;
-		border: 1px solid rgba(255, 255, 255, 0.8);
+		border: 1px solid rgba(169, 93, 52, .5);
 		border-radius: 999px;
-		background: rgba(255, 255, 255, 0.38);
+		background: rgba(255, 250, 225, .75);
 		cursor: pointer;
 		transition: width 0.25s ease, background 0.25s ease;
 	}
 
 	button.active {
 		width: 30px;
-		background: #fff9ec;
+		background: #c97543;
 	}
 }
 
 :deep(.el-carousel__arrow) {
 	width: 44px;
 	height: 44px;
-	background: rgba(255, 255, 255, 0.82);
-	color: #365e51;
-	box-shadow: 0 8px 24px rgba(34, 63, 53, 0.18);
+	background: rgba(255, 253, 244, 0.9);
+	color: #a95d34;
+	box-shadow: 0 8px 24px rgba(141, 83, 41, 0.16);
 }
 
 @media (max-width: 1000px) {
@@ -256,7 +278,7 @@ h1 {
 
 	.hero-copy {
 		left: 34px;
-		width: min(620px, 72vw);
+		width: min(590px, 56vw);
 	}
 }
 
@@ -273,9 +295,7 @@ h1 {
 	}
 
 	.hero-shade {
-		background:
-			linear-gradient(90deg, rgba(24, 52, 44, 0.74), rgba(35, 59, 49, 0.4) 72%, rgba(35, 59, 49, 0.2)),
-			linear-gradient(0deg, rgba(15, 36, 30, 0.34), transparent 55%);
+		background: linear-gradient(180deg, rgba(255, 238, 187, .94), rgba(255, 246, 216, .76));
 	}
 
 	.hero-copy {
@@ -283,6 +303,13 @@ h1 {
 		right: 24px;
 		top: 48%;
 		width: auto;
+	}
+
+	.companion-illustration {
+		right: -18px;
+		bottom: 22px;
+		width: 58vw;
+		opacity: .72;
 	}
 
 	.hero-kicker {

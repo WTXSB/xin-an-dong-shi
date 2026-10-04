@@ -105,9 +105,10 @@ const submitForm = (formEl: FormInstance | undefined) => {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	/* background: linear-gradient(135deg, #56ccf2 0%, #2f80ed 100%); */
-	background-image: url('/bg3.jpg');
-	background-size: cover;
+	background:
+		radial-gradient(circle at 18% 18%, rgba(255, 207, 81, .34), transparent 24%),
+		radial-gradient(circle at 84% 78%, rgba(143, 170, 119, .18), transparent 28%),
+		linear-gradient(145deg, #fffdf6 0%, #fff3cf 100%);
 	padding: 20px;
 }
 
@@ -119,9 +120,10 @@ const submitForm = (formEl: FormInstance | undefined) => {
 	opacity: 0;
 	width: 460px;
 	padding: 40px 50px;
-	background: rgba(255, 255, 255, 0.95);
-	border-radius: 16px;
-	box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+	background: rgba(255, 254, 248, .96);
+	border: 1px solid rgba(165, 106, 56, .16);
+	border-radius: 28px;
+	box-shadow: 0 22px 58px rgba(133, 82, 39, .14);
 	backdrop-filter: blur(10px);
 }
 
@@ -132,7 +134,7 @@ const submitForm = (formEl: FormInstance | undefined) => {
 
 .title h2 {
 	font-size: 20px;
-	color: #2c3e50;
+	color: #4c382d;
 	margin-bottom: 10px;
 	font-weight: 600;
 }
@@ -155,7 +157,7 @@ const submitForm = (formEl: FormInstance | undefined) => {
 }
 
 :deep(.custom-input .el-input__wrapper.is-focus) {
-	box-shadow: 0 0 0 1px #409eff;
+	box-shadow: 0 0 0 1px #c97543;
 	background: #fff;
 }
 
@@ -166,7 +168,7 @@ const submitForm = (formEl: FormInstance | undefined) => {
 	font-weight: 500;
 	letter-spacing: 1px;
 	border-radius: 8px;
-	background: linear-gradient(to right, #2f80ed 0%, #56ccf2 100%);
+	background: linear-gradient(to right, #cf7a46 0%, #b55f36 100%);
 	border: none;
 	margin-top: 10px;
 	transition: transform 0.3s ease;
@@ -174,7 +176,7 @@ const submitForm = (formEl: FormInstance | undefined) => {
 
 .login-btn:hover {
 	transform: translateY(-2px);
-	background: linear-gradient(to right, #2f80ed 0%, #56ccf2 100%);
+	background: linear-gradient(to right, #bd693d 0%, #a85632 100%);
 	opacity: 0.9;
 }
 
@@ -184,7 +186,7 @@ const submitForm = (formEl: FormInstance | undefined) => {
 }
 
 .options a {
-	color: #2f80ed;
+	color: #a95d34;
 	text-decoration: none;
 	font-size: 15px;
 	transition: all 0.3s ease;
@@ -192,7 +194,7 @@ const submitForm = (formEl: FormInstance | undefined) => {
 }
 
 .options a:hover {
-	color: #56ccf2;
+	color: #c97543;
 	text-decoration: underline;
 }
 
@@ -212,7 +214,7 @@ const submitForm = (formEl: FormInstance | undefined) => {
 	display: block;
 	width: 40px;
 	height: 40px;
-	background-color: rgba(255, 255, 255, 0.15);
+	background-color: rgba(255, 227, 148, .2);
 	bottom: -160px;
 	animation: square 25s infinite;
 	transition-timing-function: linear;

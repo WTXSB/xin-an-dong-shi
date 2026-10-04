@@ -68,13 +68,13 @@ onMounted(loadAvatar);
 </script>
 
 <style scoped lang="scss">
-.header-actions { display: flex; align-items: center; gap: 8px; padding-right: 18px; }
+.header-actions { display: flex; align-items: center; gap: 8px; padding-right: 0; }
 .search-button, .profile-button { border: 0; background: transparent; color: #5f5a52; cursor: pointer; }
 .search-button { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; font-size: 19px; }
-.search-button:hover { background: #edf5ec; color: #63836b; }
+.search-button:hover { background: #fff2c5; color: #ad6238; }
 .profile-button { display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 4px 0 6px; border-radius: 22px; font-family: inherit; }
-.profile-button:hover { background: #f5f0e8; }
-.profile-button img { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; background: #e8eee7; border: 2px solid #fff; box-shadow: 0 2px 10px rgba(74, 97, 76, 0.15); }
+.profile-button:hover { background: #fff5d8; }
+.profile-button img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; background: #fff0bc; border: 2px solid #fff; box-shadow: 0 4px 12px rgba(159, 91, 42, 0.16); }
 .profile-name { max-width: 88px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media (max-width: 1000px) {
 	.header-actions { order: 3; padding-right: 0; gap: 2px; }

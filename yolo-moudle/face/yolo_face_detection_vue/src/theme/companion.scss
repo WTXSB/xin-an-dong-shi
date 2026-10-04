@@ -1,0 +1,142 @@
+:root {
+	--ease-ink: #44342b;
+	--ease-muted: #89796d;
+	--ease-caramel: #c97543;
+	--ease-caramel-deep: #a95d34;
+	--ease-butter: #f7ca63;
+	--ease-butter-soft: #fff1b8;
+	--ease-cream: #fffaf0;
+	--ease-paper: #fffef9;
+	--ease-sage: #92ad7d;
+	--ease-line: rgba(136, 101, 65, 0.16);
+	--ease-shadow: 0 18px 46px rgba(135, 94, 48, 0.11);
+	--el-color-primary: #c97543;
+	--el-color-primary-light-3: #da986f;
+	--el-color-primary-light-5: #e8b99b;
+	--el-color-primary-light-7: #f3d8c7;
+	--el-color-primary-light-8: #f8e7dc;
+	--el-color-primary-light-9: #fcf3ed;
+	--el-color-primary-dark-2: #a95d34;
+	--el-border-radius-base: 12px;
+	--next-bg-main-color: #fffaf0;
+}
+
+html,
+body,
+#app {
+	color: var(--ease-ink);
+	background: var(--ease-cream);
+}
+
+body::before {
+	position: fixed;
+	inset: 0;
+	z-index: -1;
+	content: '';
+	pointer-events: none;
+	background:
+		radial-gradient(circle at 7% 16%, rgba(250, 204, 100, 0.18), transparent 19%),
+		radial-gradient(circle at 93% 78%, rgba(146, 173, 125, 0.13), transparent 22%),
+		linear-gradient(180deg, #fffdf7 0%, #fff8e9 100%);
+}
+
+.layout-container .layout-main {
+	background: var(--ease-cream) !important;
+}
+
+.layout-parent {
+	background: var(--ease-cream);
+}
+
+.el-button {
+	min-height: 38px;
+	border-radius: 999px;
+	font-family: inherit;
+	font-weight: 700;
+	letter-spacing: 0.02em;
+	transition: transform 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+
+.el-button:hover:not(:disabled) {
+	transform: translateY(-1px);
+}
+
+.el-button--primary {
+	border-color: var(--ease-caramel);
+	background: var(--ease-caramel);
+	box-shadow: 0 8px 20px rgba(201, 117, 67, 0.22);
+}
+
+.el-card,
+.el-dialog,
+.el-message-box,
+.el-drawer,
+.el-popover.el-popper,
+.el-dropdown-menu {
+	border-color: var(--ease-line) !important;
+	border-radius: 22px !important;
+	background-color: rgba(255, 254, 249, 0.98) !important;
+	box-shadow: var(--ease-shadow) !important;
+}
+
+.el-input__wrapper,
+.el-select__wrapper,
+.el-textarea__inner {
+	border-radius: 12px !important;
+	background: rgba(255, 254, 249, 0.94) !important;
+	box-shadow: 0 0 0 1px rgba(151, 113, 73, 0.2) inset !important;
+}
+
+.el-input__wrapper:hover,
+.el-select__wrapper:hover,
+.el-textarea__inner:hover,
+.el-input__wrapper.is-focus,
+.el-select__wrapper.is-focused {
+	box-shadow: 0 0 0 1px var(--ease-caramel) inset !important;
+}
+
+.el-table {
+	--el-table-header-bg-color: #fff5d7;
+	--el-table-row-hover-bg-color: #fff9eb;
+	--el-table-border-color: rgba(145, 109, 74, 0.12);
+	--el-table-header-text-color: #6e594a;
+	--el-table-text-color: #5e5046;
+	border-radius: 16px;
+	background: transparent;
+}
+
+.el-tag {
+	border-radius: 999px;
+}
+
+.el-pagination.is-background .el-pager li.is-active {
+	background: var(--ease-caramel);
+}
+
+.el-message,
+.el-notification {
+	border: 1px solid var(--ease-line);
+	border-radius: 16px;
+	background: rgba(255, 254, 249, 0.98);
+	box-shadow: var(--ease-shadow);
+}
+
+.el-scrollbar__thumb {
+	background-color: rgba(183, 126, 72, 0.32);
+}
+
+::selection {
+	color: #493326;
+	background: #ffe09a;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		scroll-behavior: auto !important;
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+	}
+}
