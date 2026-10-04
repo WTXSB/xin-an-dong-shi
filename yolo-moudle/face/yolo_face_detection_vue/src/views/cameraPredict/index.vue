@@ -16,19 +16,24 @@
 			<section class="privacy-panel">
 				<div>
 					<strong>开始前的隐私确认</strong>
-					<p>摄像头画面会交给本地 YOLO 服务实时处理。画面不会自动发送给安小宁或 DeepSeek；本次是否保存记录和结果视频路径由你单独选择。</p>
+					<p>开始时浏览器会单独询问摄像头权限，只采集画面、不采集声音。画面逐帧交给本地 YOLO 服务分析，不会发送给安小宁或 DeepSeek。</p>
+					<p>未选择“保留结果视频”时，服务端不会创建视频文件；停止、撤回授权或离开页面都会立即关闭浏览器摄像头。</p>
 				</div>
 				<div class="privacy-options">
-					<el-checkbox v-model="cameraAccepted">我了解摄像头只会在确认后开启</el-checkbox>
-					<el-checkbox v-model="keepRecord">保存这次觉察记录</el-checkbox>
-					<el-checkbox v-model="keepMedia" :disabled="!keepRecord">在记录中保留结果视频路径</el-checkbox>
+					<el-checkbox v-model="cameraAccepted" :disabled="state.cameraIsOpen || state.isStarting">我已阅读并同意本次摄像头分析</el-checkbox>
+					<el-checkbox v-model="keepRecord" :disabled="state.cameraIsOpen || state.isStarting">保存结构化觉察记录</el-checkbox>
+					<el-checkbox v-model="keepMedia" :disabled="!keepRecord || state.cameraIsOpen || state.isStarting">保留本次处理后的视频</el-checkbox>
+					<div class="permission-state" :class="`is-${state.permissionState}`">
+						<span class="permission-dot"></span>
+						{{ permissionLabel }}
+					</div>
 				</div>
 			</section>
 
 			<PreVisitNotes
 				v-model:complaint="state.form.complaint"
 				v-model:additional-notes="state.form.additionalNotes"
-				:disabled="state.cameraIsOpen || state.isStopping"
+				:disabled="state.cameraIsOpen || state.isStarting || state.isStopping"
 			/>
 
 			<section class="controls">
@@ -51,16 +56,18 @@
 					<el-slider v-model="conf" :format-tooltip="formatTooltip" :min="20" :max="90" />
 				</label>
 
-				<el-button class="primary-button" :disabled="!canStart || state.cameraIsOpen" @click="startCameraSense">开始温柔感知</el-button>
+				<el-button class="primary-button" :disabled="!canStart || state.cameraIsOpen || state.isStarting" @click="startCameraSense">
+					{{ state.isStarting ? '正在请求授权…' : '开始温柔感知' }}
+				</el-button>
 				<el-button class="soft-button" :disabled="!state.cameraIsOpen || state.isStopping" @click="stopCameraSense">
-					{{ state.isStopping ? '正在整理…' : '停止并整理' }}
+					{{ state.isStopping ? '正在停止并整理…' : '停止并撤回本次授权' }}
 				</el-button>
 			</section>
 
 			<section class="status-row">
 				<div class="status-card">
 					<strong>当前状态</strong>
-					<p>{{ state.isStopping ? '采集已停止，正在整理并保存本次线索…' : state.cameraIsOpen ? '正在温柔感知中，你可以随时停止。' : '摄像头尚未开启。' }}</p>
+					<p>{{ state.isStopping ? '采集已停止，正在整理并保存本次线索…' : state.isStarting ? '正在等待浏览器授权并建立安全会话…' : state.cameraIsOpen ? '正在温柔感知中，你可以随时停止。' : '摄像头尚未开启。' }}</p>
 				</div>
 				<div class="status-card">
 					<strong>整理进度</strong>
@@ -77,9 +84,11 @@
 				<article class="preview-panel">
 					<div v-if="!state.cameraIsOpen" class="empty-state">
 						<strong>等你准备好再开始</strong>
-						<p>勾选隐私确认后，点击开始。你始终可以暂停、停止和离开。</p>
+						<p>勾选隐私确认并点击开始后，浏览器会显示系统级摄像头权限询问。</p>
 					</div>
-					<img v-else class="video-stream" :src="state.videoPath" alt="摄像头温柔感知画面" />
+					<video ref="cameraVideo" v-show="state.cameraIsOpen && !state.processedFrame" class="video-stream" autoplay muted playsinline></video>
+					<img v-show="state.cameraIsOpen && state.processedFrame" class="video-stream" :src="state.processedFrame" alt="摄像头温柔感知画面" />
+					<canvas ref="captureCanvas" class="capture-canvas" aria-hidden="true"></canvas>
 				</article>
 
 				<article class="feedback-panel">
@@ -134,14 +143,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import request from '/@/utils/request';
 import { linkAnalysisRecord, saveAwarenessRecord, savePrivacyConsent } from '/@/api/healing';
 import { useUserInfo } from '/@/stores/userInfo';
 import { storeToRefs } from 'pinia';
-import { SocketService } from '/@/utils/socket';
 import { formatDate } from '/@/utils/formatTime';
 import { analysisModeItems, confidencePercent, createAnalysisSessionId, evidenceLabel, getAnalysisModelOptions, type AnalysisResult, type BfrbCue } from '/@/utils/analysisModes';
 import PreVisitNotes from '/@/components/preVisitNotes/index.vue';
@@ -158,14 +166,23 @@ const keepRecord = ref(true);
 const keepMedia = ref(false);
 const recordSaved = ref(false);
 const savedAwarenessRecordId = ref(0);
+const cameraVideo = ref<HTMLVideoElement | null>(null);
+const captureCanvas = ref<HTMLCanvasElement | null>(null);
+let mediaStream: MediaStream | null = null;
+let captureTimer: number | undefined;
+let captureActive = false;
+let frameInFlight = false;
+let pageDisposed = false;
 
 const state = reactive({
 	weightItems: getAnalysisModelOptions('combined'),
 	kindItems: analysisModeItems,
-	videoPath: '',
+	processedFrame: '',
+	permissionState: 'idle' as 'idle' | 'requesting' | 'granted' | 'denied' | 'unsupported',
 	percentage: 0,
 	showProgress: false,
 	cameraIsOpen: false,
+	isStarting: false,
 	isStopping: false,
 	resultReady: false,
 	analysisResult: null as AnalysisResult | null,
@@ -181,11 +198,18 @@ const state = reactive({
 		sessionId: '',
 		complaint: '',
 		additionalNotes: '',
+		consentId: '',
 	},
 });
 
 const canStart = computed(() => cameraAccepted.value && !!weight.value);
-const socketService = new SocketService();
+const permissionLabel = computed(() => ({
+	idle: '摄像头权限尚未请求',
+	requesting: '正在等待浏览器授权',
+	granted: '本次摄像头权限已获得，可随时停止',
+	denied: '摄像头权限未获得',
+	unsupported: '当前浏览器不支持摄像头授权',
+}[state.permissionState]));
 const bfrbSummary = computed(() => state.analysisResult?.bfrbSummary || {
 	eventCount: 0,
 	totalDurationSeconds: 0,
@@ -223,27 +247,6 @@ watch(keepRecord, (value) => {
 	if (!value) keepMedia.value = false;
 });
 
-socketService.on('message', (data: string) => {
-	if (data) ElMessage.success(data);
-});
-
-socketService.on('camera_progress', (data: string) => {
-	const value = Math.round(Number(data));
-	if (Number.isNaN(value)) return;
-	state.percentage = value;
-	state.showProgress = value < 100;
-});
-
-socketService.on('bfrb_live', (data: any) => {
-	if (data?.scene === 'camera') state.liveCues = data.cues || [];
-});
-
-socketService.on('analysis_result', (data: AnalysisResult) => {
-	if (data?.scene !== 'camera') return;
-	state.analysisResult = data;
-	completeCameraReflection();
-});
-
 const formatTooltip = (val: number) => `${val}%`;
 
 const getData = () => {
@@ -257,15 +260,47 @@ const startCameraSense = async () => {
 		return;
 	}
 
-	await ElMessageBox.confirm(
-		'即将开启摄像头实时感知。画面会交给本地 YOLO 服务处理；结果只作为自我觉察线索，是否保存记录和素材路径由你决定。',
-		'开启摄像头温柔感知',
-		{
-			confirmButtonText: '我准备好了',
-			cancelButtonText: '再等一下',
-			type: 'info',
+	try {
+		await ElMessageBox.confirm(
+			`即将由浏览器请求摄像头权限，只采集画面、不采集声音。画面会逐帧交给本地 YOLO 服务分析；${
+				keepRecord.value ? '本次会保存结构化觉察记录' : '本次不会保存觉察记录'
+			}，${keepMedia.value ? '会保留处理后的视频' : '不会创建或保留视频文件'}。你可以随时停止。`,
+			'本次摄像头授权确认',
+			{
+				confirmButtonText: '继续并由浏览器询问',
+				cancelButtonText: '取消',
+				type: 'info',
+			}
+		);
+	} catch (_) {
+		return;
+	}
+
+	if (!navigator.mediaDevices?.getUserMedia) {
+		state.permissionState = 'unsupported';
+		ElMessage.error('当前浏览器不支持摄像头授权，请使用最新版 Edge 或 Chrome，并通过 localhost 或 HTTPS 访问。');
+		return;
+	}
+
+	state.isStarting = true;
+	state.permissionState = 'requesting';
+	try {
+		mediaStream = await navigator.mediaDevices.getUserMedia({
+			audio: false,
+			video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' },
+		});
+		if (pageDisposed) {
+			releaseLocalCamera();
+			return;
 		}
-	);
+		state.permissionState = 'granted';
+	} catch (error: any) {
+		state.isStarting = false;
+		state.permissionState = 'denied';
+		const blocked = error?.name === 'NotAllowedError' || error?.name === 'SecurityError';
+		ElMessage.error(blocked ? '你没有允许摄像头权限，本次感知没有开始。可在浏览器地址栏的权限设置中重新允许。' : '摄像头暂时无法使用，请检查是否被其他程序占用。');
+		return;
+	}
 
 	state.form.weight = weight.value || 'combined';
 	state.form.kind = kind.value;
@@ -276,7 +311,6 @@ const startCameraSense = async () => {
 	state.form.keepMedia = keepMedia.value ? 'true' : 'false';
 	state.form.sessionId = createAnalysisSessionId();
 	state.resultReady = false;
-	state.cameraIsOpen = true;
 	state.isStopping = false;
 	state.percentage = 0;
 	state.showProgress = false;
@@ -284,46 +318,158 @@ const startCameraSense = async () => {
 	savedAwarenessRecordId.value = 0;
 	state.analysisResult = null;
 	state.liveCues = [];
+	state.processedFrame = '';
 
-	saveCameraConsent();
-	const queryParams = new URLSearchParams(state.form as any).toString();
-	state.videoPath = `http://127.0.0.1:5000/predictCamera?${queryParams}`;
-	ElMessage.success('摄像头感知已开始，你可以随时停止。');
+	try {
+		const consentId = await saveCameraConsent();
+		if (pageDisposed) {
+			releaseLocalCamera();
+			return;
+		}
+		state.form.consentId = String(consentId);
+		const started: any = await request.post('/flask/cameraSession/start', { ...state.form });
+		if (started?.status !== 200) throw new Error(started?.message || '摄像头会话建立失败');
+		if (pageDisposed) {
+			releaseLocalCamera();
+			void stopCameraSessionOnLeave();
+			return;
+		}
+
+		state.cameraIsOpen = true;
+		state.isStarting = false;
+		captureActive = true;
+		await nextTick();
+		if (!cameraVideo.value || !mediaStream) throw new Error('摄像头预览初始化失败');
+		cameraVideo.value.srcObject = mediaStream;
+		await cameraVideo.value.play();
+		scheduleNextFrame(0);
+		ElMessage.success('摄像头感知已开始，你可以随时停止或直接离开页面。');
+	} catch (error: any) {
+		releaseLocalCamera();
+		state.cameraIsOpen = false;
+		state.isStarting = false;
+		state.permissionState = 'idle';
+		ElMessage.error(error?.message || '授权记录或摄像头分析服务暂时不可用，本次感知没有开始。');
+	}
 };
 
 const stopCameraSense = async () => {
 	if (state.isStopping) return;
 	state.isStopping = true;
+	captureActive = false;
+	if (captureTimer) window.clearTimeout(captureTimer);
+	releaseLocalCamera();
 	state.showProgress = true;
-	state.percentage = Math.max(state.percentage, 1);
+	state.percentage = Math.max(state.percentage, 10);
 	try {
-		await request.get('/flask/stopCamera');
-		// 保留流式图像节点，直到 Flask 完成汇总并发回 analysis_result。
-		// 如果此处立即设为 false，浏览器会断开流，后端就无法执行落库收尾。
-		ElMessage.success('摄像头采集已停止，正在整理并保存记录。');
+		const result: any = await request.post('/flask/cameraSession/stop', { sessionId: state.form.sessionId });
+		if (result?.status !== 200) throw new Error(result?.message || '摄像头结果整理失败');
+		state.analysisResult = result as AnalysisResult;
+		state.percentage = 100;
+		await completeCameraReflection();
 	} catch (error) {
+		state.cameraIsOpen = false;
 		state.isStopping = false;
 		state.showProgress = false;
-		ElMessage.error('摄像头暂时无法停止，请稍后重试。');
+		state.permissionState = 'idle';
+		ElMessage.error('摄像头已经关闭，但本次结果整理失败，请稍后重试。');
 	}
 };
 
-const saveCameraConsent = () => {
-	savePrivacyConsent({
+const saveCameraConsent = async () => {
+	const saved: any = await savePrivacyConsent({
 		username: userInfos.value.userName,
 		scene: 'camera',
 		consentType: 'camera-recognition',
-		consentText: '用户确认摄像头只在主动开始后开启，画面交给本地 YOLO 服务实时处理。',
+		consentText: '摄像头隐私说明 v2：浏览器原生授权；仅采集画面不采集声音；画面逐帧交给本地YOLO服务；不发送给DeepSeek；未勾选保留素材时不创建视频；停止或离开页面立即释放摄像头。',
 		agreed: cameraAccepted.value,
 		keepRecord: keepRecord.value,
 		keepMedia: keepMedia.value,
-	}).catch(() => {});
+	});
+	if ((saved?.code !== '0' && saved?.code !== 0) || !saved?.data?.id) {
+		throw new Error(saved?.msg || '隐私授权记录保存失败');
+	}
+	return Number(saved.data.id);
+};
+
+const scheduleNextFrame = (delay = 320) => {
+	if (!captureActive) return;
+	if (captureTimer) window.clearTimeout(captureTimer);
+	captureTimer = window.setTimeout(captureAndAnalyzeFrame, delay);
+};
+
+const canvasBlob = (canvas: HTMLCanvasElement) => new Promise<Blob>((resolve, reject) => {
+	canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('摄像头画面编码失败')), 'image/jpeg', 0.82);
+});
+
+const captureAndAnalyzeFrame = async () => {
+	if (!captureActive || frameInFlight || !cameraVideo.value || !captureCanvas.value) return;
+	const video = cameraVideo.value;
+	if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA || !video.videoWidth) {
+		scheduleNextFrame(120);
+		return;
+	}
+	frameInFlight = true;
+	try {
+		const width = Math.min(video.videoWidth, 640);
+		const height = Math.round(video.videoHeight * (width / video.videoWidth));
+		const canvas = captureCanvas.value;
+		canvas.width = width;
+		canvas.height = height;
+		canvas.getContext('2d')?.drawImage(video, 0, 0, width, height);
+		const form = new FormData();
+		form.append('sessionId', state.form.sessionId);
+		form.append('frame', await canvasBlob(canvas), 'camera-frame.jpg');
+		const result: any = await request.post('/flask/cameraSession/frame', form, {
+			headers: { 'Content-Type': 'multipart/form-data' },
+			timeout: 120000,
+		});
+		if (captureActive && result?.status === 200) {
+			state.processedFrame = result.image || state.processedFrame;
+			state.liveCues = result.cues || [];
+		}
+	} catch (error: any) {
+		if (captureActive) {
+			captureActive = false;
+			releaseLocalCamera();
+			state.cameraIsOpen = false;
+			state.permissionState = 'idle';
+			ElMessage.error(error?.response?.data?.message || '实时画面分析中断，摄像头已自动关闭。');
+			void stopCameraSessionOnLeave();
+		}
+	} finally {
+		frameInFlight = false;
+		if (captureActive) scheduleNextFrame();
+	}
+};
+
+const releaseLocalCamera = () => {
+	mediaStream?.getTracks().forEach((track) => track.stop());
+	mediaStream = null;
+	if (cameraVideo.value) cameraVideo.value.srcObject = null;
+};
+
+const stopCameraSessionOnLeave = async () => {
+	const sessionId = state.form.sessionId;
+	if (!sessionId) return;
+	try {
+		await fetch('/flask/cameraSession/stop', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ sessionId }),
+			keepalive: true,
+		});
+	} catch (_) {
+		// The local camera has already been released; the server session also
+		// expires from further frame input even if the best-effort request fails.
+	}
 };
 
 const completeCameraReflection = async () => {
 	state.cameraIsOpen = false;
 	state.isStopping = false;
-	state.videoPath = '';
+	state.processedFrame = '';
+	state.permissionState = 'idle';
 	state.resultReady = true;
 	state.showProgress = false;
 	state.percentage = 100;
@@ -367,11 +513,23 @@ const openPreVisitReport = () => {
 };
 
 onMounted(() => {
+	pageDisposed = false;
 	getData();
+	window.addEventListener('beforeunload', cleanupCameraOnLeave);
 });
 
+function cleanupCameraOnLeave() {
+	if (captureTimer) window.clearTimeout(captureTimer);
+	captureActive = false;
+	releaseLocalCamera();
+	if (state.cameraIsOpen || state.isStopping) void stopCameraSessionOnLeave();
+}
+
 onUnmounted(() => {
-	socketService.disconnect();
+	pageDisposed = true;
+	state.isStarting = false;
+	window.removeEventListener('beforeunload', cleanupCameraOnLeave);
+	cleanupCameraOnLeave();
 });
 </script>
 
@@ -486,6 +644,29 @@ onUnmounted(() => {
 	gap: 8px;
 }
 
+.permission-state {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 10px;
+	border-radius: 8px;
+	background: #f5f1eb;
+	color: #75695e;
+	font-size: 12px;
+}
+
+.permission-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: #a99f94;
+}
+
+.permission-state.is-requesting .permission-dot { background: #d49b50; }
+.permission-state.is-granted .permission-dot { background: #5eaa73; }
+.permission-state.is-denied .permission-dot,
+.permission-state.is-unsupported .permission-dot { background: #d96f67; }
+
 .controls {
 	display: grid;
 	grid-template-columns: 200px 200px minmax(240px, 1fr) 150px 150px;
@@ -576,6 +757,10 @@ onUnmounted(() => {
 	height: 100%;
 	max-height: 640px;
 	object-fit: contain;
+}
+
+.capture-canvas {
+	display: none;
 }
 
 .feedback-panel {

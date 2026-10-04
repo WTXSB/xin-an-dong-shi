@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 import json
 import os
+import base64
+import re
 import subprocess
 import sys
+import threading
 import cv2
 import requests
 import time
@@ -77,7 +80,10 @@ class VideoProcessingApp:
             'video_output': "./runs/video/camera_output.avi",
             'result_img': './runs/result.jpg'
         }
-        self.recording = False
+        self.camera_sessions = {}
+        self.camera_sessions_lock = threading.RLock()
+        self.used_camera_consents = set()
+        threading.Thread(target=self.camera_session_watchdog, daemon=True).start()
         self.bfrb_detectors = {}  # BFRB 检测器缓存：key=(weight, face_weight, conf)
 
     def setup_routes(self):
@@ -85,7 +91,10 @@ class VideoProcessingApp:
         self.app.add_url_rule('/predictImg', 'predictImg', self.predictImg, methods=['POST'])
         self.app.add_url_rule('/predictVideo', 'predictVideo', self.predictVideo)
         self.app.add_url_rule('/predictCamera', 'predictCamera', self.predictCamera)
-        self.app.add_url_rule('/stopCamera', 'stopCamera', self.stopCamera, methods=['GET'])
+        self.app.add_url_rule('/stopCamera', 'stopCamera', self.stopCamera, methods=['GET', 'POST'])
+        self.app.add_url_rule('/cameraSession/start', 'startCameraSession', self.startCameraSession, methods=['POST'])
+        self.app.add_url_rule('/cameraSession/frame', 'processCameraFrame', self.processCameraFrame, methods=['POST'])
+        self.app.add_url_rule('/cameraSession/stop', 'stopCameraSession', self.stopCameraSession, methods=['POST'])
         self.app.add_url_rule('/predictBfrb', 'predictBfrb', self.predictBfrb, methods=['POST'])
 
         @self.socketio.on('connect')
@@ -677,126 +686,283 @@ class VideoProcessingApp:
 
     # ====================== 摄像头实时预测 ======================
     def predictCamera(self):
-        camera_data = request.args.to_dict()
-        self.data = camera_data
-        save_record = as_bool(camera_data.get("saveRecord", camera_data.get("keepRecord")), True)
-        keep_media = as_bool(camera_data.get("keepMedia"), False)
-        analyzers = self.build_analyzers(camera_data)
-
-        recorded_ids = set()
-        cap = cv2.VideoCapture(0)
-        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-        writer = cv2.VideoWriter(self.paths['camera_output'], cv2.VideoWriter_fourcc(*'XVID'), 20, (640, 480))
-        self.recording = True
-        event_aggregator = BfrbEventAggregator(fps=20, min_hits=3, max_gap_seconds=0.5)
-        emotion_stats = {}
-
-        def generate():
-            nonlocal recorded_ids
-            fps_counter = 0
-            fps_start = time.time()
-            frame_index = 0
-
-            while self.recording:
-                ret, frame = cap.read()
-                if not ret:
-                    continue
-
-                run_bfrb = frame_index % 4 == 0
-                frame, analysis = self.analyze_frame(frame, analyzers, run_bfrb=run_bfrb)
-                emotion = analysis["emotion"]
-                labels = emotion["labels"]
-                confs = emotion["confidences"]
-                bboxes = emotion["bboxes"]
-                track_ids = emotion["trackIds"]
-
-                for label, confidence in zip(labels, confs):
-                    item = emotion_stats.setdefault(label, {"count": 0, "confidences": []})
-                    item["count"] += 1
-                    item["confidences"].append(float(confidence))
-
-                if run_bfrb:
-                    event_aggregator.update(frame_index, analysis["bfrb"]["cues"])
-                    self.socketio.emit('bfrb_live', {'data': {
-                        "scene": "camera",
-                        "frameSeconds": round(frame_index / 20, 2),
-                        "cues": analysis["bfrb"]["cues"],
-                    }})
-
-                emotion_map = {'angry': '生气', 'happy': '高兴', 'neutral': '中性', 'sad': '悲伤'}
-                for label, conf, bbox, tid in zip(labels, confs, bboxes, track_ids):
-                    if save_record and tid not in recorded_ids:
-                        recorded_ids.add(tid)
-                        emotion_data = {
-                            "emotion_id": str(tid),
-                            "emotionType": emotion_map.get(label, label),
-                            "confidence": conf,
-                            "username": camera_data.get("username", ""),
-                            "startTime": camera_data.get("startTime", ""),
-                            "bbox": bbox
-                        }
-                        self.save_data(safe_json_dumps(emotion_data), 'http://localhost:9999/emotion')  # 安全序列化
-
-                if self.recording:
-                    writer.write(frame)
-
-                _, jpeg = cv2.imencode('.jpg', frame)
-                fps_counter += 1
-                if fps_counter % 10 == 0:
-                    elapsed = time.time() - fps_start
-                    fps = fps_counter / elapsed if elapsed > 0 else 0
-                    self.socketio.emit('fps', {'data': f"{fps:.1f}"})
-                frame_index += 1
-
-                yield b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + jpeg.tobytes() + b'\r\n'
-
-            cap.release()
-            writer.release()
-            bfrb_summary = event_aggregator.finish(frame_index)
-            emotion_summary = []
-            for label, values in emotion_stats.items():
-                confidences = values["confidences"]
-                emotion_summary.append({
-                    "label": label,
-                    "frameCount": values["count"],
-                    "averageConfidence": round(sum(confidences) / len(confidences), 3),
-                    "maxConfidence": round(max(confidences), 3),
-                })
-            emotion_summary.sort(key=lambda item: -item["frameCount"])
-            for p in self.convert_avi_to_mp4(self.paths['camera_output']):
-                if p < 100:
-                    self.socketio.emit('camera_progress', {'data': p})
-
-            url = self.upload(self.paths['output']) if keep_media else ""
-            camera_data["outVideo"] = url or ""
-            persistence = self.save_structured_analysis(
-                camera_data,
-                "camera",
-                analyzers["mode"],
-                emotion_summary,
-                bfrb_summary,
-                output_media=url or "",
-            )
-            self.socketio.emit('analysis_result', {'data': {
-                "scene": "camera",
-                "mode": analyzers["mode"],
-                "emotionSummary": emotion_summary,
-                "bfrbSummary": bfrb_summary,
-                **persistence,
-            }})
-            self.socketio.emit('camera_progress', {'data': 100})
-            if not save_record:
-                self.cleanup_files([self.paths['output'], self.paths['camera_output']])
-                return
-            self.save_data(safe_json_dumps(camera_data), 'http://localhost:9999/cameraRecords')
-            self.cleanup_files([self.paths['output'], self.paths['camera_output']])
-
-        return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
+        return self.json_response({
+            "status": 410,
+            "message": "旧版服务端直连摄像头接口已停用，请从网页完成原生摄像头授权后使用。",
+        }, status=410)
 
     def stopCamera(self):
-        self.recording = False
-        return json.dumps({"status": 200, "message": "已停止"}, ensure_ascii=False)
+        return self.stopCameraSession()
+
+    @staticmethod
+    def json_response(payload, status=200):
+        return Response(safe_json_dumps(payload), status=status, mimetype='application/json')
+
+    @staticmethod
+    def valid_camera_session_id(value):
+        return bool(re.fullmatch(r'[A-Za-z0-9_-]{8,80}', str(value or '')))
+
+    def camera_session_watchdog(self):
+        """Discard abandoned in-memory sessions and any opted-in temp files.
+
+        The browser normally sends /stop on navigation. This watchdog is the
+        privacy backstop for a crashed browser or a lost network connection.
+        """
+        while True:
+            time.sleep(30)
+            now = time.monotonic()
+            stale = []
+            with self.camera_sessions_lock:
+                for session_id, session in list(self.camera_sessions.items()):
+                    idle_too_long = now - session.get("lastFrameAt", session["startedAt"]) > 90
+                    duration_too_long = now - session["startedAt"] > 60 * 60
+                    if idle_too_long or duration_too_long:
+                        session["closing"] = True
+                        stale.append((session_id, session))
+                        self.camera_sessions.pop(session_id, None)
+            for session_id, session in stale:
+                with session["lock"]:
+                    writer = session.get("writer")
+                    if writer is not None:
+                        writer.release()
+                        session["writer"] = None
+                    self.cleanup_files([session["aviPath"], session["outputPath"]])
+                print(f"已清理失联的摄像头会话: {session_id}")
+
+    def validate_camera_consent(self, camera_data):
+        consent_id = camera_data.get("consentId")
+        username = str(camera_data.get("username") or '').strip()
+        if not consent_id or not username:
+            return None, "缺少摄像头授权凭证"
+        try:
+            response = requests.get(
+                f"http://localhost:9999/privacyConsents/{int(consent_id)}/validate",
+                params={"username": username, "scene": "camera"},
+                timeout=5,
+            )
+            result = response.json()
+            approved = result.get("data") or {}
+            if result.get("code") != "0" or not approved.get("valid"):
+                return None, result.get("msg") or "摄像头授权无效"
+            return approved, None
+        except Exception as error:
+            print("摄像头授权校验失败:", error)
+            return None, "暂时无法校验摄像头授权，请确认 Spring Boot 服务已启动"
+
+    def startCameraSession(self):
+        camera_data = request.get_json(silent=True) or {}
+        session_id = str(camera_data.get("sessionId") or '')
+        if not self.valid_camera_session_id(session_id):
+            return self.json_response({"status": 400, "message": "摄像头会话编号无效"}, status=400)
+
+        approved, error = self.validate_camera_consent(camera_data)
+        if error:
+            return self.json_response({"status": 403, "message": error}, status=403)
+
+        consent_id = int(approved.get("consentId"))
+        with self.camera_sessions_lock:
+            if session_id in self.camera_sessions:
+                return self.json_response({"status": 409, "message": "该摄像头会话已经开始"}, status=409)
+            if consent_id in self.used_camera_consents:
+                return self.json_response({"status": 409, "message": "该摄像头授权已经使用，请重新确认授权"}, status=409)
+            self.used_camera_consents.add(consent_id)
+
+        # Retention choices come from the verified consent row, never from a
+        # caller-controlled frame request.
+        save_record = bool(approved.get("keepRecord"))
+        keep_media = bool(approved.get("keepMedia")) and save_record
+        camera_data["saveRecord"] = "true" if save_record else "false"
+        camera_data["keepMedia"] = "true" if keep_media else "false"
+        camera_data["consentId"] = consent_id
+
+        try:
+            analyzers = self.build_analyzers(camera_data)
+        except Exception as build_error:
+            print("摄像头模型初始化失败:", build_error)
+            return self.json_response({"status": 500, "message": "摄像头分析模型初始化失败"}, status=500)
+
+        safe_session_id = re.sub(r'[^A-Za-z0-9_-]', '', session_id)
+        video_dir = os.path.join('.', 'runs', 'video')
+        session = {
+            "id": session_id,
+            "data": camera_data,
+            "analyzers": analyzers,
+            "saveRecord": save_record,
+            "keepMedia": keep_media,
+            "eventAggregator": BfrbEventAggregator(fps=4, min_hits=3, max_gap_seconds=0.75),
+            "emotionStats": {},
+            "recordedIds": set(),
+            "frameIndex": 0,
+            "startedAt": time.monotonic(),
+            "lastFrameAt": time.monotonic(),
+            "writer": None,
+            "writerSize": None,
+            "aviPath": os.path.join(video_dir, f'camera_{safe_session_id}.avi'),
+            "outputPath": os.path.join(video_dir, f'camera_{safe_session_id}.mp4'),
+            "lock": threading.RLock(),
+            "closing": False,
+        }
+        with self.camera_sessions_lock:
+            self.camera_sessions[session_id] = session
+        return self.json_response({
+            "status": 200,
+            "message": "摄像头会话已建立",
+            "sessionId": session_id,
+            "saveRecord": save_record,
+            "keepMedia": keep_media,
+        })
+
+    def processCameraFrame(self):
+        session_id = str(request.form.get("sessionId") or '')
+        with self.camera_sessions_lock:
+            session = self.camera_sessions.get(session_id)
+        if session is None:
+            return self.json_response({"status": 404, "message": "摄像头会话不存在或已经结束"}, status=404)
+        if session.get("closing"):
+            return self.json_response({"status": 409, "message": "摄像头会话正在停止"}, status=409)
+        uploaded = request.files.get("frame")
+        if uploaded is None:
+            return self.json_response({"status": 400, "message": "缺少摄像头画面"}, status=400)
+        raw = uploaded.read()
+        if not raw or len(raw) > 4 * 1024 * 1024:
+            return self.json_response({"status": 400, "message": "摄像头画面为空或超过大小限制"}, status=400)
+        frame = cv2.imdecode(np.frombuffer(raw, np.uint8), cv2.IMREAD_COLOR)
+        if frame is None:
+            return self.json_response({"status": 400, "message": "无法读取摄像头画面"}, status=400)
+
+        with session["lock"]:
+            if session.get("closing"):
+                return self.json_response({"status": 409, "message": "摄像头会话正在停止"}, status=409)
+            frame_index = session["frameIndex"]
+            session["lastFrameAt"] = time.monotonic()
+            annotated, analysis = self.analyze_frame(frame, session["analyzers"], run_bfrb=True)
+            emotion = analysis["emotion"]
+            labels = emotion["labels"]
+            confidences = emotion["confidences"]
+
+            for label, confidence in zip(labels, confidences):
+                item = session["emotionStats"].setdefault(label, {"count": 0, "confidences": []})
+                item["count"] += 1
+                item["confidences"].append(float(confidence))
+            session["eventAggregator"].update(frame_index, analysis["bfrb"]["cues"])
+
+            emotion_map = {'angry': '生气', 'happy': '高兴', 'neutral': '中性', 'sad': '悲伤'}
+            for label, confidence, bbox, track_id in zip(
+                    labels, confidences, emotion["bboxes"], emotion["trackIds"]):
+                if session["saveRecord"] and track_id not in session["recordedIds"]:
+                    session["recordedIds"].add(track_id)
+                    emotion_data = {
+                        "emotion_id": f'{session_id}-{track_id}',
+                        "emotionType": emotion_map.get(label, label),
+                        "confidence": confidence,
+                        "username": session["data"].get("username", ""),
+                        "startTime": session["data"].get("startTime", ""),
+                        "bbox": bbox,
+                    }
+                    self.save_data(safe_json_dumps(emotion_data), 'http://localhost:9999/emotion')
+
+            # No video writer is created at all unless the verified consent says
+            # that the user wants the processed result video retained.
+            if session["keepMedia"]:
+                height, width = annotated.shape[:2]
+                if session["writer"] is None:
+                    os.makedirs(os.path.dirname(session["aviPath"]), exist_ok=True)
+                    session["writerSize"] = (width, height)
+                    session["writer"] = cv2.VideoWriter(
+                        session["aviPath"], cv2.VideoWriter_fourcc(*'XVID'), 4, (width, height)
+                    )
+                if session["writerSize"] == (width, height):
+                    session["writer"].write(annotated)
+
+            encoded, jpeg = cv2.imencode('.jpg', annotated, [int(cv2.IMWRITE_JPEG_QUALITY), 82])
+            if not encoded:
+                return self.json_response({"status": 500, "message": "分析画面编码失败"}, status=500)
+            session["frameIndex"] += 1
+            elapsed = max(time.monotonic() - session["startedAt"], 0)
+            return self.json_response({
+                "status": 200,
+                "sessionId": session_id,
+                "frameIndex": frame_index,
+                "elapsedSeconds": round(elapsed, 2),
+                "image": "data:image/jpeg;base64," + base64.b64encode(jpeg.tobytes()).decode('ascii'),
+                "cues": analysis["bfrb"]["cues"],
+                "emotion": {
+                    "labels": labels,
+                    "confidences": confidences,
+                },
+            })
+
+    def stopCameraSession(self):
+        payload = request.get_json(silent=True) or {}
+        session_id = str(payload.get("sessionId") or request.args.get("sessionId") or '')
+        if not session_id:
+            return self.json_response({"status": 400, "message": "缺少摄像头会话编号"}, status=400)
+        with self.camera_sessions_lock:
+            session = self.camera_sessions.get(session_id)
+            if session is not None:
+                session["closing"] = True
+        if session is None:
+            return self.json_response({"status": 200, "message": "摄像头会话已停止", "alreadyStopped": True})
+
+        output_url = ""
+        try:
+            with session["lock"]:
+                writer = session.get("writer")
+                if writer is not None:
+                    writer.release()
+                    session["writer"] = None
+
+                frame_count = session["frameIndex"]
+                bfrb_summary = session["eventAggregator"].finish(max(frame_count - 1, 0))
+                emotion_summary = []
+                for label, values in session["emotionStats"].items():
+                    values_confidence = values["confidences"]
+                    emotion_summary.append({
+                        "label": label,
+                        "frameCount": values["count"],
+                        "averageConfidence": round(sum(values_confidence) / len(values_confidence), 3),
+                        "maxConfidence": round(max(values_confidence), 3),
+                    })
+                emotion_summary.sort(key=lambda item: -item["frameCount"])
+
+                if session["keepMedia"] and frame_count > 0 and os.path.exists(session["aviPath"]):
+                    for progress in self.convert_avi_to_mp4(session["aviPath"], session["outputPath"]):
+                        self.socketio.emit('camera_progress', {'data': {
+                            "sessionId": session_id,
+                            "percentage": progress,
+                        }})
+                    output_url = self.upload(session["outputPath"]) or ""
+
+                camera_data = session["data"]
+                camera_data["outVideo"] = output_url
+                persistence = self.save_structured_analysis(
+                    camera_data,
+                    "camera",
+                    session["analyzers"]["mode"],
+                    emotion_summary,
+                    bfrb_summary,
+                    output_media=output_url,
+                )
+                if session["saveRecord"]:
+                    self.save_data(safe_json_dumps(camera_data), 'http://localhost:9999/cameraRecords')
+
+                result = {
+                    "status": 200,
+                    "message": "摄像头采集已停止并完成整理",
+                    "scene": "camera",
+                    "mode": session["analyzers"]["mode"],
+                    "emotionSummary": emotion_summary,
+                    "bfrbSummary": bfrb_summary,
+                    **persistence,
+                }
+                return self.json_response(result)
+        except Exception as stop_error:
+            print("摄像头会话整理失败:", stop_error)
+            return self.json_response({"status": 500, "message": "摄像头已释放，但结果整理失败"}, status=500)
+        finally:
+            self.cleanup_files([session["aviPath"], session["outputPath"]])
+            with self.camera_sessions_lock:
+                self.camera_sessions.pop(session_id, None)
 
     # ====================== 工具函数 ======================
     def save_data(self, data, url):
@@ -805,8 +971,9 @@ class VideoProcessingApp:
         except Exception as e:
             print("上传记录失败:", e)
 
-    def convert_avi_to_mp4(self, avi_path):
-        cmd = f'ffmpeg -i "{avi_path}" -c:v libx264 -crf 23 "{self.paths["output"]}" -y'
+    def convert_avi_to_mp4(self, avi_path, output_path=None):
+        output_path = output_path or self.paths["output"]
+        cmd = f'ffmpeg -i "{avi_path}" -c:v libx264 -crf 23 "{output_path}" -y'
         p = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE, text=True, bufsize=1)
         total = self.get_video_duration(avi_path)
         for line in p.stderr:
