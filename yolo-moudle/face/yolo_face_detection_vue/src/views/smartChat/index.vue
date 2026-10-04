@@ -17,7 +17,7 @@
 					<div class="welcome-mark">安</div>
 					<p>安心对话</p>
 					<h1>今天想从哪里聊起？</h1>
-					<span>你可以打字、说话，或附上一份经过你确认的文字资料。</span>
+					<span>你可以打字、说话，或附上经过你确认的文件与图片。</span>
 					<div class="suggestion-grid">
 						<button v-for="question in suggestedQuestions" :key="question.title" type="button" @click="selectQuestion(question.prompt)">
 							<strong>{{ question.title }}</strong><small>{{ question.description }}</small>
@@ -31,8 +31,8 @@
 						<div class="message-body">
 							<div v-if="message.attachments?.length" class="sent-attachments">
 								<div v-for="attachment in message.attachments" :key="attachment.name" class="sent-file">
-									<span class="file-icon">文</span>
-									<div><strong>{{ attachment.name }}</strong><small>{{ formatSize(attachment.size) }} · 已批准发送</small></div>
+									<span class="file-icon">{{ attachmentIcon(attachment) }}</span>
+									<div><strong>{{ attachment.name }}</strong><small>{{ attachment.summary }} · 已批准发送</small></div>
 								</div>
 							</div>
 							<div class="message-content">{{ message.content }}</div>
@@ -54,8 +54,8 @@
 			<div class="composer-wrap">
 				<div v-if="attachments.length" class="attachment-tray">
 					<div v-for="attachment in attachments" :key="attachment.id" :class="['attachment-card', { approved: attachment.approved }]">
-						<span class="file-icon">文</span>
-						<div class="file-summary"><strong>{{ attachment.name }}</strong><small>{{ formatSize(attachment.size) }}</small></div>
+						<span class="file-icon">{{ attachmentIcon(attachment) }}</span>
+						<div class="file-summary"><strong>{{ attachment.name }}</strong><small>{{ attachment.summary }} · {{ formatSize(attachment.size) }}</small></div>
 						<label class="approval-control">
 							<input v-model="attachment.approved" type="checkbox" />
 							<span>{{ attachment.approved ? '已批准发送' : '批准后发送' }}</span>
@@ -69,7 +69,7 @@
 					<div class="composer-toolbar">
 						<div class="left-tools">
 							<input ref="fileInput" class="sr-only" type="file" multiple :accept="acceptedFileTypes" @change="handleFileSelection" />
-							<button class="round-tool" type="button" title="添加文字资料" aria-label="添加文字资料" @click="openFilePicker">
+							<button class="round-tool" type="button" title="添加文件或图片" aria-label="添加文件或图片" :disabled="processingFiles" @click="openFilePicker">
 								<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
 							</button>
 							<button :class="['voice-tool', { listening: isListening }]" type="button" :title="isListening ? '停止语音输入' : '语音输入'" :aria-label="isListening ? '停止语音输入' : '语音输入'" @click="toggleVoiceInput">
@@ -77,7 +77,7 @@
 								<span>{{ isListening ? '正在听…' : '语音' }}</span>
 							</button>
 						</div>
-						<button class="send-button" type="button" :disabled="!canSend || loading" title="发送" aria-label="发送消息" @click="sendMessage">
+						<button class="send-button" type="button" :disabled="!canSend || loading || processingFiles" title="发送" aria-label="发送消息" @click="sendMessage">
 							<svg v-if="!loading" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6" /></svg>
 							<span v-else class="send-spinner"></span>
 						</button>
@@ -86,7 +86,8 @@
 
 				<div class="composer-meta">
 					<label><input v-model="saveConversation" type="checkbox" /> 保存本次对话</label>
-					<span v-if="voiceHint" class="voice-hint">{{ voiceHint }}</span>
+					<span v-if="processingFiles" class="voice-hint">正在安全读取文件，请稍候…</span>
+					<span v-else-if="voiceHint" class="voice-hint">{{ voiceHint }}</span>
 					<span v-else>附件只有经你逐项批准后，才会随消息发送</span>
 				</div>
 				<p class="safety-note">安小宁用于情绪陪伴和信息梳理，不构成医学诊断或紧急医疗服务。</p>
@@ -99,16 +100,17 @@
 import { computed, nextTick, onBeforeUnmount, ref } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import request from '/@/utils/request';
+import { AGENT_FILE_ACCEPT, parseAgentAttachment, type AgentAttachmentKind } from '/@/utils/attachmentParser';
 import { useUserInfo } from '/@/stores/userInfo';
 import { storeToRefs } from 'pinia';
 
-type SentAttachment = { name: string; size: number };
-type PendingAttachment = SentAttachment & { id: string; mimeType: string; textContent: string; approved: boolean };
+type SentAttachment = { name: string; size: number; kind: AgentAttachmentKind; summary: string };
+type PendingAttachment = SentAttachment & { id: string; mimeType: string; textContent: string; images: string[]; approved: boolean };
 type ChatMessage = { id: number; role: 'assistant' | 'user'; content: string; provider?: string; attachments?: SentAttachment[] };
 
-const MAX_FILE_SIZE = 2 * 1024 * 1024;
-const MAX_ATTACHMENTS = 3;
-const acceptedFileTypes = '.txt,.md,.csv,.json,.log,.xml,.yaml,.yml,text/plain,text/markdown,text/csv,application/json';
+const MAX_FILE_SIZE = 20 * 1024 * 1024;
+const MAX_ATTACHMENTS = 5;
+const acceptedFileTypes = AGENT_FILE_ACCEPT;
 const stores = useUserInfo();
 const { userInfos } = storeToRefs(stores);
 const messageContainer = ref<HTMLElement>();
@@ -116,6 +118,7 @@ const textareaRef = ref<HTMLTextAreaElement>();
 const fileInput = ref<HTMLInputElement>();
 const userInput = ref('');
 const loading = ref(false);
+const processingFiles = ref(false);
 const saveConversation = ref(true);
 const isListening = ref(false);
 const voiceHint = ref('');
@@ -132,7 +135,7 @@ const suggestedQuestions = [
 	{ title: '整理此刻的感受', description: '我有点乱，不知道从哪里说起', prompt: '我现在心里有点乱，可以陪我梳理一下吗？' },
 	{ title: '把任务拆小一点', description: '一想到任务就紧绷', prompt: '我一想到手头的任务就紧绷，能陪我把它拆小一点吗？' },
 	{ title: '做一次短暂放松', description: '用三分钟让身体慢下来', prompt: '请带我做一次三分钟的放松练习。' },
-	{ title: '阅读一份文字资料', description: '添加资料后逐项批准发送', prompt: '我附带了一份文字资料，请帮我梳理其中最需要关注的内容。' },
+	{ title: '阅读文件或图片', description: '添加后逐项批准发送', prompt: '我附带了一份资料，请帮我梳理其中最需要关注的内容。' },
 ];
 
 const approvedAttachments = computed(() => attachments.value.filter((item) => item.approved));
@@ -145,6 +148,15 @@ const selectQuestion = (question: string) => {
 };
 const providerLabel = (provider?: string) => (provider === 'deepseek' ? 'DeepSeek' : provider === 'local-fallback' ? '本地备用回复' : '');
 const formatSize = (size: number) => size < 1024 ? `${size} B` : size < 1024 * 1024 ? `${(size / 1024).toFixed(1)} KB` : `${(size / 1024 / 1024).toFixed(1)} MB`;
+const attachmentIcon = (attachment: SentAttachment) => {
+	if (attachment.kind === 'image') return '图';
+	if (attachment.kind === 'mixed') return '图文';
+	const extension = attachment.name.split('.').pop()?.toLowerCase();
+	if (extension === 'pdf') return 'PDF';
+	if (['xls', 'xlsx', 'ods', 'csv'].includes(extension || '')) return '表';
+	if (['pptx', 'odp'].includes(extension || '')) return '演';
+	return '文';
+};
 
 const copyMessage = async (text: string) => {
 	try { await navigator.clipboard.writeText(text); ElMessage.success('回答已复制'); }
@@ -162,12 +174,6 @@ const resizeTextarea = () => {
 };
 
 const openFilePicker = () => fileInput.value?.click();
-const readTextFile = (file: File) => new Promise<string>((resolve, reject) => {
-	const reader = new FileReader();
-	reader.onload = () => resolve(String(reader.result || ''));
-	reader.onerror = () => reject(reader.error);
-	reader.readAsText(file, 'UTF-8');
-});
 
 const handleFileSelection = async (event: Event) => {
 	const input = event.target as HTMLInputElement;
@@ -177,13 +183,29 @@ const handleFileSelection = async (event: Event) => {
 	const remainingSlots = MAX_ATTACHMENTS - attachments.value.length;
 	if (remainingSlots <= 0) { ElMessage.warning(`每次最多添加 ${MAX_ATTACHMENTS} 份资料`); return; }
 
-	for (const file of selectedFiles.slice(0, remainingSlots)) {
-		if (file.size > MAX_FILE_SIZE) { ElMessage.warning(`${file.name} 超过 2 MB，暂未添加`); continue; }
-		try {
-			const textContent = await readTextFile(file);
-			if (!textContent.trim()) { ElMessage.warning(`${file.name} 没有可读取的文字内容`); continue; }
-			attachments.value.push({ id: `${Date.now()}-${Math.random().toString(16).slice(2)}`, name: file.name, size: file.size, mimeType: file.type || 'text/plain', textContent: textContent.slice(0, 6000), approved: false });
-		} catch { ElMessage.error(`${file.name} 读取失败`); }
+	processingFiles.value = true;
+	try {
+		for (const file of selectedFiles.slice(0, remainingSlots)) {
+			if (file.size > MAX_FILE_SIZE) { ElMessage.warning(`${file.name} 超过 20 MB，暂未添加`); continue; }
+			try {
+				const parsed = await parseAgentAttachment(file);
+				attachments.value.push({
+					id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+					name: file.name,
+					size: file.size,
+					kind: parsed.kind,
+					summary: parsed.summary,
+					mimeType: parsed.mimeType,
+					textContent: parsed.textContent,
+					images: parsed.images,
+					approved: false,
+				});
+			} catch (error) {
+				ElMessage.error(`${file.name}：${error instanceof Error ? error.message : '读取失败'}`);
+			}
+		}
+	} finally {
+		processingFiles.value = false;
 	}
 	if (selectedFiles.length > remainingSlots) ElMessage.info(`已保留前 ${remainingSlots} 份资料`);
 };
@@ -228,23 +250,25 @@ const resetConversation = async () => {
 const sendMessage = async () => {
 	const typedContent = userInput.value.trim();
 	const approved = approvedAttachments.value;
-	if ((!typedContent && !approved.length) || loading.value) return;
+	if ((!typedContent && !approved.length) || loading.value || processingFiles.value) return;
 	if (hasUnapprovedAttachments.value) { ElMessage.warning('仍有附件未批准。请先批准发送或将它移除'); return; }
 	const content = typedContent || '请阅读我附带的资料，并帮我梳理其中最需要关注的内容。';
-	const attachmentSnapshot = approved.map((item) => ({ name: item.name, size: item.size }));
+	const attachmentSnapshot = approved.map((item) => ({ name: item.name, size: item.size, kind: item.kind, summary: item.summary }));
 	const contextBeforeCurrent = messages.value.slice(-8).map((item) => ({ role: item.role, content: item.content }));
 	messages.value.push({ id: createMessageId(), role: 'user', content, attachments: attachmentSnapshot });
-	const payloadAttachments = approved.map((item) => ({ name: item.name, size: item.size, mimeType: item.mimeType, textContent: item.textContent, approved: true }));
+	const payloadAttachments = approved.map((item) => ({ name: item.name, size: item.size, kind: item.kind, mimeType: item.mimeType, textContent: item.textContent, images: item.images, approved: true }));
 	resetComposer();
 	loading.value = true;
 	scrollToBottom();
 
 	try {
-		const res = await request.post('/api/ai/chat', { message: content, username: userInfos.value.userName, saveConversation: saveConversation.value, messages: contextBeforeCurrent, attachments: payloadAttachments });
+		const res = await request.post('/api/ai/chat', { message: content, username: userInfos.value.userName, saveConversation: saveConversation.value, messages: contextBeforeCurrent, attachments: payloadAttachments }, { timeout: 120000 });
+		if (String(res?.code) !== '0') throw new Error(res?.msg || '附件没有被正确接收');
 		messages.value.push({ id: createMessageId(), role: 'assistant', content: res?.data?.reply || '我在这里。我们先慢慢呼吸一次，再把事情拆小一点。', provider: res?.data?.provider });
-	} catch {
-		ElMessage.error('安小宁暂时没有连上，但你可以先慢慢呼吸三次。');
-		messages.value.push({ id: createMessageId(), role: 'assistant', content: '刚刚的连接暂时没有成功。你写下的内容仍留在当前页面，我们可以稍后再试。', provider: 'local-fallback' });
+	} catch (error) {
+		const reason = error instanceof Error ? error.message : '安小宁暂时没有连上';
+		ElMessage.error(reason);
+		messages.value.push({ id: createMessageId(), role: 'assistant', content: `刚刚的发送没有成功：${reason}。你可以重新添加附件后再试。`, provider: 'local-fallback' });
 	} finally { loading.value = false; scrollToBottom(); }
 };
 
@@ -313,6 +337,7 @@ onBeforeUnmount(() => { if (recognition) recognition.abort(); });
 .round-tool,.voice-tool,.send-button { display: inline-flex; align-items: center; justify-content: center; border: 0; cursor: pointer; }
 .round-tool { width: 34px; height: 34px; border: 1px solid #e0e3de; border-radius: 50%; background: #fff; color: #555b55; }
 .round-tool:hover,.voice-tool:hover { background: #f1f4ef; }
+.round-tool:disabled { opacity: .5; cursor: wait; }
 .round-tool svg,.voice-tool svg,.send-button svg { fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
 .round-tool svg { width: 18px; height: 18px; }
 .voice-tool { height: 34px; padding: 0 10px; gap: 5px; border-radius: 17px; background: transparent; color: #666c65; }
