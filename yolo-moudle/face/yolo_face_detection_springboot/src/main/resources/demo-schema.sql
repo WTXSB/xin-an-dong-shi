@@ -145,6 +145,54 @@ CREATE TABLE IF NOT EXISTS previsit_report_summaries (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS care_letter_summaries (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  awareness_record_id BIGINT NOT NULL UNIQUE,
+  analysis_record_id BIGINT,
+  provider VARCHAR(32),
+  model_name VARCHAR(64),
+  prompt_version VARCHAR(32),
+  letter_text CLOB,
+  generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS spa_identities (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(64) NOT NULL UNIQUE,
+  identity_type VARCHAR(16) NOT NULL,
+  real_name VARCHAR(64),
+  id_card_masked VARCHAR(32),
+  license_no VARCHAR(64),
+  hospital VARCHAR(128),
+  department VARCHAR(128),
+  title VARCHAR(64),
+  bio VARCHAR(1024),
+  audit_status VARCHAR(16) DEFAULT 'pending',
+  audit_note VARCHAR(512),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS spa_requests (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  patient_username VARCHAR(64) NOT NULL,
+  practitioner_username VARCHAR(64) NOT NULL,
+  initial_message VARCHAR(1024),
+  status VARCHAR(16) DEFAULT 'active',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS spa_messages (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  request_id BIGINT NOT NULL,
+  sender_username VARCHAR(64) NOT NULL,
+  sender_identity VARCHAR(16),
+  content VARCHAR(2048) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS privacy_consents (
   id INT AUTO_INCREMENT PRIMARY KEY,
   username VARCHAR(64),

@@ -5,11 +5,54 @@
 				<el-button plain @click="router.push('/trashRecords')">返回觉察记录</el-button>
 				<div>
 					<span>打印窗口中选择“另存为 PDF”，即可生成可携带的 PDF 文件。</span>
-					<el-button type="primary" :disabled="!state.awareness || !state.analysis || state.loading" @click="printReport">打印 / 导出PDF</el-button>
+					<el-button type="primary" :disabled="printDisabled" @click="printReport">打印 / 导出PDF</el-button>
 				</div>
 			</div>
 
-			<section v-loading="state.loading" class="report-paper">
+			<div class="view-switch" role="tablist" aria-label="报告视角切换">
+				<button type="button" role="tab" :class="{ active: viewMode === 'letter' }" :aria-selected="viewMode === 'letter'" @click="viewMode = 'letter'">
+					写给你的一封信
+				</button>
+				<button type="button" role="tab" :class="{ active: viewMode === 'clinician' }" :aria-selected="viewMode === 'clinician'" @click="viewMode = 'clinician'">
+					给心灵SPA师的客观参考（专业向）
+				</button>
+			</div>
+
+			<section
+				v-if="viewMode === 'letter'"
+				v-loading="state.letterLoading || state.letterGenerating"
+				:element-loading-text="state.letterGenerating ? '正在为你写信…' : '正在展开信纸…'"
+				class="letter-paper"
+			>
+				<template v-if="state.letter">
+					<p class="letter-brand">心安动识 · 写给你的一封信</p>
+					<h1 class="letter-title">写给此刻的你</h1>
+					<div class="letter-body">
+						<p v-for="(paragraph, index) in letterParagraphs" :key="index">{{ paragraph }}</p>
+					</div>
+					<p class="letter-sign">—— 心安动识</p>
+					<p class="letter-meta">{{ letterMetaText }}</p>
+					<footer class="letter-disclaimer">这封信基于你主动分享的记录写成，只是陪伴与参考，不是任何结论。</footer>
+				</template>
+
+				<div v-else-if="!state.letterLoading && !state.letterGenerating" class="letter-empty">
+					<div class="letter-illustration" aria-hidden="true">
+						<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<rect x="8" y="16" width="48" height="34" rx="5" stroke="#c98f5c" stroke-width="2.5" />
+							<path d="M10 20l22 16 22-16" stroke="#c98f5c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+							<path d="M32 8c2.2 2.6 2.2 5.4 0 8-2.2-2.6-2.2-5.4 0-8z" fill="#e4b98a" />
+						</svg>
+					</div>
+					<strong>这里还没有写给你的信</strong>
+					<p>当你愿意的时候，我们可以根据你主动分享的记录，为你写一封温柔的信。信里只有陪伴与参考，不会有任何结论。</p>
+					<el-button type="primary" :loading="state.letterGenerating" @click="generateLetter">
+						{{ state.letterGenerating ? '正在为你写信…' : '生成我的关怀信' }}
+					</el-button>
+					<footer class="letter-disclaimer">这封信基于你主动分享的记录写成，只是陪伴与参考，不是任何结论。</footer>
+				</div>
+			</section>
+
+			<section v-else v-loading="state.loading" class="report-paper">
 				<div v-if="state.error" class="report-error">
 					<strong>暂时无法生成这份报告</strong>
 					<p>{{ state.error }}</p>
@@ -33,6 +76,21 @@
 					<section class="notice">
 						<strong>报告用途说明</strong>
 						<p>本报告用于帮助患者向心理门诊医生回顾检测时段内的自述、情绪与动作线索，缩短基础信息整理时间。结果由算法辅助生成，不替代医生访谈、量表评估或临床诊断。</p>
+					</section>
+
+					<section class="safety-flags-card">
+						<div class="safety-flags-header">
+							<strong>安全关注标注</strong>
+							<span>由算法辅助整理，仅供门诊沟通时参考，不构成诊断结论</span>
+						</div>
+						<ul v-if="safetyFlags.length" class="safety-flags-list">
+							<li v-for="(flag, index) in safetyFlags" :key="index" :class="`flag-${flag.level}`">
+								<em>{{ safetyFlagLevelName(flag.level) }}</em>
+								<p>{{ flag.reason }}</p>
+							</li>
+						</ul>
+						<p v-else class="safety-flags-empty">本次记录未触发特别关注标注</p>
+						<small v-if="safetyFlagsNote" class="safety-flags-note">{{ safetyFlagsNote }}</small>
 					</section>
 
 					<section class="report-section">
@@ -163,15 +221,18 @@
 </template>
 
 <script setup lang="ts" name="PreVisitReport">
-import { computed, onMounted, reactive } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import {
+	generateCareLetter,
 	generatePreVisitReportSummary,
 	getAnalysisRecordByAwareness,
 	getAwarenessRecord,
+	getCareLetter,
 	getPreVisitReportSummary,
 } from '/@/api/healing';
+import type { CareLetterData, SafetyFlag } from '/@/api/healing';
 
 type AwarenessRecord = {
 	id: number;
@@ -234,12 +295,15 @@ type AiSummary = {
 	clinicianQuestions: string[];
 	visitPreparation: string[];
 	safetyNote: string;
+	safetyFlags?: SafetyFlag[];
+	safetyFlagsNote?: string;
 	generatedAt?: string;
 	cached?: boolean;
 };
 
 const route = useRoute();
 const router = useRouter();
+const viewMode = ref<'letter' | 'clinician'>('letter');
 const state = reactive({
 	loading: false,
 	error: '',
@@ -247,6 +311,9 @@ const state = reactive({
 	analysis: null as AnalysisDetail | null,
 	aiSummary: null as AiSummary | null,
 	aiLoading: false,
+	letter: null as CareLetterData | null,
+	letterLoading: false,
+	letterGenerating: false,
 });
 
 const awarenessRecordId = computed(() => Number(route.params.awarenessRecordId || 0));
@@ -258,6 +325,30 @@ const sortedEmotions = computed(() => {
 });
 
 const dominantEmotion = computed(() => sortedEmotions.value[0]);
+
+const letterParagraphs = computed(() => {
+	return (state.letter?.letterText || '')
+		.split(/\n+/)
+		.map((line) => line.trim())
+		.filter(Boolean);
+});
+
+const letterMetaText = computed(() => {
+	if (!state.letter) return '';
+	const timeText = `写于 ${formatDateTime(state.letter.generatedAt)}`;
+	// 本地备用来源不展示任何技术性文字，保持信件的沉浸感。
+	if (!state.letter.provider || state.letter.provider === 'local-fallback') return timeText;
+	return `由 AI 温柔协助整理 · ${timeText}`;
+});
+
+const safetyFlags = computed<SafetyFlag[]>(() => state.aiSummary?.safetyFlags || []);
+
+const safetyFlagsNote = computed(() => state.aiSummary?.safetyFlagsNote || '');
+
+const printDisabled = computed(() => {
+	if (viewMode.value === 'letter') return !state.letter || state.letterLoading || state.letterGenerating;
+	return !state.awareness || !state.analysis || state.loading;
+});
 
 const behaviorSummary = computed(() => {
 	const grouped = new Map<string, { key: string; label: string; count: number; duration: number }>();
@@ -315,6 +406,54 @@ const loadExistingAiSummary = async () => {
 	} catch (error) {
 		// 尚未生成摘要或后端暂不可用时，仍正常展示原始预诊报告。
 	}
+};
+
+const loadCareLetter = async () => {
+	state.letter = null;
+	if (!awarenessRecordId.value) return;
+	state.letterLoading = true;
+	try {
+		const response = await getCareLetter(awarenessRecordId.value);
+		if ((response.code === '0' || response.code === 0) && response.data) {
+			state.letter = response.data as CareLetterData;
+		}
+	} catch (error) {
+		// 信尚未写好或后端暂不可用时，展示空态，由用户决定何时生成。
+	} finally {
+		state.letterLoading = false;
+	}
+};
+
+const generateLetter = async () => {
+	if (state.letterGenerating || !awarenessRecordId.value) return;
+	try {
+		await ElMessageBox.confirm(
+			'我们会根据你主动分享的记录，为你写一封温柔的信。信里只有陪伴与参考，不会有任何结论。要现在写吗？',
+			'生成我的关怀信',
+			{ confirmButtonText: '好的，写信吧', cancelButtonText: '再等等', type: 'info' }
+		);
+	} catch (error) {
+		return;
+	}
+	state.letterGenerating = true;
+	try {
+		const response = await generateCareLetter(awarenessRecordId.value);
+		if ((response.code === '0' || response.code === 0) && response.data) {
+			state.letter = response.data as CareLetterData;
+			ElMessage.success('信已经写好了，慢慢读就好');
+			return;
+		}
+		ElMessage.error('这封信暂时没有写成，请稍后再试一次');
+	} catch (error) {
+		ElMessage.error('这封信暂时没有写成，请稍后再试一次');
+	} finally {
+		state.letterGenerating = false;
+	}
+};
+
+const safetyFlagLevelName = (level?: string) => {
+	const labels: Record<string, string> = { prompt: '提示', attention: '关注', priority: '优先' };
+	return labels[level || ''] || '提示';
 };
 
 const loadReport = async () => {
@@ -415,15 +554,17 @@ const formatDateTime = (value?: string) => {
 };
 
 const printReport = () => {
-	if (!state.awareness || !state.analysis) return;
+	const isLetter = viewMode.value === 'letter';
+	if (isLetter ? !state.letter : !state.awareness || !state.analysis) return;
+	const printingClass = isLetter ? 'previsit-printing-letter' : 'previsit-printing';
 	const originalTitle = document.title;
-	document.title = `心安动识预诊参考报告-${reportNumber.value}`;
-	document.documentElement.classList.add('previsit-printing');
-	document.body.classList.add('previsit-printing');
+	document.title = isLetter ? '心安动识-写给你的一封信' : `心安动识预诊参考报告-${reportNumber.value}`;
+	document.documentElement.classList.add(printingClass);
+	document.body.classList.add(printingClass);
 	const restoreTitle = () => {
 		document.title = originalTitle;
-		document.documentElement.classList.remove('previsit-printing');
-		document.body.classList.remove('previsit-printing');
+		document.documentElement.classList.remove(printingClass);
+		document.body.classList.remove(printingClass);
 		window.removeEventListener('afterprint', restoreTitle);
 	};
 	window.addEventListener('afterprint', restoreTitle);
@@ -431,7 +572,10 @@ const printReport = () => {
 	window.setTimeout(restoreTitle, 1000);
 };
 
-onMounted(loadReport);
+onMounted(() => {
+	loadReport();
+	loadCareLetter();
+});
 </script>
 
 <style scoped lang="scss">
@@ -473,6 +617,210 @@ onMounted(loadReport);
 
 	> div { display: flex; align-items: center; gap: 12px; }
 	span { color: #887d71; font-size: 13px; }
+}
+
+.view-switch {
+	display: flex;
+	justify-content: center;
+	gap: 6px;
+	margin: 0 auto 20px;
+	padding: 5px;
+	width: fit-content;
+	border: 1px solid #e6d9c8;
+	border-radius: 999px;
+	background: #fbf6ef;
+	box-shadow: 0 6px 18px rgba(120, 94, 66, 0.08);
+
+	button {
+		padding: 9px 22px;
+		border: 0;
+		border-radius: 999px;
+		background: transparent;
+		color: #8a7a68;
+		font-size: 14px;
+		cursor: pointer;
+		transition: background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+
+		&:hover { color: #6d573f; }
+
+		&.active {
+			background: #c98f5c;
+			color: #fffdf8;
+			box-shadow: 0 4px 12px rgba(201, 143, 92, 0.35);
+		}
+	}
+}
+
+.letter-paper {
+	max-width: 640px;
+	min-height: 480px;
+	margin: 0 auto;
+	padding: 52px 48px 40px;
+	border: 1px solid #ecdfd0;
+	border-radius: 6px;
+	background: linear-gradient(180deg, #fffdf8 0%, #fbf6ef 100%);
+	box-shadow: 0 14px 40px rgba(120, 94, 66, 0.12);
+	text-align: left;
+
+	.letter-brand {
+		margin: 0 0 6px;
+		color: #c4a484;
+		font-size: 12px;
+		letter-spacing: 0.14em;
+		text-align: center;
+	}
+
+	.letter-title {
+		margin: 0 0 30px;
+		padding-bottom: 18px;
+		border-bottom: 1px solid #eee1d1;
+		color: #6d573f;
+		font-size: 26px;
+		font-weight: 700;
+		letter-spacing: 0.1em;
+		text-align: center;
+	}
+
+	.letter-body p {
+		margin: 0 0 1.2em;
+		color: #5b4f43;
+		font-size: 15.5px;
+		line-height: 2.15;
+		text-indent: 2em;
+	}
+
+	.letter-sign {
+		margin: 34px 0 0;
+		color: #8a715a;
+		font-size: 15px;
+		text-align: right;
+	}
+
+	.letter-meta {
+		margin: 10px 0 0;
+		color: #bda98f;
+		font-size: 12px;
+		text-align: right;
+	}
+
+	.letter-disclaimer {
+		margin-top: 36px;
+		padding-top: 16px;
+		border-top: 1px dashed #e6d7c4;
+		color: #a7937d;
+		font-size: 12px;
+		line-height: 1.9;
+		text-align: center;
+	}
+}
+
+.letter-empty {
+	display: grid;
+	justify-items: center;
+	gap: 14px;
+	padding: 30px 10px 10px;
+	text-align: center;
+
+	.letter-illustration {
+		display: grid;
+		width: 96px;
+		height: 96px;
+		place-items: center;
+		border-radius: 50%;
+		background: #f6ead9;
+
+		svg { width: 52px; height: 52px; }
+	}
+
+	strong { color: #6d573f; font-size: 19px; }
+
+	p {
+		max-width: 420px;
+		margin: 0;
+		color: #8a7a68;
+		font-size: 14px;
+		line-height: 2;
+	}
+
+	.letter-disclaimer {
+		margin-top: 22px;
+		padding-top: 14px;
+		border-top: 1px dashed #e6d7c4;
+		color: #a7937d;
+		font-size: 12px;
+		line-height: 1.9;
+	}
+}
+
+.safety-flags-card {
+	margin: 0 0 4px;
+	padding: 16px 18px;
+	border: 1px solid #e3d8ca;
+	border-radius: 8px;
+	background: #faf6f0;
+
+	.safety-flags-header {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 6px 14px;
+
+		strong { color: #6a584a; font-size: 15px; }
+		span { color: #96897b; font-size: 12px; }
+	}
+
+	.safety-flags-list {
+		display: grid;
+		gap: 8px;
+		margin: 12px 0 0;
+		padding: 0;
+		list-style: none;
+
+		li {
+			display: flex;
+			align-items: flex-start;
+			gap: 10px;
+			padding: 10px 14px;
+			border-left: 4px solid #9fb4c4;
+			border-radius: 6px;
+			background: #f4f7fa;
+
+			em { flex: 0 0 auto; font-style: normal; font-size: 12px; font-weight: 700; }
+			p { margin: 0; color: #5f5750; font-size: 13px; line-height: 1.75; }
+		}
+
+		li.flag-prompt {
+			border-left-color: #9fb4c4;
+			background: #f4f7fa;
+			em { color: #5d7790; }
+		}
+
+		li.flag-attention {
+			border-left-color: #dfa25e;
+			background: #fdf6ec;
+			em { color: #b97a2e; }
+		}
+
+		li.flag-priority {
+			border-left-color: #d17c74;
+			background: #fdf1f0;
+			em { color: #b04a42; }
+		}
+	}
+
+	.safety-flags-empty {
+		margin: 10px 0 0;
+		color: #7d7167;
+		font-size: 13px;
+	}
+
+	.safety-flags-note {
+		display: block;
+		margin-top: 10px;
+		color: #a29385;
+		font-size: 12px;
+		line-height: 1.7;
+	}
 }
 
 .report-paper {
@@ -715,6 +1063,9 @@ onMounted(loadReport);
 	.report-shell { padding: 12px; }
 	.report-header h1 { font-size: 26px; }
 	.info-grid, .metric-row, .ai-list-grid { grid-template-columns: 1fr; }
+	.view-switch { flex-direction: column; border-radius: 18px; width: 100%; }
+	.view-switch button { width: 100%; }
+	.letter-paper { padding: 34px 22px 28px; }
 }
 </style>
 
@@ -801,6 +1152,7 @@ onMounted(loadReport);
 	}
 
 	.previsit-printing .notice,
+	.previsit-printing .safety-flags-card,
 	.previsit-printing .summary-box,
 	.previsit-printing .metric-row,
 	.previsit-printing .emotion-card,
@@ -848,6 +1200,86 @@ onMounted(loadReport);
 
 	.previsit-printing .report-footer {
 		margin-top: 18px !important;
+	}
+}
+
+@media print {
+	html.previsit-printing-letter,
+	body.previsit-printing-letter,
+	body.previsit-printing-letter #app {
+		width: auto !important;
+		height: auto !important;
+		min-height: 0 !important;
+		overflow: visible !important;
+		background: #ffffff !important;
+	}
+
+	body.previsit-printing-letter {
+		-webkit-print-color-adjust: exact;
+		print-color-adjust: exact;
+	}
+
+	.previsit-printing-letter .layout-aside,
+	.previsit-printing-letter .layout-header,
+	.previsit-printing-letter .layout-navbars-container,
+	.previsit-printing-letter .layout-footer,
+	.previsit-printing-letter .el-backtop,
+	.previsit-printing-letter .page-actions,
+	.previsit-printing-letter .view-switch,
+	.previsit-printing-letter .letter-empty .el-button {
+		display: none !important;
+	}
+
+	.previsit-printing-letter .layout-container,
+	.previsit-printing-letter .layout-container-view,
+	.previsit-printing-letter .layout-main,
+	.previsit-printing-letter .layout-main-scroll,
+	.previsit-printing-letter .layout-parent,
+	.previsit-printing-letter .report-page,
+	.previsit-printing-letter .report-shell {
+		position: static !important;
+		display: block !important;
+		width: 100% !important;
+		height: auto !important;
+		min-height: 0 !important;
+		padding: 0 !important;
+		margin: 0 !important;
+		overflow: visible !important;
+		background: #ffffff !important;
+		border: 0 !important;
+	}
+
+	.previsit-printing-letter .el-scrollbar__wrap,
+	.previsit-printing-letter .el-scrollbar__view {
+		position: static !important;
+		height: auto !important;
+		max-height: none !important;
+		overflow: visible !important;
+	}
+
+	.previsit-printing-letter .el-scrollbar__bar {
+		display: none !important;
+	}
+
+	.previsit-printing-letter .letter-paper {
+		max-width: none !important;
+		width: 100% !important;
+		min-height: 0 !important;
+		margin: 0 !important;
+		padding: 0 !important;
+		border: 0 !important;
+		border-radius: 0 !important;
+		box-shadow: none !important;
+		background: #ffffff !important;
+		font-size: 11pt;
+	}
+
+	.previsit-printing-letter .letter-title {
+		break-after: avoid-page;
+	}
+
+	.previsit-printing-letter .letter-body p {
+		line-height: 2;
 	}
 }
 </style>

@@ -70,6 +70,7 @@ import { formatAxis } from '/@/utils/formatTime';
 import { NextLoading } from '/@/utils/loading';
 import type { FormInstance, FormRules } from 'element-plus';
 import request from '/@/utils/request';
+import { getMyIdentity } from '/@/api/spa';
 
 const { t } = useI18n();
 const storesThemeConfig = useThemeConfig();
@@ -122,7 +123,22 @@ const onSignIn = async () => {
 	}
 };
 
-const signInSuccess = (isNoPower: boolean | undefined) => {
+// 首次登录身份引导：游客跳过；查询不到身份记录（code '404'）时先去身份向导
+const checkIdentityGuide = async (): Promise<boolean> => {
+	if (Cookies.get('role') === 'others') return false;
+	try {
+		const res = await getMyIdentity(ruleForm.username);
+		if (res.code === '404' || res.code === 404) {
+			router.push('/identityGuide');
+			return true;
+		}
+	} catch (error) {
+		// 心有灵犀后端未就绪时不阻塞正常登录
+	}
+	return false;
+};
+
+const signInSuccess = async (isNoPower: boolean | undefined) => {
 	if (isNoPower) {
 		ElMessage.warning('暂时没有访问权限');
 		Session.clear();
@@ -133,7 +149,8 @@ const signInSuccess = (isNoPower: boolean | undefined) => {
 				query: Object.keys(<string>route.query?.params).length > 0 ? JSON.parse(<string>route.query?.params) : '',
 			});
 		} else {
-			router.push('/');
+			const guided = await checkIdentityGuide();
+			if (!guided) router.push('/');
 		}
 		ElMessage.success(`${currentTime.value}，${t('message.signInText')}`);
 		// 动态路由初始化已经可能启动全局 Loading，避免重复创建遮罩后只移除一层。

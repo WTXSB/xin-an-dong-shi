@@ -103,6 +103,42 @@
 - 无 Key 时会走本地温柔兜底回复。
 - 已测试接通 `deepseek-v4-pro`，后端返回 `provider = deepseek`。
 
+### 9. 预诊报告与双视角输出
+
+- 结构化检测记录可生成预诊报告（AI 辅助摘要 + 本地模板兜底 + 禁词拦截）。
+- 同一份检测数据提供两种视角：
+  - **患者视角（默认）**：书信式关怀信，温柔口吻、生活化表达，给出可行动的小建议，
+    不出现"检测、诊断、症状"等医学用词，结尾声明"只是陪伴与参考，不是任何结论"。
+  - **心灵SPA师视角**：完整客观预诊报告 + 安全关注标注
+    （持续愤怒主导、BFRB 高频/长持续、自述危险关键词三档规则），
+    标注仅为算法线索汇总，不构成诊断依据。
+- 书信与报告均支持打印 / 另存为 PDF。
+- 心灵 SPA 地图导引已接入真实高德地图 API：IP 定位（城市级）+ 浏览器精确定位、
+  附近真实机构检索（心理咨询/心理门诊/冥想瑜伽/公园绿道/书店茶饮）、
+  机构详情弹窗（电话/地址/高德详情链接）、自由缩放。
+
+### 10. 心有灵犀（医患联动）
+
+- 注册后首次登录进入身份向导：「我来照顾自己」（使用者）或「我是心灵SPA师」。
+- 双端认证体系（模拟审核流，管理员手动通过/驳回）：
+  - 心灵SPA师：医师资格证号 + 实名 + 就职医院 + 科室 + 职称 + 简介；
+  - 使用者：平时无需实名，发起倾诉前完成实名认证（身份证仅存掩码，绝不存明文）。
+- 已认证心灵SPA师卡片展示（医院/科室/职称/简介），使用者「向TA倾诉」寄出第一封信
+  建立联结，书信式站内对话（轮询增量刷新）。
+- 心灵SPA师可在对话侧栏查看求助者历史觉察记录，并跳转预诊报告客观参考视角，
+  形成"线上预诊、必要时转线下"的流程雏形。
+- 认证审核界面（admin）：待审列表 + 通过/驳回 + 备注。
+
+### 11. BFRB 行为检测模型与数据管线
+
+- 五类 BFRB 行为直检模型 `weights/bfrb_behavior.pt`（咬指甲/抠皮肤揉眼/拔头发抓头皮/摸脸/手部自然状态），
+  同源验证集 mAP50 = 0.744；皮肤损伤痕迹模型 `weights/bfrb_wound.pt`（mAP50 = 0.519）作为辅助通道。
+- 数据管线（Flask 目录）：`pseudo_label_pipeline.py`（视频/图片抽帧 → 手脸模型自动伪标注）、
+  `merge_datasets.py`（多来源数据集合并）、`train_bfrb.py`（GPU 微调训练，内置全套增广）。
+- 训练数据：FaceTouch 公开数据集（PLOS ONE）+ 团队自录动作视频，经伪标注合并。
+- Flask `/predictBfrb` 双模式：行为模型直检 / 手脸几何规则兜底，按权重类别名自动切换。
+- 详细文档见 `yolo-moudle/face/yolo_face_detection_flask/BFRB_README.md`。
+
 ## 常用本地地址
 
 | 页面 | 地址 |
@@ -114,6 +150,7 @@
 | 觉察记录 | `http://127.0.0.1:8100/#/trashRecords` |
 | 心灵 SPA 导引 | `http://127.0.0.1:8100/#/trashMap` |
 | 安心对话 | `http://127.0.0.1:8100/#/smartChat` |
+| 心有灵犀 | `http://127.0.0.1:8100/#/spaConnect` |
 
 ## 启动方式
 
@@ -160,6 +197,18 @@ $env:DEEPSEEK_API_URL = "https://api.deepseek.com/chat/completions"
 - 不要把真实 Key 提交到仓库。
 - 修改 Key 后需要重启 Spring Boot。
 
+## 高德地图与 Roboflow 本地配置
+
+高德地图 Key（Web端 JS API，心灵 SPA 地图使用）配置在前端 `yolo-moudle/face/yolo_face_detection_vue/.env.local`：
+
+```text
+VITE_AMAP_KEY=你的高德 Key
+VITE_AMAP_SECURITY_CODE=你的高德安全密钥
+```
+
+Roboflow API Key（BFRB 数据集下载）保存在 `scripts/roboflow-env.local.txt`。
+两者均已加入 `.gitignore`，不会提交到仓库；修改高德 Key 后需重启前端 dev server。
+
 ## 数据库与部署方向
 
 本地演示阶段使用文件型 H2 Demo Profile，数据保存在 Spring Boot 目录的 `data/yolo-demo.mv.db`，重启后仍可回看觉察记录和结构化分析。测试环境使用独立的内存 H2，不会写入演示数据。
@@ -192,7 +241,14 @@ deployment-recommendation-tencent-cloud.docx
 | `yolo-moudle/face/yolo_face_detection_springboot/src/main/java/com/example/Ece/controller/AiChatController.java` | DeepSeek 后端代理 |
 | `yolo-moudle/face/yolo_face_detection_springboot/src/main/java/com/example/Ece/controller/AwarenessRecordController.java` | 觉察记录接口 |
 | `yolo-moudle/face/yolo_face_detection_springboot/src/main/java/com/example/Ece/controller/DetectionAnalysisRecordController.java` | 结构化检测结果保存、查询与关联接口 |
+| `yolo-moudle/face/yolo_face_detection_springboot/src/main/java/com/example/Ece/controller/PreVisitReportSummaryController.java` | 预诊报告摘要与关怀书信生成、安全标注 |
+| `yolo-moudle/face/yolo_face_detection_springboot/src/main/java/com/example/Ece/controller/SpaConnectController.java` | 心有灵犀：身份认证、求助单、站内对话 |
+| `yolo-moudle/face/yolo_face_detection_vue/src/views/preVisitReport/index.vue` | 预诊报告双视角页面（书信/客观参考） |
+| `yolo-moudle/face/yolo_face_detection_vue/src/views/spaConnect/index.vue` | 心有灵犀模块页 |
+| `yolo-moudle/face/yolo_face_detection_vue/src/views/trashMap/index.vue` | 心灵 SPA 专属疗愈地图（高德 API） |
 | `yolo-moudle/face/yolo_face_detection_flask/facetry.py` | YOLO 图片、视频、摄像头推理服务 |
+| `yolo-moudle/face/yolo_face_detection_flask/bfrb_detect.py` | BFRB 手脸几何规则 + 行为模型直检 |
+| `yolo-moudle/face/yolo_face_detection_flask/pseudo_label_pipeline.py` | 伪标注数据管线 |
 
 ## 隐私与表达原则
 
@@ -206,18 +262,22 @@ deployment-recommendation-tencent-cloud.docx
 ## 已验证
 
 - 前端 `npm run build` 通过。
-- Spring Boot `mvn test` 通过（3 项测试）。
-- Flask YOLO `py_compile` 通过。
-- `/flask/file_names` 可返回 `emotion.pt`。
+- Spring Boot `mvn test` 通过（12 项测试）。
+- Flask YOLO `py_compile` 通过，`test_bfrb_events.py` 4 项测试通过。
+- `/flask/file_names` 可返回 `emotion.pt` 与 BFRB 系列权重。
 - `/ai/chat` 已接入 DeepSeek，返回 `provider = deepseek`。
 - 图片、视频、摄像头页面均已通过浏览器基础检查。
 - 图片与视频链路已通过结构化落库、幂等、刷新回查与隐私不保存验证。
+- 心有灵犀全流程（注册 → 身份向导 → 认证提交 → admin 审核 → 发起倾诉 → 双向书信对话 → 医生查看历史报告）已经浏览器端到端走查。
+- 预诊报告双视角（书信禁词检查、幂等缓存、安全标注规则）已经接口与浏览器验证。
+- 心灵 SPA 地图高德 API（IP 定位、真实 POI、详情弹窗、缩放）已经浏览器实测。
 
 ## 后续优化建议
 
 - 将 H2 Demo 数据正式迁移到 MySQL。
 - 补充对话历史管理与删除功能。
 - 给安心对话增加流式输出体验。
-- 在结构化检测记录基础上增加预诊报告预览、AI 辅助摘要与 PDF 导出。
-- 心灵 SPA 导引继续接入更可靠的真实地图与资源数据。
+- 行为模型迭代：扩充多人物多场景自录数据、修正伪标注噪声帧，缩小跨域差距。
+- 腕戴传感器通道原型（STM32 + IMU 时序手势识别），与视觉通道形成多传感器融合。
+- 医院实地调研，「心有灵犀」接入真实医生并完善角色权限。
 - 腾讯云部署时拆分主站与 YOLO 推理服务，避免小规格服务器资源紧张。

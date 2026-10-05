@@ -6,11 +6,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.example.Ece.common.Result;
 import com.example.Ece.entity.AwarenessRecord;
+import com.example.Ece.entity.CareLetterSummary;
 import com.example.Ece.entity.DetectionAnalysisRecord;
 import com.example.Ece.entity.DetectionBfrbEvent;
 import com.example.Ece.entity.DetectionEmotionResult;
 import com.example.Ece.entity.PreVisitReportSummary;
 import com.example.Ece.mapper.AwarenessRecordMapper;
+import com.example.Ece.mapper.CareLetterSummaryMapper;
 import com.example.Ece.mapper.DetectionAnalysisRecordMapper;
 import com.example.Ece.mapper.DetectionBfrbEventMapper;
 import com.example.Ece.mapper.DetectionEmotionResultMapper;
@@ -49,6 +51,26 @@ public class PreVisitReportSummaryController {
             "确诊", "诊断为", "抑郁症", "焦虑症", "强迫症", "双相", "自闭症",
             "建议服用", "需要服药", "停药", "加药", "减药", "治疗方案", "轻度", "中度", "重度"
     );
+    private static final String CARE_LETTER_PROMPT_VERSION = "care-letter-v1";
+    private static final String CARE_LETTER_SYSTEM_PROMPT =
+            "你是“心安动识”平台的陪伴书信撰写助手，为写下记录的人写一封温柔的中文书信。"
+                    + "以书信形式、第二人称“你”写作，语气温暖、克制，不贴标签、不下结论。"
+                    + "结构依次为：问候；接住对方的感受；委婉提及记录中观察到的身体小信号（生活化描述，不评判）；"
+                    + "给出2到3个当下就能完成的小建议；给一个温柔的下一步，把“找专业人员聊聊”表达为低压力的选择，不强迫；"
+                    + "最后以“心安动识”落款。"
+                    + "严禁出现医学用词（如诊断、症状、疾病、障碍、治疗、用药、处方、临床、患者、病人、轻中重程度等）。"
+                    + "只输出书信正文纯文本，不要JSON，不要Markdown，不要解释。";
+    private static final List<String> LETTER_PROHIBITED_OUTPUT = Arrays.asList(
+            "检测结果", "诊断", "症状", "证明", "确诊", "疾病", "障碍", "治疗", "用药", "处方",
+            "病理", "临床", "患者", "病人", "轻度", "中度", "重度"
+    );
+    private static final String LETTER_DISCLAIMER =
+            "这封信基于你主动分享的记录写成，只是陪伴与参考，不是任何结论。";
+    private static final String SAFETY_FLAGS_NOTE =
+            "以上标注仅为算法线索汇总，仅供具备资质的专业人员参考，不构成任何诊断依据。";
+    private static final List<String> SAFETY_KEYWORDS = Arrays.asList(
+            "自伤", "自杀", "伤害", "暴力", "失控", "想死", "躁"
+    );
 
     @Value("${deepseek.api-key:}")
     private String deepseekApiKey;
@@ -67,6 +89,8 @@ public class PreVisitReportSummaryController {
     DetectionBfrbEventMapper bfrbEventMapper;
     @Resource
     PreVisitReportSummaryMapper summaryMapper;
+    @Resource
+    CareLetterSummaryMapper careLetterMapper;
 
     @GetMapping("/by-awareness/{awarenessRecordId}")
     public Result<?> getByAwarenessRecordId(@PathVariable int awarenessRecordId) {
@@ -74,7 +98,7 @@ public class PreVisitReportSummaryController {
         if (summary == null) {
             return Result.error("404", "该报告尚未生成AI辅助摘要");
         }
-        return Result.success(toResponse(summary, true));
+        return Result.success(toResponse(summary, true, loadSafetyFlags(summary.getAnalysisRecordId())));
     }
 
     @PostMapping("/generate/{awarenessRecordId}")
@@ -95,7 +119,7 @@ public class PreVisitReportSummaryController {
 
         PreVisitReportSummary existing = findByAwarenessId(awarenessRecordId);
         if (existing != null) {
-            return Result.success(toResponse(existing, true));
+            return Result.success(toResponse(existing, true, loadSafetyFlags(existing.getAnalysisRecordId())));
         }
 
         List<DetectionEmotionResult> emotions = emotionResultMapper.selectList(
@@ -123,7 +147,62 @@ public class PreVisitReportSummaryController {
         summary.setGeneratedAt(LocalDateTime.now());
         summary.setUpdatedAt(LocalDateTime.now());
         summaryMapper.insert(summary);
-        return Result.success(toResponse(summary, false));
+        return Result.success(toResponse(summary, false, computeSafetyFlags(analysis, emotions, events)));
+    }
+
+    @GetMapping("/care-letter/{awarenessRecordId}")
+    public Result<?> getCareLetter(@PathVariable int awarenessRecordId) {
+        CareLetterSummary letter = findLetterByAwarenessId(awarenessRecordId);
+        if (letter == null) {
+            return Result.error("404", "该记录的关怀书信尚未生成");
+        }
+        return Result.success(toLetterResponse(letter, true));
+    }
+
+    @PostMapping("/care-letter/generate/{awarenessRecordId}")
+    @Transactional(rollbackFor = Exception.class)
+    public Result<?> generateCareLetter(@PathVariable int awarenessRecordId) {
+        AwarenessRecord awareness = awarenessRecordMapper.selectById(awarenessRecordId);
+        if (awareness == null) {
+            return Result.error("404", "未找到对应的觉察记录");
+        }
+        DetectionAnalysisRecord analysis = analysisRecordMapper.selectOne(
+                Wrappers.<DetectionAnalysisRecord>lambdaQuery()
+                        .eq(DetectionAnalysisRecord::getAwarenessRecordId, awarenessRecordId)
+                        .last("LIMIT 1")
+        );
+        if (analysis == null) {
+            return Result.error("400", "该记录缺少结构化检测明细，不能生成可靠的关怀书信");
+        }
+
+        CareLetterSummary existing = findLetterByAwarenessId(awarenessRecordId);
+        if (existing != null) {
+            return Result.success(toLetterResponse(existing, true));
+        }
+
+        List<DetectionEmotionResult> emotions = emotionResultMapper.selectList(
+                Wrappers.<DetectionEmotionResult>lambdaQuery()
+                        .eq(DetectionEmotionResult::getAnalysisRecordId, analysis.getId())
+                        .orderByDesc(DetectionEmotionResult::getFrameCount)
+        );
+        List<DetectionBfrbEvent> events = bfrbEventMapper.selectList(
+                Wrappers.<DetectionBfrbEvent>lambdaQuery()
+                        .eq(DetectionBfrbEvent::getAnalysisRecordId, analysis.getId())
+                        .orderByAsc(DetectionBfrbEvent::getStartSeconds)
+        );
+
+        GeneratedLetter generated = generateLetterText(awareness, analysis, emotions, events);
+        CareLetterSummary letter = new CareLetterSummary();
+        letter.setAwarenessRecordId(awarenessRecordId);
+        letter.setAnalysisRecordId(analysis.getId());
+        letter.setProvider(generated.provider);
+        letter.setModelName(generated.modelName);
+        letter.setPromptVersion(CARE_LETTER_PROMPT_VERSION);
+        letter.setLetterText(limit(generated.letterText, 8000));
+        letter.setGeneratedAt(LocalDateTime.now());
+        letter.setUpdatedAt(LocalDateTime.now());
+        careLetterMapper.insert(letter);
+        return Result.success(toLetterResponse(letter, false));
     }
 
     private GeneratedSummary generateSummary(AwarenessRecord awareness,
@@ -181,6 +260,14 @@ public class PreVisitReportSummaryController {
                                            DetectionAnalysisRecord analysis,
                                            List<DetectionEmotionResult> emotions,
                                            List<DetectionBfrbEvent> events) {
+        return "请依据以下去标识化数据生成预诊材料辅助摘要。不得输出姓名、账号、素材路径或诊断结论：\n"
+                + buildDeidentifiedData(awareness, analysis, emotions, events).toJSONString();
+    }
+
+    private JSONObject buildDeidentifiedData(AwarenessRecord awareness,
+                                             DetectionAnalysisRecord analysis,
+                                             List<DetectionEmotionResult> emotions,
+                                             List<DetectionBfrbEvent> events) {
         JSONObject data = new JSONObject(true);
         data.put("sourceType", analysis.getSourceType());
         data.put("analysisMode", analysis.getAnalysisMode());
@@ -215,7 +302,7 @@ public class PreVisitReportSummaryController {
         data.put("bfrbEventCount", analysis.getBfrbEventCount());
         data.put("bfrbTotalDurationSeconds", analysis.getBfrbTotalDurationSeconds());
         data.put("bfrbEvents", eventData);
-        return "请依据以下去标识化数据生成预诊材料辅助摘要。不得输出姓名、账号、素材路径或诊断结论：\n" + data.toJSONString();
+        return data;
     }
 
     private GeneratedSummary parseRemoteAnswer(String answer) {
@@ -281,6 +368,230 @@ public class PreVisitReportSummaryController {
         return false;
     }
 
+    private GeneratedLetter generateLetterText(AwarenessRecord awareness,
+                                               DetectionAnalysisRecord analysis,
+                                               List<DetectionEmotionResult> emotions,
+                                               List<DetectionBfrbEvent> events) {
+        if (StrUtil.isBlank(deepseekApiKey)) {
+            return localCareLetter(awareness, analysis, emotions, events);
+        }
+        try {
+            JSONObject request = new JSONObject();
+            request.put("model", deepseekModel);
+            request.put("temperature", 0.7);
+            request.put("max_tokens", 1200);
+            request.put("stream", false);
+
+            JSONArray messages = new JSONArray();
+            JSONObject system = new JSONObject();
+            system.put("role", "system");
+            system.put("content", CARE_LETTER_SYSTEM_PROMPT);
+            messages.add(system);
+            JSONObject user = new JSONObject();
+            user.put("role", "user");
+            user.put("content", "请依据以下去标识化数据，给写下这份记录的人写一封温柔的书信。"
+                    + "不得输出姓名、账号、素材路径，只输出书信正文纯文本：\n"
+                    + buildDeidentifiedData(awareness, analysis, emotions, events).toJSONString());
+            messages.add(user);
+            request.put("messages", messages);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(deepseekApiKey.trim());
+            SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+            factory.setConnectTimeout(15000);
+            factory.setReadTimeout(30000);
+            RestTemplate client = new RestTemplate(factory);
+            ResponseEntity<String> response = client.exchange(
+                    deepseekApiUrl, HttpMethod.POST, new HttpEntity<>(request.toJSONString(), headers), String.class
+            );
+            JSONObject responseJson = JSONObject.parseObject(response.getBody());
+            String answer = responseJson.getJSONArray("choices")
+                    .getJSONObject(0).getJSONObject("message").getString("content");
+            String letterText = cleanRemoteLetter(answer);
+            if (StrUtil.isBlank(letterText)) {
+                throw new IllegalArgumentException("AI书信返回为空");
+            }
+            if (containsProhibitedLetterOutput(letterText)) {
+                return localCareLetter(awareness, analysis, emotions, events);
+            }
+            return new GeneratedLetter(limit(letterText, 8000), "deepseek", deepseekModel);
+        } catch (Exception exception) {
+            System.out.println("[CareLetter] AI letter failed, using local fallback: " + exception.getMessage());
+            return localCareLetter(awareness, analysis, emotions, events);
+        }
+    }
+
+    private String cleanRemoteLetter(String answer) {
+        if (StrUtil.isBlank(answer)) return "";
+        String text = answer.trim();
+        if (text.startsWith("```")) {
+            text = text.replaceFirst("^```(?:text|plaintext)?\\s*", "").replaceFirst("\\s*```$", "");
+        }
+        return text.trim();
+    }
+
+    private boolean containsProhibitedLetterOutput(String letterText) {
+        for (String prohibited : LETTER_PROHIBITED_OUTPUT) {
+            if (letterText.contains(prohibited)) return true;
+        }
+        return false;
+    }
+
+    private GeneratedLetter localCareLetter(AwarenessRecord awareness,
+                                            DetectionAnalysisRecord analysis,
+                                            List<DetectionEmotionResult> emotions,
+                                            List<DetectionBfrbEvent> events) {
+        StringBuilder letter = new StringBuilder();
+        letter.append("亲爱的你：\n\n");
+        letter.append("见字如面。谢谢你愿意把这段时间的自己记录下来，也愿意让这些记录被看见。\n\n");
+
+        // 接住感受：优先使用觉察记录里的情绪标注，其次使用主要情绪线索
+        String emotionCue = StrUtil.blankToDefault(awareness.getEmotionLabel(),
+                emotions.isEmpty() ? "" : emotions.get(0).getEmotionType());
+        letter.append("从这些记录里，我们隐约感觉到，").append(gentleEmotionPhrase(emotionCue))
+                .append("。无论它是什么，都值得被温柔地接住，而不是被评判。\n\n");
+
+        // 委婉提及观察到的身体小信号，使用生活化描述
+        if (!events.isEmpty()) {
+            letter.append("我们也留意到，记录里有一些").append(gentleCuePhrase(events.get(0).getCueType()))
+                    .append("。这些时刻往往发生在不经意间，它们不是错，只是身体在用自己的方式说话。\n\n");
+        }
+
+        // 自述
+        String complaint = StrUtil.blankToDefault(analysis.getComplaint(), "");
+        if (StrUtil.isNotBlank(complaint)) {
+            letter.append("你还写下了“").append(limit(complaint, 100))
+                    .append("”。谢谢你愿意说出来，把心里的事情写下来，本身就已经很不容易。\n\n");
+        }
+
+        letter.append("如果你愿意，可以试试这几件小事：\n")
+                .append("1. 找个安静的地方，慢慢做几次深呼吸，吸气四拍、呼气六拍。\n")
+                .append("2. 当那些不经意的时刻出现时，先轻轻把手放在桌面上，感受手心的温度，不急着责怪自己。\n")
+                .append("3. 睡前花几分钟，把今天最惦记的一件事写在纸上，写完就把它放下。\n\n");
+        letter.append("如果有一天，你想找专业的人聊聊，那是一个随时都可以做的选择，")
+                .append("不必着急，也不用勉强自己；在此之前，我们会一直在这里陪着你。\n\n");
+        letter.append(LETTER_DISCLAIMER).append("\n\n");
+        letter.append("—— 心安动识");
+        return new GeneratedLetter(letter.toString(), "local-fallback", "rule-letter-v1");
+    }
+
+    private String gentleEmotionPhrase(String emotionCue) {
+        String cue = StrUtil.blankToDefault(emotionCue, "").toLowerCase(Locale.ROOT);
+        if (cue.contains("sad") || cue.contains("难过") || cue.contains("低落")) {
+            return "最近的日子似乎有些沉，心里压着一些东西";
+        }
+        if (cue.contains("angry") || cue.contains("生气") || cue.contains("烦")) {
+            return "心里好像攒着一些火气，闷着不太舒服";
+        }
+        if (cue.contains("fear") || cue.contains("害怕") || cue.contains("紧张")) {
+            return "心里似乎有些紧绷，像一直提着一口气";
+        }
+        if (cue.contains("happy") || cue.contains("开心")) {
+            return "这段日子里透着一些轻松的时刻";
+        }
+        return "这段时间的情绪有些起伏";
+    }
+
+    private String gentleCuePhrase(String cueType) {
+        String cue = StrUtil.blankToDefault(cueType, "");
+        if (cue.contains("咬") || cue.contains("嘴") || cue.contains("进食") || cue.contains("指甲")) {
+            return "手不自觉地靠近嘴边的时刻";
+        }
+        if (cue.contains("抠") || cue.contains("抓") || cue.contains("皮肤")) {
+            return "手指不自觉地触碰皮肤的时刻";
+        }
+        if (cue.contains("拔") || cue.contains("头发")) {
+            return "手指不自觉地绕向头发的时刻";
+        }
+        return "一些小动作反复出现的时刻";
+    }
+
+    private List<Map<String, Object>> loadSafetyFlags(Integer analysisRecordId) {
+        if (analysisRecordId == null) {
+            return Collections.emptyList();
+        }
+        DetectionAnalysisRecord analysis = analysisRecordMapper.selectById(analysisRecordId);
+        if (analysis == null) {
+            return Collections.emptyList();
+        }
+        List<DetectionEmotionResult> emotions = emotionResultMapper.selectList(
+                Wrappers.<DetectionEmotionResult>lambdaQuery()
+                        .eq(DetectionEmotionResult::getAnalysisRecordId, analysis.getId())
+                        .orderByDesc(DetectionEmotionResult::getFrameCount)
+        );
+        List<DetectionBfrbEvent> events = bfrbEventMapper.selectList(
+                Wrappers.<DetectionBfrbEvent>lambdaQuery()
+                        .eq(DetectionBfrbEvent::getAnalysisRecordId, analysis.getId())
+                        .orderByAsc(DetectionBfrbEvent::getStartSeconds)
+        );
+        return computeSafetyFlags(analysis, emotions, events);
+    }
+
+    private List<Map<String, Object>> computeSafetyFlags(DetectionAnalysisRecord analysis,
+                                                         List<DetectionEmotionResult> emotions,
+                                                         List<DetectionBfrbEvent> events) {
+        List<Map<String, Object>> flags = new ArrayList<>();
+
+        // 愤怒类情绪线索：帧占比达到一半且平均置信度足够高时提示注意
+        int totalFrames = 0;
+        DetectionEmotionResult angryEmotion = null;
+        for (DetectionEmotionResult emotion : emotions) {
+            totalFrames += value(emotion.getFrameCount());
+            if ("angry".equalsIgnoreCase(StrUtil.blankToDefault(emotion.getEmotionType(), ""))) {
+                angryEmotion = emotion;
+            }
+        }
+        if (angryEmotion != null && totalFrames > 0 && angryEmotion.getAverageConfidence() != null) {
+            double ratio = value(angryEmotion.getFrameCount()) * 1.0 / totalFrames;
+            if (ratio >= 0.5 && angryEmotion.getAverageConfidence().doubleValue() >= 0.6) {
+                flags.add(safetyFlag("attention", "持续愤怒类情绪线索占比较高：帧占比 "
+                        + percent(BigDecimal.valueOf(ratio)) + "，该类型平均置信度 "
+                        + angryEmotion.getAverageConfidence().stripTrailingZeros().toPlainString()));
+            }
+        }
+
+        // 重复性身体行为线索：次数或累计时长偏高时提示注意
+        int eventCount = value(analysis.getBfrbEventCount());
+        double totalDuration = analysis.getBfrbTotalDurationSeconds() == null
+                ? 0 : analysis.getBfrbTotalDurationSeconds().doubleValue();
+        if (eventCount >= 10 || totalDuration >= 120) {
+            flags.add(safetyFlag("attention", "重复性身体行为线索较频繁：共 " + eventCount
+                    + " 次，累计持续 " + decimal(analysis.getBfrbTotalDurationSeconds()) + " 秒"));
+        }
+
+        // 单次持续时间较长的行为线索
+        BigDecimal maxDuration = null;
+        for (DetectionBfrbEvent event : events) {
+            if (event.getDurationSeconds() != null
+                    && (maxDuration == null || event.getDurationSeconds().compareTo(maxDuration) > 0)) {
+                maxDuration = event.getDurationSeconds();
+            }
+        }
+        if (maxDuration != null && maxDuration.doubleValue() >= 60) {
+            flags.add(safetyFlag("prompt", "存在单次持续时间较长的行为线索：最长约 "
+                    + decimal(maxDuration) + " 秒"));
+        }
+
+        // 自述中的优先关注表达
+        String selfReport = StrUtil.blankToDefault(analysis.getComplaint(), "")
+                + StrUtil.blankToDefault(analysis.getAdditionalNotes(), "");
+        for (String keyword : SAFETY_KEYWORDS) {
+            if (selfReport.contains(keyword)) {
+                flags.add(safetyFlag("priority", "自述中包含需要优先关注的表达"));
+                break;
+            }
+        }
+        return flags;
+    }
+
+    private Map<String, Object> safetyFlag(String level, String reason) {
+        Map<String, Object> flag = new LinkedHashMap<>();
+        flag.put("level", level);
+        flag.put("reason", reason);
+        return flag;
+    }
+
     private List<String> readStringArray(JSONArray array, int maxItems) {
         if (array == null) return Collections.emptyList();
         List<String> values = new ArrayList<>();
@@ -299,7 +610,16 @@ public class PreVisitReportSummaryController {
         );
     }
 
-    private Map<String, Object> toResponse(PreVisitReportSummary summary, boolean cached) {
+    private CareLetterSummary findLetterByAwarenessId(int awarenessRecordId) {
+        return careLetterMapper.selectOne(
+                Wrappers.<CareLetterSummary>lambdaQuery()
+                        .eq(CareLetterSummary::getAwarenessRecordId, awarenessRecordId)
+                        .last("LIMIT 1")
+        );
+    }
+
+    private Map<String, Object> toResponse(PreVisitReportSummary summary, boolean cached,
+                                           List<Map<String, Object>> safetyFlags) {
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("id", summary.getId());
         data.put("awarenessRecordId", summary.getAwarenessRecordId());
@@ -311,7 +631,23 @@ public class PreVisitReportSummaryController {
         data.put("clinicianQuestions", parseStoredArray(summary.getClinicianQuestionsJson()));
         data.put("visitPreparation", parseStoredArray(summary.getVisitPreparationJson()));
         data.put("safetyNote", summary.getSafetyNote());
+        data.put("safetyFlags", safetyFlags);
+        data.put("safetyFlagsNote", SAFETY_FLAGS_NOTE);
         data.put("generatedAt", summary.getGeneratedAt());
+        data.put("cached", cached);
+        return data;
+    }
+
+    private Map<String, Object> toLetterResponse(CareLetterSummary letter, boolean cached) {
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("id", letter.getId());
+        data.put("awarenessRecordId", letter.getAwarenessRecordId());
+        data.put("analysisRecordId", letter.getAnalysisRecordId());
+        data.put("provider", letter.getProvider());
+        data.put("modelName", letter.getModelName());
+        data.put("promptVersion", letter.getPromptVersion());
+        data.put("letterText", letter.getLetterText());
+        data.put("generatedAt", letter.getGeneratedAt());
         data.put("cached", cached);
         return data;
     }
@@ -355,6 +691,18 @@ public class PreVisitReportSummaryController {
             this.objectiveSummary = objectiveSummary;
             this.clinicianQuestions = clinicianQuestions;
             this.visitPreparation = visitPreparation;
+            this.provider = provider;
+            this.modelName = modelName;
+        }
+    }
+
+    private static class GeneratedLetter {
+        String letterText;
+        String provider;
+        String modelName;
+
+        GeneratedLetter(String letterText, String provider, String modelName) {
+            this.letterText = letterText;
             this.provider = provider;
             this.modelName = modelName;
         }

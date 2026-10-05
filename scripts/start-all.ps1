@@ -31,6 +31,27 @@ if ([string]::IsNullOrWhiteSpace($JavaExe)) {
     }
 }
 
+# 校验自动探测到的 Java 确实可用（Oracle javapath 可能是无输出的损坏存根），
+# 不可用时回退到本机已知的 JBR 17。
+function Test-JavaWorks {
+    param([string]$Exe)
+    if ([string]::IsNullOrWhiteSpace($Exe) -or -not (Test-Path $Exe)) { return $false }
+    $prev = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"  # java -version 走 stderr，避免触发 NativeCommandError
+    $out = & $Exe -version 2>&1 | Out-String
+    $ErrorActionPreference = $prev
+    return $out -match 'version|openjdk'
+}
+
+if (-not (Test-JavaWorks $JavaExe)) {
+    # 本机可用的完整 JBR（PyCharm 2024.1 的 jbr 缺 jvm.cfg，仅 -version 可用、无法真正启动）
+    $jbrFallback = "D:\software\IntelliJ-IDEA-Community\jbr\bin\java.exe"
+    if (Test-JavaWorks $jbrFallback) {
+        Write-Host "Auto-detected java is unusable, falling back to JBR: $jbrFallback"
+        $JavaExe = $jbrFallback
+    }
+}
+
 if ([string]::IsNullOrWhiteSpace($MavenCmd)) {
     $mavenCommand = Get-Command mvn.cmd -ErrorAction SilentlyContinue
     if ($null -eq $mavenCommand) {

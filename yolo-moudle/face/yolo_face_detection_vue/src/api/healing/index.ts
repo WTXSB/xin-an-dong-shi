@@ -31,3 +31,28 @@ export function getPreVisitReportSummary(awarenessRecordId: number) {
 export function generatePreVisitReportSummary(awarenessRecordId: number) {
 	return request.post(`/api/preVisitReportSummaries/generate/${awarenessRecordId}`);
 }
+
+export type SafetyFlag = {
+	level: 'prompt' | 'attention' | 'priority';
+	reason: string;
+};
+
+export type CareLetterData = {
+	id: number;
+	awarenessRecordId: number;
+	analysisRecordId?: number;
+	provider?: string;
+	modelName?: string;
+	promptVersion?: string;
+	letterText: string;
+	generatedAt?: string;
+	cached?: boolean;
+};
+
+export function getCareLetter(awarenessRecordId: number) {
+	return request.get(`/api/preVisitReportSummaries/care-letter/${awarenessRecordId}`);
+}
+
+export function generateCareLetter(awarenessRecordId: number) {
+	return request.post(`/api/preVisitReportSummaries/care-letter/generate/${awarenessRecordId}`);
+}

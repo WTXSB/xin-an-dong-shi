@@ -60,3 +60,8 @@ yolo-moudle/face/ffmpeg-7.1-full_build/
 *.zip
 *.rar
 *.7z
+
+# Personal signatures and signed reports (never commit to public repo)
+项目文档/midterm-assets/sign-*.jpg
+项目文档/midterm-assets/template_page*.png
+项目文档/中期检验报告.pdf

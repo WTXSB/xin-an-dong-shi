@@ -1,0 +1,136 @@
+% !TeX program = xelatex
+% 「心安动识」下一阶段核心创新点（会议纪要整理）
+% 编译：xelatex 06_下一阶段核心创新点.tex（需 ctex 宏包，Windows 系统字体）
+\documentclass[12pt, a4paper]{ctexart}
+
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{titlesec}
+
+\definecolor{warmpink}{RGB}{174, 105, 82}
+\definecolor{warmgray}{RGB}{90, 80, 70}
+
+\titleformat{\section}{\Large\bfseries\color{warmpink}}{\thesection}{0.8em}{}
+\titleformat{\subsection}{\large\bfseries\color{warmgray}}{\thesubsection}{0.8em}{}
+
+\setlist{nosep, leftmargin=1.8em}
+
+\title{\bfseries 「心安动识」下一阶段核心创新点\\ \large ——基于多传感器融合的 BFRBs 智能检测系统研究（会议纪要整理）}
+\author{心安动识项目组}
+\date{2026 年 9 月}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+\section*{总定位：把通用技术，封装成让特定群体真正受益的工具}
+
+本项目的根本创新不在于单项技术本身，而在于\textbf{面向情绪疗养与心理支持需求人群的
+场景化封装}：将 YOLO 视觉检测、地图服务、在线医疗这些通用能力，重新组织为一套
+"检测 $\rightarrow$ 报告 $\rightarrow$ 问诊 $\rightarrow$ 就医导引"的完整疗愈闭环，
+让有 BFRBs（身体聚焦重复行为）困扰与情绪波动的人群获得\textbf{客观而不冰冷}的帮助。
+
+\section{创新点一：面向中国人群的情绪行为 YOLO 专属模型与"不冰冷"的客观检测报告}
+
+\subsection{要解决的问题}
+\begin{itemize}
+  \item 现有公开表情/行为数据集多为国外早期照片（上世纪六、七十年代留存影像），
+        画质差、样本老旧；
+  \item 外国人群的表情习惯与肢体语言特征差异大，直接迁移到中国人群，
+        识别准确率无法保证；
+  \item 传统检测报告充斥冰冷的诊断性文字，容易给使用者造成心理压力，
+        反而阻碍求助意愿。
+\end{itemize}
+
+\subsection{方案}
+\begin{itemize}
+  \item \textbf{自采自建中国人群数据集}：针对"情绪低落""特别开心""焦虑"等典型状态，
+        自行录制视频、拍摄照片，覆盖对应的面部动作与肢体动作
+        （咬指甲、抠皮肤、拔头发、摸脸等 BFRBs 行为及表情线索）；
+  \item \textbf{持续训练专属 YOLO 模型}：在自建数据集上迭代训练，
+        让中国人群的情绪行为识别"测得准"；
+  \item \textbf{输出客观的检测报告}：报告内容基于模型检测结果的客观描述，
+        可供使用者线下就诊时\textbf{提前带给医生参考}，提高医患沟通效率；
+  \item \textbf{温柔化表达原则}：报告只说"我们看到的线索"，不下诊断结论，
+        不使用冰冷、标签化的医学措辞——看见线索，不贴标签。
+\end{itemize}
+
+\subsection{当前基础（已落地）}
+五类 BFRBs 行为直检模型 \texttt{bfrb\_behavior.pt} 已完成首版训练
+（咬指甲/抠皮肤/拔头发/摸脸/手部自然状态，同源验证集 mAP50 = 0.744），
+配套的"视频抽帧 $\rightarrow$ 自动伪标注 $\rightarrow$ 合并 $\rightarrow$ 复训"
+全流程工具链已就绪，自录素材可持续喂入迭代。
+
+\section{创新点二：线上问诊模块——先占位，后接入真实医院医生}
+
+\subsection{设计思路}
+\begin{itemize}
+  \item \textbf{现阶段}：先开发线上问诊模块作为占位符，跑通界面与数据流程；
+  \item \textbf{合作路径}：赴校医院、武汉本地医院（华科同济、陆军医院、中医附院等）
+        心理门诊\textbf{实地调研洽谈}，争取医生同意开展线上试运营；
+  \item \textbf{医生端能力}：合作医院的心理门诊医生接入后端后，
+        可\textbf{提前在线查看}就诊患者近期的情绪变化与平台出具的客观检测报告，
+        先完成一轮线上预诊断；
+  \item \textbf{分级转介}：线上预诊认为需要面诊的，再引导患者线下就医——
+        与心灵 SPA 地图导引模块自然衔接。
+\end{itemize}
+
+\subsection{差异化价值}
+市面上通用问诊平台不了解患者的情绪轨迹；本平台的线上问诊
+\textbf{自带客观检测依据}（YOLO 模型报告 + 觉察记录时间线），
+让医生的预诊断建立在连续、客观的数据之上，而非仅凭患者口头描述。
+
+\section{创新点三：心灵 SPA 专属疗愈地图——不是通用地图，是疗养人群的智能推荐}
+
+\subsection{与通用地图的本质区别}
+高德地图是通用工具：它不知道使用者是谁、需要什么。本平台的心灵 SPA 地图导引模块
+\textbf{登录即定位}，围绕情绪疗养人群的需求做\textbf{专属化智能推荐}：
+
+\begin{itemize}
+  \item \textbf{放松类场所优先推荐}：书店、公园、瑜伽馆、自然景区等
+        可以放空、慢下来的低压力空间；
+  \item \textbf{就诊类严格筛选}：只推荐\textbf{真实官方医院的心理门诊}，
+        支持用户在搜索框中直接检索，杜绝非正规机构；
+  \item \textbf{位置智能}：基于真实定位，按距离与类别智能推荐附近疗愈资源。
+\end{itemize}
+
+\subsection{当前基础（已落地）}
+模块已接入真实高德地图 JS API（IP 定位 + 浏览器精确定位、5 公里真实 POI 检索、
+机构电话与详情弹窗、自由缩放），区别于通用地图的"推荐策略层"将在下一阶段继续打磨。
+
+\section{闭环：四个创新点如何咬合成一个产品}
+
+\begin{enumerate}[label=\textbf{第\arabic*步}，leftmargin=3.2em]
+  \item \textbf{检测}：专属 YOLO 模型识别面部表情与 BFRBs 肢体行为线索；
+  \item \textbf{报告}：生成客观、温柔、可携带的检测报告（给医生看的提前参考）；
+  \item \textbf{问诊}：线上医生基于报告与情绪轨迹预诊断；
+  \item \textbf{导引}：需要线下时，专属地图推荐正规医院心理门诊或附近放松场所；
+  \item \textbf{回访}：觉察记录持续沉淀，反哺下一次检测与问诊。
+\end{enumerate}
+
+\section{下一阶段行动清单}
+
+\begin{center}
+\begin{tabular}{p{0.62\textwidth} p{0.28\textwidth}}
+\toprule
+\textbf{事项} & \textbf{性质} \\
+\midrule
+自录多人物、多光线、多角度的情绪行为视频/照片，扩充自建数据集 & 数据 \\
+用扩充后的中国人群数据集迭代训练专属 YOLO 模型 & 模型 \\
+修正伪标注噪声帧，提升标注质量 & 数据 \\
+开发线上问诊模块占位符（界面 + 数据流程） & 产品 \\
+赴目标医院心理门诊实地调研，洽谈线上试运营 & 合作 \\
+完善专属地图推荐策略（放松场所优先、官方门诊筛选） & 产品 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{1em}
+\noindent\textbf{一句话总结}：我们不发明新的轮子，而是把通用的轮子组装成
+\textbf{只属于情绪疗养人群的车}——检测得准、报告不冰冷、问诊有依据、导引有温度。
+
+\end{document}
