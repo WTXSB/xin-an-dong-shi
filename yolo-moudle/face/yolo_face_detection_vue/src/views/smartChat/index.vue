@@ -18,12 +18,17 @@
 					<p>安心对话</p>
 					<h1>今天想从哪里聊起？</h1>
 					<span>你可以打字、说话，或附上经过你确认的文件与图片。</span>
-					<div class="suggestion-grid">
+
+			<HealingDecorationStrip variant="sky" />
+<div class="suggestion-grid">
 						<button v-for="question in suggestedQuestions" :key="question.title" type="button" @click="selectQuestion(question.prompt)">
 							<strong>{{ question.title }}</strong><small>{{ question.description }}</small>
 						</button>
 					</div>
-				</section>
+
+
+			<HealingIllustratedFrame variant="clouds" />
+			</section>
 
 				<section v-else class="message-list" aria-live="polite">
 					<article v-for="message in messages.slice(1)" :key="message.id" :class="['message-row', message.role]">
@@ -47,6 +52,7 @@
 						<div class="message-body typing-state"><span></span><span></span><span></span></div>
 					</article>
 				</section>
+				<HealingDecorationStrip variant="rest" />
 			</div>
 		</main>
 

@@ -1,0 +1,286 @@
+[
+  {
+    "name": "aboutProduct",
+    "hash": "#/aboutProduct",
+    "title": "关于产品 - 心安动识",
+    "width": 1440,
+    "viewport": 1440,
+    "height": 2210,
+    "innerOverflow": [
+      "anxiaoning-float",
+      "float-core"
+    ],
+    "navText": [
+      "首页",
+      "关于产品",
+      "情绪画像",
+      "心灵 SPA",
+      "觉察记录",
+      "安心对话"
+    ],
+    "horizontalOverflow": false
+  },
+  {
+    "name": "imgPredict",
+    "hash": "#/imgPredict",
+    "title": "图片感知 - 心安动识",
+    "width": 1440,
+    "viewport": 1440,
+    "height": 2414,
+    "innerOverflow": [
+      "anxiaoning-float",
+      "float-core"
+    ],
+    "navText": [
+      "首页",
+      "关于产品",
+      "情绪画像",
+      "心灵 SPA",
+      "觉察记录",
+      "安心对话"
+    ],
+    "horizontalOverflow": false
+  },
+  {
+    "name": "videoPredict",
+    "hash": "#/videoPredict",
+    "title": "视频感知 - 心安动识",
+    "width": 1440,
+    "viewport": 1440,
+    "height": 2231,
+    "innerOverflow": [
+      "anxiaoning-float",
+      "float-core"
+    ],
+    "navText": [
+      "首页",
+      "关于产品",
+      "情绪画像",
+      "心灵 SPA",
+      "觉察记录",
+      "安心对话"
+    ],
+    "horizontalOverflow": false
+  },
+  {
+    "name": "cameraPredict",
+    "hash": "#/cameraPredict",
+    "title": "摄像头感知 - 心安动识",
+    "width": 1440,
+    "viewport": 1440,
+    "height": 2245,
+    "innerOverflow": [
+      "anxiaoning-float",
+      "float-core"
+    ],
+    "navText": [
+      "首页",
+      "关于产品",
+      "情绪画像",
+      "心灵 SPA",
+      "觉察记录",
+      "安心对话"
+    ],
+    "horizontalOverflow": false
+  },
+  {
+    "name": "dataView",
+    "hash": "#/dataView",
+    "title": "情绪画像 - 心安动识",
+    "width": 1440,
+    "viewport": 1440,
+    "height": 1970,
+    "innerOverflow": [
+      "anxiaoning-float",
+      "float-core"
+    ],
+    "navText": [
+      "首页",
+      "关于产品",
+      "情绪画像",
+      "心灵 SPA",
+      "觉察记录",
+      "安心对话"
+    ],
+    "horizontalOverflow": false
+  },
+  {
+    "name": "trashMap",
+    "hash": "#/trashMap",
+    "title": "心灵 SPA - 心安动识",
+    "width": 1440,
+    "viewport": 1440,
+    "height": 2966,
+    "innerOverflow": [
+      "anxiaoning-float",
+      "float-core"
+    ],
+    "navText": [
+      "首页",
+      "关于产品",
+      "情绪画像",
+      "心灵 SPA",
+      "觉察记录",
+      "安心对话"
+    ],
+    "horizontalOverflow": false
+  },
+  {
+    "name": "trashRecords",
+    "hash": "#/trashRecords",
+    "title": "觉察记录 - 心安动识",
+    "width": 1440,
+    "viewport": 1440,
+    "height": 1508,
+    "innerOverflow": [
+      "anxiaoning-float",
+      "float-core"
+    ],
+    "navText": [
+      "首页",
+      "关于产品",
+      "情绪画像",
+      "心灵 SPA",
+      "觉察记录",
+      "安心对话"
+    ],
+    "horizontalOverflow": false
+  },
+  {
+    "name": "smartChat",
+    "hash": "#/smartChat",
+    "title": "安心对话 - 心安动识",
+    "width": 1440,
+    "viewport": 1440,
+    "height": 900,
+    "innerOverflow": [],
+    "navText": [
+      "首页",
+      "关于产品",
+      "情绪画像",
+      "心灵 SPA",
+      "觉察记录",
+      "安心对话"
+    ],
+    "horizontalOverflow": false
+  },
+  {
+    "name": "aboutProduct-mobile",
+    "hash": "#/aboutProduct",
+    "title": "关于产品 - 心安动识",
+    "width": 390,
+    "viewport": 390,
+    "height": 4200,
+    "innerOverflow": [
+      "anxiaoning-float",
+      "float-core"
+    ],
+    "horizontalOverflow": false
+  },
+  {
+    "name": "imgPredict-mobile",
+    "hash": "#/imgPredict",
+    "title": "图片感知 - 心安动识",
+    "width": 390,
+    "viewport": 390,
+    "height": 4056,
+    "innerOverflow": [
+      "anxiaoning-float",
+      "float-core"
+    ],
+    "horizontalOverflow": false
+  },
+  {
+    "name": "videoPredict-mobile",
+    "hash": "#/videoPredict",
+    "title": "视频感知 - 心安动识",
+    "width": 390,
+    "viewport": 390,
+    "height": 3362,
+    "innerOverflow": [
+      "anxiaoning-float",
+      "float-core"
+    ],
+    "horizontalOverflow": false
+  },
+  {
+    "name": "cameraPredict-mobile",
+    "hash": "#/cameraPredict",
+    "title": "摄像头感知 - 心安动识",
+    "width": 390,
+    "viewport": 390,
+    "height": 3485,
+    "innerOverflow": [
+      "anxiaoning-float",
+      "float-core"
+    ],
+    "horizontalOverflow": false
+  },
+  {
+    "name": "dataView-mobile",
+    "hash": "#/dataView",
+    "title": "情绪画像 - 心安动识",
+    "width": 390,
+    "viewport": 390,
+    "height": 2823,
+    "innerOverflow": [
+      "anxiaoning-float",
+      "float-core"
+    ],
+    "horizontalOverflow": false
+  },
+  {
+    "name": "trashMap-mobile",
+    "hash": "#/trashMap",
+    "title": "心灵 SPA - 心安动识",
+    "width": 390,
+    "viewport": 390,
+    "height": 3290,
+    "innerOverflow": [
+      "anxiaoning-float",
+      "float-core"
+    ],
+    "horizontalOverflow": false
+  },
+  {
+    "name": "trashRecords-mobile",
+    "hash": "#/trashRecords",
+    "title": "觉察记录 - 心安动识",
+    "width": 390,
+    "viewport": 390,
+    "height": 1897,
+    "innerOverflow": [
+      "anxiaoning-float",
+      "float-core"
+    ],
+    "horizontalOverflow": false
+  },
+  {
+    "name": "smartChat-mobile",
+    "hash": "#/smartChat",
+    "title": "安心对话 - 心安动识",
+    "width": 390,
+    "viewport": 390,
+    "height": 844,
+    "innerOverflow": [],
+    "horizontalOverflow": false
+  },
+  {
+    "name": "trashMap-1920",
+    "viewport": 1920,
+    "width": 1920,
+    "scrollerWidth": 1920
+  },
+  {
+    "name": "trashMap-1024",
+    "viewport": 1024,
+    "width": 1024,
+    "scrollerWidth": 1024
+  },
+  {
+    "name": "trashMap-768",
+    "viewport": 768,
+    "width": 768,
+    "scrollerWidth": 768
+  }
+]

@@ -24,7 +24,6 @@
 			</el-carousel>
 
 			<div class="hero-shade" aria-hidden="true"></div>
-			<img class="companion-illustration" :src="gentleCompanions" alt="" aria-hidden="true" />
 			<div class="hero-copy">
 				<p class="hero-kicker">心安动识 · MINDEASE</p>
 				<h1>看见焦虑，遇见安宁</h1>
@@ -53,11 +52,10 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import heroJournal from '/@/assets/home-carousel/hero-journal.webp';
-import heroMeadow from '/@/assets/home-carousel/hero-meadow.webp';
-import heroCompanionship from '/@/assets/home-carousel/hero-companionship.webp';
-import heroSeaside from '/@/assets/home-carousel/hero-seaside.webp';
-import gentleCompanions from '/@/assets/companion/gentle-companions.png';
+import heroCompanions from '/@/assets/home-carousel/hero-handpaint-companions-4k.webp';
+import heroRainyNook from '/@/assets/home-carousel/hero-handpaint-rainy-nook-4k.webp';
+import heroRabbitMeadow from '/@/assets/home-carousel/hero-handpaint-rabbit-meadow-4k.webp';
+import heroLakesideCabin from '/@/assets/home-carousel/hero-handpaint-lakeside-cabin-4k.webp';
 
 const carouselRef = ref<any>();
 const activeIndex = ref(0);
@@ -65,10 +63,10 @@ const touchStartX = ref(0);
 const autoplay = ref(true);
 
 const slides = [
-	{ src: heroJournal, alt: '晨光中安静书写，给情绪留出被看见的空间' },
-	{ src: heroMeadow, alt: '在晨光草地上慢慢行走，感受呼吸与身体' },
-	{ src: heroCompanionship, alt: '在温暖的陪伴中表达心情，感受被认真倾听' },
-	{ src: heroSeaside, alt: '迎着海边晨光安静远望，重新找回内心节奏' },
+	{ src: heroCompanions, alt: '手绘晨光里相依休息的金毛犬与猫咪' },
+	{ src: heroRainyNook, alt: '手绘雨日窗边的温暖茶桌与花枝' },
+	{ src: heroRabbitMeadow, alt: '手绘晨光花野中安静停留的小兔子' },
+	{ src: heroLakesideCabin, alt: '手绘薄雾湖畔亮着暖灯的小木屋' },
 ];
 
 const onSlideChange = (index: number) => {
@@ -123,8 +121,8 @@ const onTouchEnd = (event: TouchEvent) => {
 	object-fit: cover;
 	object-position: center;
 	transform: scale(1.002);
-	opacity: .38;
-	filter: saturate(.72) sepia(.12) contrast(.92);
+	opacity: .92;
+	filter: saturate(.9) sepia(.04) contrast(.96);
 }
 
 .hero-shade {
@@ -133,20 +131,8 @@ const onTouchEnd = (event: TouchEvent) => {
 	z-index: 2;
 	pointer-events: none;
 	background:
-		linear-gradient(90deg, rgba(255, 235, 173, .96) 0%, rgba(255, 241, 195, .9) 34%, rgba(255, 245, 213, .46) 61%, rgba(255, 250, 232, .2) 100%),
+		linear-gradient(90deg, rgba(255, 244, 207, .92) 0%, rgba(255, 247, 217, .79) 34%, rgba(255, 249, 226, .32) 61%, rgba(255, 252, 239, .08) 100%),
 		linear-gradient(0deg, rgba(225, 151, 79, .08), transparent 45%);
-}
-
-.companion-illustration {
-	position: absolute;
-	right: clamp(22px, 5vw, 90px);
-	bottom: clamp(14px, 2.4vw, 42px);
-	z-index: 3;
-	width: min(42vw, 610px);
-	max-height: 76%;
-	object-fit: contain;
-	pointer-events: none;
-	filter: drop-shadow(0 18px 20px rgba(154, 94, 44, .16));
 }
 
 .hero-copy {
@@ -303,13 +289,6 @@ h1 {
 		right: 24px;
 		top: 48%;
 		width: auto;
-	}
-
-	.companion-illustration {
-		right: -18px;
-		bottom: 22px;
-		width: 58vw;
-		opacity: .72;
 	}
 
 	.hero-kicker {

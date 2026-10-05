@@ -3,23 +3,26 @@
 		<el-scrollbar @wheel.native.prevent="onElMenuHorizontalScroll" ref="elMenuHorizontalScrollRef">
 			<el-menu router :default-active="state.defaultActive" :ellipsis="false" background-color="transparent" mode="horizontal">
 				<template v-for="val in menuLists">
-					<el-sub-menu :index="val.path" v-if="val.children && val.children.length > 0" :key="val.path">
+					<el-sub-menu :index="val.path" v-if="val.children && val.children.length > 0" :key="val.path" :class="{ 'curtain-open': expandedNav === val.path }" :aria-label="$t(val.meta.title)" @click="revealNav(val.path)">
 						<template #title>
-							<SvgIcon :name="val.meta.icon" />
-							<span>{{ $t(val.meta.title) }}</span>
+							<SvgIcon :name="val.path === '/aboutProduct' ? 'ele-InfoFilled' : val.meta.icon" :size="20" />
+							<HealingNavCurtain v-if="expandedNav === val.path" :key="curtainSequence" />
+							<span class="curtain-label">{{ $t(val.meta.title) }}</span>
 						</template>
 						<SubItem :chil="val.children" />
 					</el-sub-menu>
 					<template v-else>
-						<el-menu-item :index="val.path" :key="val.path">
+						<el-menu-item :index="val.path" :key="val.path" :class="{ 'curtain-open': expandedNav === val.path }" :aria-label="$t(val.meta.title)" @click="revealNav(val.path)">
 							<template #title v-if="!val.meta.isLink || (val.meta.isLink && val.meta.isIframe)">
-								<SvgIcon :name="val.meta.icon" />
-								{{ $t(val.meta.title) }}
+								<SvgIcon :name="val.path === '/aboutProduct' ? 'ele-InfoFilled' : val.meta.icon" :size="20" />
+								<HealingNavCurtain v-if="expandedNav === val.path" :key="curtainSequence" />
+							<span class="curtain-label">{{ $t(val.meta.title) }}</span>
 							</template>
 							<template #title v-else>
 								<a class="w100" @click.prevent="onALinkClick(val)">
-									<SvgIcon :name="val.meta.icon" />
-									{{ $t(val.meta.title) }}
+									<SvgIcon :name="val.path === '/aboutProduct' ? 'ele-InfoFilled' : val.meta.icon" :size="20" />
+									<HealingNavCurtain v-if="expandedNav === val.path" :key="curtainSequence" />
+							<span class="curtain-label">{{ $t(val.meta.title) }}</span>
 								</a>
 							</template>
 						</el-menu-item>
@@ -38,6 +41,7 @@ import { useRoutesList } from '/@/stores/routesList';
 import { useThemeConfig } from '/@/stores/themeConfig';
 import other from '/@/utils/other';
 import mittBus from '/@/utils/mitt';
+import HealingNavCurtain from './HealingNavCurtain.vue';
 
 // 引入组件
 const SubItem = defineAsyncComponent(() => import('/@/layout/navMenu/subItem.vue'));
@@ -53,6 +57,10 @@ const props = defineProps({
 
 // 定义变量内容
 const elMenuHorizontalScrollRef = ref();
+// 仅记录导航的视觉展开状态；原有 router 跳转与菜单数据保持不变。
+const expandedNav = ref('');
+const curtainSequence = ref(0);
+const revealNav = (path: string) => { expandedNav.value = path; curtainSequence.value += 1; };
 const stores = useRoutesList();
 const storesThemeConfig = useThemeConfig();
 const { routesList } = storeToRefs(stores);
@@ -178,13 +186,77 @@ onBeforeRouteUpdate((to) => {
 	:deep(.el-menu--horizontal > .el-menu-item.is-active),
 	:deep(.el-menu--horizontal > .el-sub-menu.is-active .el-sub-menu__title) {
 		color: #9f552f !important;
-		background: linear-gradient(135deg, #fff1b9, #ffe0a2);
-		box-shadow: 0 8px 18px rgba(191, 116, 48, .14);
+		background: transparent !important;
+		box-shadow: none !important;
 	}
 	:deep(.el-menu-item .svg-icon),
 	:deep(.el-sub-menu__title .svg-icon) {
 		margin-right: 7px;
 		color: #c57a48;
 	}
+}
+</style>
+
+<style scoped lang="scss">
+.el-menu-horizontal-warp {
+ :deep(.el-menu--horizontal > .el-menu-item),
+ :deep(.el-menu--horizontal > .el-sub-menu > .el-sub-menu__title) {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 54px;
+  height: 54px !important;
+  padding: 0 17px;
+  overflow: hidden;
+  background: transparent;
+  border-radius: 15px;
+  line-height: 20px;
+  &::before, &::after { content: none; }
+ }
+ :deep(.curtain-label) {
+  display: inline-block;
+  position: relative;
+  max-width: 0;
+  margin-left: 0;
+  overflow: hidden;
+  opacity: 0;
+  white-space: nowrap;
+  transition: max-width .7s ease, opacity 1.2s ease .55s, margin-left .7s ease;
+ }
+ :deep(.el-menu--horizontal > .el-menu-item > i),
+ :deep(.el-menu--horizontal > .el-menu-item a > i),
+ :deep(.el-menu--horizontal > .el-sub-menu > .el-sub-menu__title > i:not(.el-sub-menu__icon-arrow)) {
+  position: relative;
+  margin-right: 0;
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+ }
+ :deep(.el-sub-menu__title .el-sub-menu__icon-arrow) { display: none; }
+ :deep(.el-menu--horizontal > .curtain-open .curtain-label) { max-width: 150px; opacity: 1; margin-left: 8px; }
+ :deep(.el-menu--horizontal > .el-menu-item.curtain-open),
+ :deep(.el-menu--horizontal > .el-sub-menu.curtain-open > .el-sub-menu__title) {
+  padding-inline: 26px;
+  background: transparent !important;
+  box-shadow: none !important;
+ }
+ :deep(.el-menu--horizontal > .el-menu-item:focus-visible),
+ :deep(.el-menu--horizontal > .el-sub-menu > .el-sub-menu__title:focus-visible) {
+  outline: 2px solid #a67236;
+  outline-offset: -2px;
+ }
+ @media (prefers-reduced-motion: reduce) { :deep(.curtain-label) { transition: none; } }
+ :deep(.el-menu--horizontal > .el-menu-item),
+ :deep(.el-menu--horizontal > .el-sub-menu > .el-sub-menu__title) {
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+ }
 }
 </style>

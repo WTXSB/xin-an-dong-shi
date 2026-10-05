@@ -11,9 +11,15 @@ import 'element-plus/dist/index.css';
 import '/@/theme/index.scss';
 import VueGridLayout from 'vue-grid-layout';
 import * as ElementPlusIconsVue from '@element-plus/icons-vue';
+import HealingIllustratedFrame from './components/healingArt/HealingIllustratedFrame.vue';
+import HealingDecorationStrip from './components/healingArt/HealingDecorationStrip.vue';
+import AnimalEmotionGallery from './components/healingArt/AnimalEmotionGallery.vue';
 import '/@/theme/fonts/iconfont.css'
 
 const app = createApp(App);
+app.component('HealingIllustratedFrame', HealingIllustratedFrame);
+app.component('HealingDecorationStrip', HealingDecorationStrip);
+app.component('AnimalEmotionGallery', AnimalEmotionGallery);
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 	app.component(key, component);
 }

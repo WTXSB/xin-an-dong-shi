@@ -1,0 +1,50 @@
+[
+  {
+    "page": "aboutProduct",
+    "textPreserved": true,
+    "directivesPreserved": true,
+    "scriptPreserved": true
+  },
+  {
+    "page": "imgPredict",
+    "textPreserved": true,
+    "directivesPreserved": true,
+    "scriptPreserved": true
+  },
+  {
+    "page": "videoPredict",
+    "textPreserved": true,
+    "directivesPreserved": true,
+    "scriptPreserved": true
+  },
+  {
+    "page": "cameraPredict",
+    "textPreserved": true,
+    "directivesPreserved": true,
+    "scriptPreserved": true
+  },
+  {
+    "page": "dataView",
+    "textPreserved": true,
+    "directivesPreserved": true,
+    "scriptPreserved": true
+  },
+  {
+    "page": "trashMap",
+    "textPreserved": true,
+    "directivesPreserved": true,
+    "scriptPreserved": true
+  },
+  {
+    "page": "trashRecords",
+    "textPreserved": true,
+    "directivesPreserved": true,
+    "scriptPreserved": true
+  },
+  {
+    "page": "smartChat",
+    "textPreserved": true,
+    "directivesPreserved": true,
+    "scriptPreserved": true
+  }
+]

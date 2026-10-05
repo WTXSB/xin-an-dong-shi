@@ -1,0 +1,264 @@
+{
+  "initial": [
+    {
+      "text": "首页",
+      "width": 0
+    },
+    {
+      "text": "关于产品",
+      "width": 0
+    },
+    {
+      "text": "温柔感知",
+      "width": 0
+    },
+    {
+      "text": "情绪画像",
+      "width": 0
+    },
+    {
+      "text": "心灵 SPA",
+      "width": 0
+    },
+    {
+      "text": "觉察记录",
+      "width": 0
+    },
+    {
+      "text": "安心对话",
+      "width": 0
+    }
+  ],
+  "animationFrames": [
+    {
+      "phase": 300,
+      "layers": [
+        {
+          "className": "drapery-side drapery-left",
+          "clipPath": "polygon(0px 0px, 99.9627% 0px, 99.9534% 25%, 99.9296% 54%, 99.9265% 74%, 99.9379% 100%, 0px 100%)"
+        },
+        {
+          "className": "drapery-side drapery-right",
+          "clipPath": "polygon(0px 0px, 99.9627% 0px, 99.9534% 25%, 99.9296% 54%, 99.9265% 74%, 99.9379% 100%, 0px 100%)"
+        },
+        {
+          "className": "drapery-valance",
+          "clipPath": "polygon(0px 0px, 100% 0px, 100% 97.6911%, 85% 98.021%, 70% 97.6252%, 50% 98.021%, 30% 97.6252%, 15% 98.021%, 0px 97.6911%)"
+        },
+        {
+          "className": "drapery-rod",
+          "clipPath": "none"
+        },
+        {
+          "className": "drapery-tie drapery-tie--left",
+          "clipPath": "none"
+        },
+        {
+          "className": "drapery-tie drapery-tie--right",
+          "clipPath": "none"
+        }
+      ],
+      "curtainCount": 1
+    },
+    {
+      "phase": 1100,
+      "layers": [
+        {
+          "className": "drapery-side drapery-left",
+          "clipPath": "polygon(0px 0px, 65.2074% 0px, 56.5093% 25%, 34.2807% 54%, 31.3813% 74%, 42.0124% 100%, 0px 100%)"
+        },
+        {
+          "className": "drapery-side drapery-right",
+          "clipPath": "polygon(0px 0px, 65.2074% 0px, 56.5093% 25%, 34.2807% 54%, 31.3813% 74%, 42.0124% 100%, 0px 100%)"
+        },
+        {
+          "className": "drapery-valance",
+          "clipPath": "polygon(0px 0px, 100% 0px, 100% 32.8798%, 85% 42.4684%, 70% 30.962%, 50% 42.4684%, 30% 30.962%, 15% 42.4684%, 0px 32.8798%)"
+        },
+        {
+          "className": "drapery-rod",
+          "clipPath": "none"
+        },
+        {
+          "className": "drapery-tie drapery-tie--left",
+          "clipPath": "none"
+        },
+        {
+          "className": "drapery-tie drapery-tie--right",
+          "clipPath": "none"
+        }
+      ],
+      "curtainCount": 1
+    },
+    {
+      "phase": 1900,
+      "layers": [
+        {
+          "className": "drapery-side drapery-left",
+          "clipPath": "polygon(0px 0px, 34.4792% 0px, 27.3242% 25%, 15.3945% 54%, 17.0072% 74%, 25.2396% 100%, 0px 100%)"
+        },
+        {
+          "className": "drapery-side drapery-right",
+          "clipPath": "polygon(0px 0px, 34.4792% 0px, 27.3242% 25%, 15.3945% 54%, 17.0072% 74%, 25.2396% 100%, 0px 100%)"
+        },
+        {
+          "className": "drapery-valance",
+          "clipPath": "polygon(0px 0px, 100% 0px, 100% 15.5058%, 85% 25.5058%, 70% 15.3176%, 50% 25.5058%, 30% 15.3176%, 15% 25.5058%, 0px 15.5058%)"
+        },
+        {
+          "className": "drapery-rod",
+          "clipPath": "none"
+        },
+        {
+          "className": "drapery-tie drapery-tie--left",
+          "clipPath": "none"
+        },
+        {
+          "className": "drapery-tie drapery-tie--right",
+          "clipPath": "none"
+        }
+      ],
+      "curtainCount": 1
+    },
+    {
+      "phase": 2700,
+      "layers": [
+        {
+          "className": "drapery-side drapery-left",
+          "clipPath": "polygon(0px 0px, 32% 0px, 24.2055% 25%, 7.64361% 54%, 14.4109% 74%, 24% 100%, 0px 100%)"
+        },
+        {
+          "className": "drapery-side drapery-right",
+          "clipPath": "polygon(0px 0px, 32% 0px, 24.2055% 25%, 7.64361% 54%, 14.4109% 74%, 24% 100%, 0px 100%)"
+        },
+        {
+          "className": "drapery-valance",
+          "clipPath": "polygon(0px 0px, 100% 0px, 100% 14%, 85% 24%, 70% 14%, 50% 24%, 30% 14%, 15% 24%, 0px 14%)"
+        },
+        {
+          "className": "drapery-rod",
+          "clipPath": "none"
+        },
+        {
+          "className": "drapery-tie drapery-tie--left",
+          "clipPath": "none"
+        },
+        {
+          "className": "drapery-tie drapery-tie--right",
+          "clipPath": "none"
+        }
+      ],
+      "curtainCount": 1
+    },
+    {
+      "phase": 3700,
+      "layers": [
+        {
+          "className": "drapery-side drapery-left",
+          "clipPath": "polygon(0px 0px, 32% 0px, 24% 25%, 6% 54%, 14% 74%, 24% 100%, 0px 100%)"
+        },
+        {
+          "className": "drapery-side drapery-right",
+          "clipPath": "polygon(0px 0px, 32% 0px, 24% 25%, 6% 54%, 14% 74%, 24% 100%, 0px 100%)"
+        },
+        {
+          "className": "drapery-valance",
+          "clipPath": "polygon(0px 0px, 100% 0px, 100% 14%, 85% 24%, 70% 14%, 50% 24%, 30% 14%, 15% 24%, 0px 14%)"
+        },
+        {
+          "className": "drapery-rod",
+          "clipPath": "none"
+        },
+        {
+          "className": "drapery-tie drapery-tie--left",
+          "clipPath": "none"
+        },
+        {
+          "className": "drapery-tie drapery-tie--right",
+          "clipPath": "none"
+        }
+      ],
+      "curtainCount": 1
+    }
+  ],
+  "results": [
+    {
+      "label": "关于产品",
+      "hash": "#/aboutProduct",
+      "expanded": [
+        "关于产品"
+      ],
+      "horizontal": "row",
+      "background": "rgba(0, 0, 0, 0)",
+      "ties": [
+        "1",
+        "1"
+      ]
+    },
+    {
+      "label": "温柔感知",
+      "hash": "#/imgPredict",
+      "expanded": [
+        "温柔感知"
+      ],
+      "horizontal": "row",
+      "background": "rgba(0, 0, 0, 0)",
+      "ties": [
+        "1",
+        "1"
+      ]
+    },
+    {
+      "label": "情绪画像",
+      "hash": "#/dataView",
+      "expanded": [
+        "情绪画像"
+      ],
+      "horizontal": "row",
+      "background": "rgba(0, 0, 0, 0)",
+      "ties": [
+        "1",
+        "1"
+      ]
+    },
+    {
+      "label": "心灵 SPA",
+      "hash": "#/trashMap",
+      "expanded": [
+        "心灵 SPA"
+      ],
+      "horizontal": "row",
+      "background": "rgba(0, 0, 0, 0)",
+      "ties": [
+        "1",
+        "1"
+      ]
+    },
+    {
+      "label": "觉察记录",
+      "hash": "#/trashRecords",
+      "expanded": [
+        "觉察记录"
+      ],
+      "horizontal": "row",
+      "background": "rgba(0, 0, 0, 0)",
+      "ties": [
+        "1",
+        "1"
+      ]
+    },
+    {
+      "label": "安心对话",
+      "hash": "#/smartChat",
+      "expanded": [
+        "安心对话"
+      ],
+      "horizontal": "row",
+      "background": "rgba(0, 0, 0, 0)",
+      "ties": [
+        "1",
+        "1"
+      ]
+    }
+  ]
+}

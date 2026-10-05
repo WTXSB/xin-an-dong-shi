@@ -1,0 +1,36 @@
+[
+  {
+    "name": "trashRecords",
+    "hash": "#/trashRecords",
+    "title": "觉察记录 - 心安动识",
+    "width": 1440,
+    "viewport": 1440,
+    "height": 1516,
+    "innerOverflow": [
+      "anxiaoning-float",
+      "float-core"
+    ],
+    "navText": [
+      "首页",
+      "关于产品",
+      "情绪画像",
+      "心灵 SPA",
+      "觉察记录",
+      "安心对话"
+    ],
+    "horizontalOverflow": false
+  },
+  {
+    "name": "trashRecords-mobile",
+    "hash": "#/trashRecords",
+    "title": "觉察记录 - 心安动识",
+    "width": 390,
+    "viewport": 390,
+    "height": 1889,
+    "innerOverflow": [
+      "anxiaoning-float",
+      "float-core"
+    ],
+    "horizontalOverflow": false
+  }
+]

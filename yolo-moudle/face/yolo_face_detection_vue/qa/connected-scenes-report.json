@@ -1,0 +1,236 @@
+{
+  "pages": [
+    {
+      "route": "#/aboutProduct",
+      "viewport": 1440,
+      "horizontalOverflow": false,
+      "sceneCount": 1,
+      "source": "url(\"http://127.0.0.1:8100/src/assets/healing-frames/connected-landscapes-smooth-v2.png\")",
+      "position": "0% 0%",
+      "ratio": 4,
+      "sceneWidth": 1280,
+      "bottomGap": 26,
+      "captions": [],
+      "connectedStrips": 2
+    },
+    {
+      "route": "#/imgPredict",
+      "viewport": 1440,
+      "horizontalOverflow": false,
+      "sceneCount": 1,
+      "source": "url(\"http://127.0.0.1:8100/src/assets/healing-frames/connected-landscapes-smooth-v2.png\")",
+      "position": "100% 0%",
+      "ratio": 4,
+      "sceneWidth": 1280,
+      "bottomGap": 26,
+      "captions": [],
+      "connectedStrips": 2
+    },
+    {
+      "route": "#/dataView",
+      "viewport": 1440,
+      "horizontalOverflow": false,
+      "sceneCount": 1,
+      "source": "url(\"http://127.0.0.1:8100/src/assets/healing-frames/connected-landscapes-smooth-v2.png\")",
+      "position": "0% 50%",
+      "ratio": 4,
+      "sceneWidth": 1280,
+      "bottomGap": 26,
+      "captions": [
+        {
+          "title": "积极情绪",
+          "labels": [
+            "开心",
+            "满足",
+            "期待",
+            "感激"
+          ]
+        },
+        {
+          "title": "消极情绪",
+          "labels": [
+            "悲伤",
+            "愤怒",
+            "担忧",
+            "疲惫"
+          ]
+        },
+        {
+          "title": "中性情绪",
+          "labels": [
+            "平静",
+            "专注",
+            "思考",
+            "观察"
+          ]
+        }
+      ],
+      "connectedStrips": 2
+    },
+    {
+      "route": "#/trashMap",
+      "viewport": 1440,
+      "horizontalOverflow": false,
+      "sceneCount": 1,
+      "source": "url(\"http://127.0.0.1:8100/src/assets/healing-frames/connected-landscapes-smooth-v2.png\")",
+      "position": "100% 50%",
+      "ratio": 4,
+      "sceneWidth": 1280,
+      "bottomGap": 54,
+      "captions": [],
+      "connectedStrips": 2
+    },
+    {
+      "route": "#/trashRecords",
+      "viewport": 1440,
+      "horizontalOverflow": false,
+      "sceneCount": 1,
+      "source": "url(\"http://127.0.0.1:8100/src/assets/healing-frames/connected-landscapes-smooth-v2.png\")",
+      "position": "0% 100%",
+      "ratio": 4,
+      "sceneWidth": 1366,
+      "bottomGap": 12,
+      "captions": [],
+      "connectedStrips": 2
+    },
+    {
+      "route": "#/smartChat",
+      "viewport": 1440,
+      "horizontalOverflow": false,
+      "sceneCount": 1,
+      "source": "url(\"http://127.0.0.1:8100/src/assets/healing-frames/connected-landscapes-smooth-v2.png\")",
+      "position": "100% 100%",
+      "ratio": 4,
+      "sceneWidth": 860,
+      "bottomGap": 26,
+      "captions": [],
+      "connectedStrips": 1
+    },
+    {
+      "route": "#/aboutProduct",
+      "viewport": 390,
+      "horizontalOverflow": false,
+      "sceneCount": 1,
+      "source": "url(\"http://127.0.0.1:8100/src/assets/healing-frames/connected-landscapes-smooth-v2.png\")",
+      "position": "0% 0%",
+      "ratio": 4,
+      "sceneWidth": 720,
+      "bottomGap": 20,
+      "captions": [],
+      "connectedStrips": 2
+    },
+    {
+      "route": "#/imgPredict",
+      "viewport": 390,
+      "horizontalOverflow": false,
+      "sceneCount": 1,
+      "source": "url(\"http://127.0.0.1:8100/src/assets/healing-frames/connected-landscapes-smooth-v2.png\")",
+      "position": "100% 0%",
+      "ratio": 4,
+      "sceneWidth": 720,
+      "bottomGap": 20,
+      "captions": [],
+      "connectedStrips": 2
+    },
+    {
+      "route": "#/dataView",
+      "viewport": 390,
+      "horizontalOverflow": false,
+      "sceneCount": 1,
+      "source": "url(\"http://127.0.0.1:8100/src/assets/healing-frames/connected-landscapes-smooth-v2.png\")",
+      "position": "0% 50%",
+      "ratio": 4,
+      "sceneWidth": 720,
+      "bottomGap": 20,
+      "captions": [
+        {
+          "title": "积极情绪",
+          "labels": [
+            "开心",
+            "满足",
+            "期待",
+            "感激"
+          ]
+        },
+        {
+          "title": "消极情绪",
+          "labels": [
+            "悲伤",
+            "愤怒",
+            "担忧",
+            "疲惫"
+          ]
+        },
+        {
+          "title": "中性情绪",
+          "labels": [
+            "平静",
+            "专注",
+            "思考",
+            "观察"
+          ]
+        }
+      ],
+      "connectedStrips": 2
+    },
+    {
+      "route": "#/trashMap",
+      "viewport": 390,
+      "horizontalOverflow": false,
+      "sceneCount": 1,
+      "source": "url(\"http://127.0.0.1:8100/src/assets/healing-frames/connected-landscapes-smooth-v2.png\")",
+      "position": "100% 50%",
+      "ratio": 4,
+      "sceneWidth": 720,
+      "bottomGap": 34,
+      "captions": [],
+      "connectedStrips": 2
+    },
+    {
+      "route": "#/trashRecords",
+      "viewport": 390,
+      "horizontalOverflow": false,
+      "sceneCount": 1,
+      "source": "url(\"http://127.0.0.1:8100/src/assets/healing-frames/connected-landscapes-smooth-v2.png\")",
+      "position": "0% 100%",
+      "ratio": 4,
+      "sceneWidth": 720,
+      "bottomGap": 12,
+      "captions": [],
+      "connectedStrips": 2
+    },
+    {
+      "route": "#/smartChat",
+      "viewport": 390,
+      "horizontalOverflow": false,
+      "sceneCount": 1,
+      "source": "url(\"http://127.0.0.1:8100/src/assets/healing-frames/connected-landscapes-smooth-v2.png\")",
+      "position": "100% 100%",
+      "ratio": 4,
+      "sceneWidth": 720,
+      "bottomGap": 20,
+      "captions": [],
+      "connectedStrips": 1
+    }
+  ],
+  "curtain": {
+    "perspective": "420px",
+    "foldCount": 14,
+    "transforms": [
+      "matrix3d(0.961262, 0, 0.275637, 0, 0, 1, 0, 0, -0.275637, 0, 0.961262, 0, 0, 0, 4, 1)",
+      "matrix3d(0.965926, 0, -0.258819, 0, 0, 1, 0, 0, 0.258819, 0, 0.965926, 0, 0, 0, 2, 1)",
+      "matrix3d(0.961262, 0, 0.275637, 0, 0, 1, 0, 0, -0.275637, 0, 0.961262, 0, 0, 0, 4, 1)",
+      "matrix3d(0.965926, 0, -0.258819, 0, 0, 1, 0, 0, 0.258819, 0, 0.965926, 0, 0, 0, 2, 1)",
+      "matrix3d(0.961262, 0, 0.275637, 0, 0, 1, 0, 0, -0.275637, 0, 0.961262, 0, 0, 0, 4, 1)",
+      "matrix3d(0.965926, 0, -0.258819, 0, 0, 1, 0, 0, 0.258819, 0, 0.965926, 0, 0, 0, 2, 1)",
+      "matrix3d(0.961262, 0, 0.275637, 0, 0, 1, 0, 0, -0.275637, 0, 0.961262, 0, 0, 0, 4, 1)",
+      "matrix3d(0.961262, 0, 0.275637, 0, 0, 1, 0, 0, -0.275637, 0, 0.961262, 0, 0, 0, 4, 1)",
+      "matrix3d(0.965926, 0, -0.258819, 0, 0, 1, 0, 0, 0.258819, 0, 0.965926, 0, 0, 0, 2, 1)",
+      "matrix3d(0.961262, 0, 0.275637, 0, 0, 1, 0, 0, -0.275637, 0, 0.961262, 0, 0, 0, 4, 1)",
+      "matrix3d(0.965926, 0, -0.258819, 0, 0, 1, 0, 0, 0.258819, 0, 0.965926, 0, 0, 0, 2, 1)",
+      "matrix3d(0.961262, 0, 0.275637, 0, 0, 1, 0, 0, -0.275637, 0, 0.961262, 0, 0, 0, 4, 1)",
+      "matrix3d(0.965926, 0, -0.258819, 0, 0, 1, 0, 0, 0.258819, 0, 0.965926, 0, 0, 0, 2, 1)",
+      "matrix3d(0.961262, 0, 0.275637, 0, 0, 1, 0, 0, -0.275637, 0, 0.961262, 0, 0, 0, 4, 1)"
+    ]
+  }
+}
