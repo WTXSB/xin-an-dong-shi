@@ -7,6 +7,12 @@ scripts/roboflow-env.local.txt
 *.local.txt
 
 # Logs, caches and runtime output
+# Local tool caches and browser QA profiles (may contain login state)
+.m2-repository/
+.maven-home/
+.npm-cache/
+qa/edge-*/
+**/qa/edge-*/
 logs/
 *.log
 *.out.log

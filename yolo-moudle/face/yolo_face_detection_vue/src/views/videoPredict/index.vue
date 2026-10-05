@@ -11,7 +11,11 @@
 					<strong>安小宁会这样陪你</strong>
 					<p>先看见画面中的表情与动作变化，再把它们整理成觉察记录、小练习和可选择保留的素材路径。</p>
 				</div>
+
+			<HealingIllustratedFrame variant="clouds" />
 			</section>
+			<HealingDecorationStrip variant="sky" />
+
 
 			<section class="privacy-panel">
 				<div>
@@ -23,6 +27,8 @@
 					<el-checkbox v-model="keepRecord">保存这次觉察记录</el-checkbox>
 					<el-checkbox v-model="keepMedia" :disabled="!keepRecord">在记录中保留视频路径</el-checkbox>
 				</div>
+
+			<HealingIllustratedFrame variant="garden" />
 			</section>
 
 			<PreVisitNotes
@@ -82,6 +88,8 @@
 					<p>如果这段画面暂时没有形成清晰线索，也没关系。它只是提醒我们换个角度照顾自己。</p>
 				</div>
 			</section>
+			<HealingDecorationStrip variant="garden" />
+
 
 			<section class="sense-grid">
 				<article class="preview-panel">
@@ -90,7 +98,9 @@
 						<p>勾选隐私确认并上传视频后，处理画面会出现在这里。</p>
 					</div>
 					<img v-else class="video-stream" :src="state.videoPath" alt="视频温柔感知处理画面" />
-				</article>
+
+			<HealingIllustratedFrame variant="rest" />
+			</article>
 
 				<article class="feedback-panel">
 					<div class="panel-title">
@@ -146,9 +156,13 @@
 						<el-button type="primary" @click="openPreVisitReport">生成预诊报告</el-button>
 						<span>报告基于本次保存的情绪与BFRB结构化结果。</span>
 					</div>
-				</article>
+
+			<HealingIllustratedFrame variant="clouds" />
+			</article>
 			</section>
 		</div>
+
+		<HealingDecorationStrip variant="rest" />
 	</div>
 </template>
 

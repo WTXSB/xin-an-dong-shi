@@ -1,0 +1,102 @@
+[
+  {
+    "viewport": "1920x1080",
+    "href": "http://127.0.0.1:8100/#/trashMap",
+    "hero": "找一处此刻能让你慢下来的地方",
+    "innerWidth": 1920,
+    "scrollWidth": 1913,
+    "horizontalOverflow": false,
+    "desktopNavVisible": true,
+    "mobileNavButtonVisible": false,
+    "mapRect": {
+      "width": 1302,
+      "height": 1076
+    },
+    "fallbackFitsMap": true,
+    "fallbackCardHeight": 451,
+    "controlsRect": {
+      "width": 430,
+      "top": 375
+    }
+  },
+  {
+    "viewport": "1440x900",
+    "href": "http://127.0.0.1:8100/#/trashMap",
+    "hero": "找一处此刻能让你慢下来的地方",
+    "innerWidth": 1440,
+    "scrollWidth": 1433,
+    "horizontalOverflow": false,
+    "desktopNavVisible": true,
+    "mobileNavButtonVisible": false,
+    "mapRect": {
+      "width": 917,
+      "height": 1076
+    },
+    "fallbackFitsMap": true,
+    "fallbackCardHeight": 451,
+    "controlsRect": {
+      "width": 430,
+      "top": 360
+    }
+  },
+  {
+    "viewport": "1024x900",
+    "href": "http://127.0.0.1:8100/#/trashMap",
+    "hero": "找一处此刻能让你慢下来的地方",
+    "innerWidth": 1024,
+    "scrollWidth": 1017,
+    "horizontalOverflow": false,
+    "desktopNavVisible": true,
+    "mobileNavButtonVisible": false,
+    "mapRect": {
+      "width": 976,
+      "height": 590
+    },
+    "fallbackFitsMap": true,
+    "fallbackCardHeight": 421,
+    "controlsRect": {
+      "width": 976,
+      "top": 949
+    }
+  },
+  {
+    "viewport": "768x900",
+    "href": "http://127.0.0.1:8100/#/trashMap",
+    "hero": "找一处此刻能让你慢下来的地方",
+    "innerWidth": 768,
+    "scrollWidth": 765,
+    "horizontalOverflow": false,
+    "desktopNavVisible": false,
+    "mobileNavButtonVisible": true,
+    "mapRect": {
+      "width": 733,
+      "height": 590
+    },
+    "fallbackFitsMap": true,
+    "fallbackCardHeight": 416,
+    "controlsRect": {
+      "width": 733,
+      "top": 1031
+    }
+  },
+  {
+    "viewport": "390x844",
+    "href": "http://127.0.0.1:8100/#/trashMap",
+    "hero": "找一处此刻能让你慢下来的地方",
+    "innerWidth": 390,
+    "scrollWidth": 387,
+    "horizontalOverflow": false,
+    "desktopNavVisible": false,
+    "mobileNavButtonVisible": true,
+    "mapRect": {
+      "width": 363,
+      "height": 630
+    },
+    "fallbackFitsMap": true,
+    "fallbackCardHeight": 584,
+    "controlsRect": {
+      "width": 363,
+      "top": 981
+    }
+  }
+]

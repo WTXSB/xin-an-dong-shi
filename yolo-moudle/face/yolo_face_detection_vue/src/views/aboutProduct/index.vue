@@ -11,6 +11,8 @@
 					<el-button class="primary-action" :icon="View" @click="$router.push('/imgPredict')">进入温柔感知</el-button>
 					<el-button class="secondary-action" :icon="ChatLineRound" @click="$router.push('/smartChat')">和安小宁聊聊</el-button>
 				</div>
+
+			<HealingIllustratedFrame variant="clouds" />
 			</div>
 			<div class="evidence-panel">
 				<div class="evidence-heading">
@@ -28,8 +30,12 @@
 					<div class="report-mark">报告</div>
 					<div><strong>形成医生可读的预诊资料</strong><small>结构化记录 · AI 辅助摘要 · PDF 导出</small></div>
 				</div>
+
+			<HealingIllustratedFrame variant="garden" />
 			</div>
 		</section>
+			<HealingDecorationStrip variant="sky" />
+
 
 		<section class="quick-grid">
 			<article class="quick-card surface-card" @click="$router.push('/imgPredict')">
@@ -53,6 +59,8 @@
 				<p>从呼吸、身体扫描与附近资源中，找到适合此刻的放松方式。</p>
 			</article>
 		</section>
+			<HealingDecorationStrip variant="garden" />
+
 
 		<section class="care-layout">
 			<div class="care-main surface-card">
@@ -63,10 +71,14 @@
 					<div class="practice-item"><strong>肩颈松开</strong><span>把肩膀轻轻向后绕三圈，告诉身体不必一直用力。</span></div>
 					<div class="practice-item"><strong>写一句事实</strong><span>只写“我现在感觉到……”，不解释，不责备。</span></div>
 				</div>
+
+			<HealingIllustratedFrame variant="rest" />
 			</div>
 			<div class="care-side surface-card">
 				<span class="eyebrow">产品原则</span>
 				<ul><li>陪伴而非打扰</li><li>理解与接住</li><li>引导而非说教</li><li>觉察先于改变</li></ul>
+
+			<HealingIllustratedFrame variant="clouds" />
 			</div>
 		</section>
 
@@ -76,6 +88,8 @@
 			<div class="metric-item"><strong>3</strong><span>个疗愈方向</span></div>
 			<div class="metric-item"><strong>0</strong><span>贴标签表达</span></div>
 		</section>
+
+		<HealingDecorationStrip variant="rest" />
 	</div>
 </template>
 

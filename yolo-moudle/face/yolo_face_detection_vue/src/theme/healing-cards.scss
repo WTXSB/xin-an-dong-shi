@@ -1,0 +1,272 @@
+/* 六个栏目各自的手绘主题；仅改变外观，文案与业务代码保持原样。 */
+:root {
+ --healing-about: url('../assets/healing-frames/shiba-cloud-frame.png');
+ --healing-sense: url('../assets/healing-frames/cat-rabbit-meadow-frame.png');
+ --healing-portrait: url('../assets/healing-frames/tiny-companions-frame.png');
+ --healing-spa: url('../assets/healing-frames/woodland-rest-frame.png');
+ --healing-records: url('../assets/healing-frames/moonlit-journal-frame.png');
+ --healing-chat: url('../assets/healing-frames/cozy-tea-chat-frame.png');
+ --healing-decoration: url('../assets/healing-frames/cloud-companions-decoration.png');
+ --healing-atlas: url('../assets/healing-frames/six-scenes-decoration-atlas.png');
+ --healing-landscapes: url('../assets/healing-frames/connected-landscapes-smooth-v2.png');
+}
+.about-page { --landscape-x: 0%; --landscape-y: 0%; }
+:is(.image-sense-page, .gentle-video-page, .gentle-camera-page) { --landscape-x: 100%; --landscape-y: 0%; }
+.emotion-page { --landscape-x: 0%; --landscape-y: 50%; }
+.spa-map-page { --landscape-x: 100%; --landscape-y: 50%; }
+.awareness-page { --landscape-x: 0%; --landscape-y: 100%; }
+.chat-page { --landscape-x: 100%; --landscape-y: 100%; }
+.about-page { --healing-frame: var(--healing-about); --scene-a-x: 0%; --scene-b-x: 33.333333%; --scene-y: 0%; --scene-flower: #f1d3bc; }
+:is(.image-sense-page, .gentle-video-page, .gentle-camera-page) { --healing-frame: var(--healing-sense); --scene-a-x: 66.666667%; --scene-b-x: 100%; --scene-y: 0%; --scene-flower: #efd1d1; }
+.emotion-page { --healing-frame: var(--healing-portrait); --scene-a-x: 0%; --scene-b-x: 33.333333%; --scene-y: 50%; --scene-flower: #ded7ec; }
+.spa-map-page { --healing-frame: var(--healing-spa); --scene-a-x: 66.666667%; --scene-b-x: 100%; --scene-y: 50%; --scene-flower: #f0dca9; }
+.awareness-page { --healing-frame: var(--healing-records); --scene-a-x: 0%; --scene-b-x: 33.333333%; --scene-y: 100%; --scene-flower: #dfd8ec; }
+.chat-page { --healing-frame: var(--healing-chat); --scene-a-x: 66.666667%; --scene-b-x: 100%; --scene-y: 100%; --scene-flower: #edccbb; }
+
+/* 改用各自固定比例的独立图案，不再循环平铺同一组花边。 */
+@mixin painted-frame($size: 56px) {
+ position: relative;
+ isolation: isolate;
+ min-width: 0;
+ border: 0 !important;
+ border-radius: 28px !important;
+ background-color: transparent !important;
+ background-image: radial-gradient(ellipse at center, var(--healing-paper, #fffdf6) 40%, rgba(255, 250, 235, .66) 76%, rgba(255, 250, 235, 0) 100%) !important;
+ box-shadow: none !important;
+ &::before { content: none !important; }
+}
+
+/* 主要标题、大段说明、主要结果区与空状态才使用动物手绘背景。 */
+:is(
+ .about-page .hero-content,
+ .about-page .evidence-panel,
+ .about-page .care-main,
+ .about-page .care-side,
+ .image-sense-page .hero,
+ .image-sense-page .privacy-panel,
+ .image-sense-page .panel,
+ .image-sense-page .body-signal-band,
+ .gentle-video-page .hero,
+ .gentle-video-page .privacy-panel,
+ .gentle-video-page .preview-panel,
+ .gentle-video-page .feedback-panel,
+ .gentle-camera-page .hero,
+ .gentle-camera-page .privacy-panel,
+ .gentle-camera-page .preview-panel,
+ .gentle-camera-page .feedback-panel,
+ .emotion-page .page-heading,
+ .emotion-page .records-card,
+ .awareness-page .hero,
+ .awareness-page .record-main,
+ .awareness-page .empty-state,
+ .spa-map-page .map-hero,
+ .spa-map-page .control-section,
+ .spa-map-page .fallback-card,
+ .chat-page .welcome-panel
+) {
+ @include painted-frame;
+}
+
+/* 小型信息框不放插画，只去掉旧边框、实色底和阴影。 */
+:is(
+ .about-page .quick-card,
+ .about-page .evidence-item,
+ .about-page .report-output,
+ .about-page .practice-item,
+ .about-page .care-side li,
+ .about-page .metric-item,
+ .image-sense-page .hero-companion,
+ .image-sense-page .control-item,
+ .image-sense-page .result-card,
+ .image-sense-page .empty-state,
+ .image-sense-page .bfrb-evidence,
+ .image-sense-page .closed-loop > div,
+ .image-sense-page .save-note,
+ .image-sense-page .body-steps > div,
+ .image-sense-page .body-steps > span,
+ .gentle-video-page .hero-note,
+ .gentle-video-page .status-card,
+ .gentle-video-page .empty-state,
+ .gentle-video-page .controls > label,
+ .gentle-video-page .closed-loop > div,
+ .gentle-video-page .analysis-summary,
+ .gentle-video-page .summary-metrics > div,
+ .gentle-video-page .event-item,
+ .gentle-video-page .save-note,
+ .gentle-camera-page .hero-note,
+ .gentle-camera-page .status-card,
+ .gentle-camera-page .empty-state,
+ .gentle-camera-page .controls > label,
+ .gentle-camera-page .closed-loop > div,
+ .gentle-camera-page .analysis-summary,
+ .gentle-camera-page .summary-metrics > div,
+ .gentle-camera-page .event-item,
+ .gentle-camera-page .save-note,
+ .emotion-page .stat-card,
+ .awareness-page .summary-item,
+ .awareness-page .reflection > div,
+ .awareness-page .structured-analysis,
+ .awareness-page .patient-notes,
+ .awareness-page .analysis-metrics > div,
+ .awareness-page .emotion-results > div,
+ .awareness-page .event-details > div,
+ .awareness-page .media-pill,
+ .spa-map-page .accuracy-box p,
+ .spa-map-page .poi-card,
+ .spa-map-page .warm-contact,
+ .spa-map-page .empty-box,
+ .spa-map-page .fallback-steps,
+ .spa-map-page .hero-note,
+ .chat-page .suggestion-grid button,
+ .chat-page .message-body,
+ .chat-page .attachment-card,
+ .chat-page .sent-file
+) {
+ border: 0 !important;
+ background: transparent !important;
+ box-shadow: none !important;
+}
+.about-page .quick-card:hover,
+.chat-page .suggestion-grid button:hover { background: transparent !important; box-shadow: none !important; }
+.spa-map-page .poi-card:hover { background: rgba(249, 237, 213, .35) !important; box-shadow: none !important; }
+
+/* 外层只是排版，移除重复的白色文本框。操作输入本身仍可聚焦。 */
+:is(
+ .about-page .about-hero,
+ .about-page .metrics-band,
+ .image-sense-page .image-sense-shell,
+ .image-sense-page .control-band,
+ .gentle-video-page .page-shell,
+ .gentle-video-page .controls,
+ .gentle-camera-page .page-shell,
+ .gentle-camera-page .controls,
+ .awareness-page .awareness-shell,
+ .awareness-page .record-card,
+ .awareness-page .toolbar,
+ .image-sense-page .pre-visit-notes,
+ .gentle-video-page .pre-visit-notes,
+ .gentle-camera-page .pre-visit-notes,
+ .chat-page .composer-box
+) {
+ border: 0 !important;
+ background: transparent !important;
+ box-shadow: none !important;
+}
+.about-page .about-hero { gap: 22px; overflow: visible; }
+.about-page .evidence-panel::after { display: none; }
+.about-page .metrics-band { gap: 18px; }
+:is(.image-sense-page .image-sense-shell, .gentle-video-page .page-shell, .gentle-camera-page .page-shell, .awareness-page .awareness-shell) {
+ overflow: visible;
+}
+
+/* 角落动物在正文外；增大阅读留白。 */
+.about-page .hero-content { padding: clamp(38px, 4vw, 58px) clamp(36px, 4vw, 58px) 86px; }
+.about-page .evidence-panel { padding: 38px 34px 80px; }
+.about-page :is(.care-main, .care-side) { padding: 34px 36px 80px; }
+.about-page .quick-grid { gap: 24px; margin: 30px 0; }
+.about-page .quick-card { padding: 24px 28px; }
+:is(.image-sense-page, .gentle-video-page, .gentle-camera-page) :is(.hero, .privacy-panel) { padding: 36px 42px 80px; }
+:is(.image-sense-page, .gentle-video-page, .gentle-camera-page) :is(.panel, .feedback-panel) { padding: 32px 36px 80px; }
+.image-sense-page .body-signal-band { padding: 36px 42px 80px; }
+.image-sense-page .result-card { height: auto; min-height: 380px; overflow: visible; }
+:is(.image-sense-page, .gentle-video-page, .gentle-camera-page) .notes-content { border: 0; }
+:is(.image-sense-page, .gentle-video-page, .gentle-camera-page) .pre-visit-notes .el-textarea__inner {
+ background: transparent;
+ box-shadow: none;
+ border-radius: 0;
+ border-bottom: 1px solid #ddcfba;
+}
+.emotion-page .page-heading { padding: 30px 42px 80px; align-items: center; }
+.emotion-page .records-card { padding: 36px 42px 80px; }
+.emotion-page .records-table { --el-table-bg-color: transparent; --el-table-tr-bg-color: transparent; }
+.emotion-page .stat-grid { margin-top: 30px; margin-bottom: 30px; }
+.emotion-page .stat-card { min-height: 100px; }
+.emotion-page .animal-emotion {
+ width: 88px !important;
+ height: 88px !important;
+ border-radius: 0 !important;
+ background: url('../assets/healing-frames/animal-emotion-sprite.png') 0 0 / 176px 176px no-repeat !important;
+}
+.emotion-page .animal-emotion .el-icon { visibility: hidden; }
+.emotion-page .green .animal-emotion { background-position: right top !important; }
+.emotion-page .peach .animal-emotion { background-position: left bottom !important; }
+.emotion-page .blue .animal-emotion { background-position: right bottom !important; }
+.awareness-page .hero { padding: 36px 42px 80px; }
+.awareness-page .record-main { padding: 36px 42px 80px; }
+.awareness-page .empty-state { padding: 52px 60px 80px; }
+.spa-map-page .map-hero { padding: 36px 42px 80px; }
+.spa-map-page .control-section { padding: 34px 36px 80px; }
+.spa-map-page .fallback-card { padding: 40px 44px 88px; }
+.spa-map-page .map-section { border-color: transparent; }
+.chat-page { background: #fbf8f1; color: #4d4138; }
+.chat-page .chat-topbar { background: #fffdf6; border-bottom-color: #eee4d4; }
+.chat-page .welcome-panel { padding: 44px 36px 80px; }
+.chat-page .suggestion-grid { gap: 20px; }
+.chat-page .suggestion-grid button { padding: 18px 22px; }
+.chat-page .message-body { padding: 16px 20px !important; }
+.chat-page .composer-box { border-bottom: 1px solid #d8c4a5 !important; border-radius: 0; }
+.chat-page .composer-area { background: linear-gradient(180deg, rgba(251, 248, 241, 0), #fbf8f1 22%); }
+.spa-map-page .fallback-steps code { white-space: normal; overflow-wrap: anywhere; }
+.spa-map-page .fallback-steps { padding: 0 !important; min-width: 0; }
+
+/* 组件自身的 scoped 样式不能缩掉这块安全阅读区。 */
+:is(.about-page .hero-content, .about-page .evidence-panel, .about-page .care-main, .about-page .care-side,
+ .image-sense-page .hero, .image-sense-page .privacy-panel, .image-sense-page .panel, .image-sense-page .body-signal-band,
+ .gentle-video-page .hero, .gentle-video-page .privacy-panel, .gentle-video-page .feedback-panel,
+ .gentle-camera-page .hero, .gentle-camera-page .privacy-panel, .gentle-camera-page .feedback-panel,
+ .emotion-page .page-heading, .emotion-page .records-card, .awareness-page .hero, .awareness-page .record-main,
+ .awareness-page .empty-state, .spa-map-page .map-hero, .spa-map-page .control-section, .spa-map-page .fallback-card,
+ .chat-page .welcome-panel) {
+ padding: 76px 82px 80px !important;
+}
+.image-sense-page .result-card { height: auto !important; min-height: 380px !important; overflow: visible !important; }
+.chat-page { background: #fbf8f1 !important; }
+.chat-page .suggestion-grid button { padding: 18px 22px !important; }
+
+/* 装饰由独立流式图组承载，移除旧的单一右下角伪元素。 */
+:is(.about-page, .emotion-page, .image-sense-shell, .gentle-video-page .page-shell, .gentle-camera-page .page-shell, .awareness-shell)::after,
+.chat-page .welcome-panel::after,
+.spa-map-page footer::after { content: none !important; display: none !important; }
+.spa-map-page footer { margin-bottom: 0 !important; }
+.awareness-page .healing-scene-strip--rest { margin-top: 12px !important; max-width: none !important; }
+.spa-map-page > .healing-scene-strip { width: min(100%, 1760px); }
+.chat-page .welcome-panel > .healing-scene-strip { height: 108px; --scene-size: 108px; }
+
+:is(.about-page .care-side, .spa-map-page .control-section:nth-child(3)) { --healing-paper: #f6f8ee; }
+.spa-map-page .final-note { --healing-paper: #fff4ed; }
+:is(.about-page .quick-card, .spa-map-page .poi-card, .chat-page .suggestion-grid button) { transition: transform .2s ease !important; }
+:is(.about-page .quick-card, .spa-map-page .poi-card, .chat-page .suggestion-grid button):hover { transform: translateY(-2px) !important; }
+:is(.about-page, .image-sense-page, .gentle-video-page, .gentle-camera-page, .emotion-page, .awareness-page, .chat-page) :is(button, summary, input, textarea):focus-visible {
+ outline: 2px solid #aa7146;
+ outline-offset: 4px;
+}
+
+@media (max-width: 760px) {
+ .awareness-page { --landscape-mobile-shift: 70px; }
+ :is(.about-page .hero-content, .about-page .evidence-panel, .about-page .care-main, .about-page .care-side,
+  .image-sense-page .hero, .image-sense-page .privacy-panel, .image-sense-page .panel, .image-sense-page .body-signal-band,
+  .gentle-video-page .hero, .gentle-video-page .privacy-panel, .gentle-video-page .feedback-panel,
+  .gentle-camera-page .hero, .gentle-camera-page .privacy-panel, .gentle-camera-page .feedback-panel,
+  .emotion-page .page-heading, .emotion-page .records-card, .awareness-page .hero, .awareness-page .record-main,
+  .spa-map-page .map-hero, .spa-map-page .control-section, .spa-map-page .fallback-card) {
+  padding: 60px 54px 64px !important;
+  &::before { border-image-width: 40px 50px; }
+ }
+ .about-page .hero-content h1 { font-size: clamp(35px, 9vw, 48px); }
+ .about-page .about-hero { gap: 18px; }
+ .emotion-page .stat-card { padding: 16px 14px; gap: 10px; }
+ .emotion-page .stat-card { flex-direction: column; align-items: flex-start; }
+ .emotion-page .animal-emotion { width: 72px !important; height: 72px !important; background-size: 144px 144px !important; }
+ .emotion-page .card-heading { flex-direction: column; align-items: flex-start; gap: 16px; }
+ .chat-page .welcome-panel { padding: 60px 54px 64px !important; }
+ .chat-page .welcome-panel::before { border-image-width: 40px 50px; }
+ .chat-page .suggestion-grid button { padding: 16px 8px !important; }
+ .awareness-page .empty-state { padding: 60px 54px 64px !important; }
+ .awareness-page .empty-state::before { border-image-width: 40px 50px; }
+ :is(.about-page, .emotion-page, .image-sense-shell, .gentle-video-page .page-shell, .gentle-camera-page .page-shell, .awareness-shell)::after {
+  width: 190px; height: 108px; margin-right: 10px;
+ }
+}
+@media (prefers-reduced-motion: reduce) {
+ :is(.about-page .quick-card, .spa-map-page .poi-card, .chat-page .suggestion-grid button) { transition: none !important; }
+}

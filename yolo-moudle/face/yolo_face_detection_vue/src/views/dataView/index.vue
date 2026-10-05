@@ -3,14 +3,21 @@
 		<header class="page-heading">
 			<div><span class="eyebrow">EMOTION PORTRAIT</span><h1>情绪画像</h1></div>
 			<p>轻轻回望今天被记录的情绪，让觉察成为照顾自己的开始。</p>
-		</header>
+
+			<HealingIllustratedFrame variant="clouds" />
+			</header>
+			<HealingDecorationStrip variant="sky" />
+
 
 		<section class="stat-grid">
 			<article v-for="item in statistics" :key="item.label" class="stat-card" :class="item.tone">
-				<div class="stat-icon"><el-icon><component :is="item.icon" /></el-icon></div>
+				<div class="stat-icon animal-emotion" aria-hidden="true"><el-icon><component :is="item.icon" /></el-icon></div>
 				<div><span>{{ item.label }}</span><strong>{{ item.value }}<small> 次</small></strong></div>
 			</article>
 		</section>
+			<HealingDecorationStrip variant="garden" />
+		<AnimalEmotionGallery />
+
 
 		<section class="records-card">
 			<div class="card-heading">
@@ -27,7 +34,11 @@
 				</el-table-column>
 				<el-table-column prop="source" label="识别来源" min-width="150" />
 			</el-table>
-		</section>
+
+			<HealingIllustratedFrame variant="garden" />
+			</section>
+
+		<HealingDecorationStrip variant="rest" />
 	</div>
 </template>
 

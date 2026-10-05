@@ -11,7 +11,11 @@
 					<div class="soft-orb">安</div>
 					<p>{{ companionText }}</p>
 				</div>
+
+			<HealingIllustratedFrame variant="clouds" />
 			</section>
+			<HealingDecorationStrip variant="sky" />
+
 
 			<section class="privacy-panel">
 				<div>
@@ -23,6 +27,8 @@
 					<el-checkbox v-model="keepRecord">保存这次觉察记录</el-checkbox>
 					<el-checkbox v-model="keepMedia" :disabled="!keepRecord">在记录中保留图片路径</el-checkbox>
 				</div>
+
+			<HealingIllustratedFrame variant="garden" />
 			</section>
 
 			<PreVisitNotes
@@ -73,7 +79,9 @@
 							<span>我们会把它当作一次轻柔的自我观察</span>
 						</div>
 					</el-upload>
-				</article>
+
+			<HealingIllustratedFrame variant="rest" />
+			</article>
 
 				<article class="panel media-panel">
 					<div class="panel-title">
@@ -86,7 +94,9 @@
 						<strong>还没有开始感知</strong>
 						<span>结果会以柔和的方式出现，只帮助你观察，不给你下结论。</span>
 					</div>
-				</article>
+
+			<HealingIllustratedFrame variant="clouds" />
+			</article>
 
 				<article class="panel result-panel">
 					<div class="panel-title">
@@ -158,8 +168,12 @@
 						<strong>这里会生成温柔反馈</strong>
 						<span>看见线索、身体提醒、小练习和保存选择会放在同一张卡片里。</span>
 					</div>
-				</article>
+
+			<HealingIllustratedFrame variant="garden" />
+			</article>
 			</section>
+			<HealingDecorationStrip variant="garden" />
+
 
 			<section class="body-signal-band">
 				<div>
@@ -172,8 +186,12 @@
 					<span>识别高频时段</span>
 					<span>引导呼吸或放松</span>
 				</div>
+
+			<HealingIllustratedFrame variant="rest" />
 			</section>
 		</div>
+
+		<HealingDecorationStrip variant="rest" />
 	</div>
 </template>
 

@@ -11,7 +11,11 @@
 					<strong>你始终拥有选择权</strong>
 					<p>是否开始、是否保存记录、是否保留结果视频路径，都由你决定。安小宁只负责陪你把线索说得更温柔。</p>
 				</div>
+
+			<HealingIllustratedFrame variant="clouds" />
 			</section>
+			<HealingDecorationStrip variant="sky" />
+
 
 			<section class="privacy-panel">
 				<div>
@@ -28,6 +32,8 @@
 						{{ permissionLabel }}
 					</div>
 				</div>
+
+			<HealingIllustratedFrame variant="garden" />
 			</section>
 
 			<PreVisitNotes
@@ -79,6 +85,8 @@
 					<p>咬指甲、搓手、低头等动作会被表达为“身心信号”，只是提醒我们多照顾自己一点。</p>
 				</div>
 			</section>
+			<HealingDecorationStrip variant="garden" />
+
 
 			<section class="sense-grid">
 				<article class="preview-panel">
@@ -89,7 +97,9 @@
 					<video ref="cameraVideo" v-show="state.cameraIsOpen && !state.processedFrame" class="video-stream" autoplay muted playsinline></video>
 					<img v-show="state.cameraIsOpen && state.processedFrame" class="video-stream" :src="state.processedFrame" alt="摄像头温柔感知画面" />
 					<canvas ref="captureCanvas" class="capture-canvas" aria-hidden="true"></canvas>
-				</article>
+
+			<HealingIllustratedFrame variant="rest" />
+			</article>
 
 				<article class="feedback-panel">
 					<div class="panel-title">
@@ -136,9 +146,13 @@
 						<el-button type="primary" @click="openPreVisitReport">生成预诊报告</el-button>
 						<span>报告基于停止后保存的情绪与BFRB结构化结果。</span>
 					</div>
-				</article>
+
+			<HealingIllustratedFrame variant="clouds" />
+			</article>
 			</section>
 		</div>
+
+		<HealingDecorationStrip variant="rest" />
 	</div>
 </template>
 

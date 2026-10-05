@@ -6,6 +6,46 @@
 
 项目的表达原则是：看见线索，不贴标签；提供陪伴，不制造压力；尊重隐私，让使用者始终拥有选择权。
 
+## 奶油暖黄手绘界面改造（2026-10-05）
+
+本次贡献通过独立分支和 Pull Request 提交，由项目创作者审阅后手动合并；不直接更新 `main`，不启用自动合并。已有全栈功能、路由、接口和地图配置保持不变。
+
+- 保留横向顶部导航，桌面默认图标显示，点击展开原导航名称；黄色窗帘采用 CSS 3D 透视、立体褶皱、上方与左右慢开和最终扎帘动画，选中背景透明，并支持减少动态效果偏好。
+- 关于产品、温柔感知、情绪画像、心灵 SPA、觉察记录、安心对话采用六套不同的手绘主题。大卡片用奶油背景和画面包围文字，小信息框保留内容但移除厚重框体。
+- 页间装饰用云层、草坡和小径连接；各栏目底部使用与栏目关联的故事书、观察溪流、情绪彩虹、林间休憩、觉察日记和安心茶叙场景。图片等比显示，窄屏裁切并调整画面焦点，不非等比拉伸。
+- 情绪画像新增独立的积极、消极、中性动物情绪展示卡，共十二个名称与表情；不参与原识别统计或数据处理。消极表情采用独立安全裁切窗口，避免串入相邻图案。
+- 觉察记录底图紧接内容，间距为 12px。首页轮播替换为四张 4K 手绘治愈壁纸，并移除原叠加动物装饰。
+- 八个原页面的正文、动态插值、业务事件与业务脚本保留；新增情绪名称仅位于独立展示组件。`/trashMap` 仍使用真实高德地图，不以插画替代。
+
+### 前端预览与构建
+
+在仓库根目录执行（Node.js 20.19+ 或 22.12+）：
+
+```powershell
+cd yolo-moudle/face/yolo_face_detection_vue
+npm ci
+npm run dev -- --host 127.0.0.1 --port 8100
+```
+
+地图页面地址保持为 `http://127.0.0.1:8100/#/trashMap`；登录、识别、资源搜索和聊天等业务需相应后端服务，可使用下方现有全栈启动脚本。
+
+```powershell
+npm run build
+node qa/verify-preservation.mjs
+```
+
+### 验收资料与素材
+
+- [本次设计、素材路径及验收说明](yolo-moudle/face/yolo_face_detection_vue/qa/connected-scenes-notes.md)
+- [手绘素材完整提示词](yolo-moudle/face/yolo_face_detection_vue/qa/connected-scenes-prompts.txt)（内置 imagegen 生成）
+- [原文、事件与脚本比对结果](yolo-moudle/face/yolo_face_detection_vue/qa/preservation-report.json)
+- [布局检查结果](yolo-moudle/face/yolo_face_detection_vue/qa/healing-cards-report.json) · [六套场景与 CSS 3D 检查](yolo-moudle/face/yolo_face_detection_vue/qa/connected-scenes-report.json)
+- [心灵 SPA 完整截图](yolo-moudle/face/yolo_face_detection_vue/qa/healing-cards-trashMap-full-1440.png)
+- [情绪画像完整截图](yolo-moudle/face/yolo_face_detection_vue/qa/healing-cards-dataView-full-1440.png)
+- [觉察记录完整截图](yolo-moudle/face/yolo_face_detection_vue/qa/healing-cards-trashRecords-full-1440.png)
+
+完整代码、最终及留存手绘素材、文档、验收脚本与截图随 PR 提交；不包含浏览器配置/登录资料、Maven/npm 缓存、`node_modules`、`dist` 或本机密钥。本次前端构建通过，1440px/390px 页面和地图额外 1920px/1024px/768px 布局已检查。当前独立验证环境未配置高德 Key，只现场检查未配置状态；配置有效 Key 后需补做定位、地图标记和详情等完整交互验收。这不否定下文原版本已有的地图实测记录。
+
 ## 当前定位
 
 - 面向已经感到紧绷、疲惫或需要情绪照顾的使用者。

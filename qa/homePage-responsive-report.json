@@ -1,0 +1,68 @@
+[
+  {
+    "viewport": "1440x900",
+    "href": "http://127.0.0.1:8100/#/homePage",
+    "innerWidth": 1440,
+    "scrollWidth": 1440,
+    "horizontalOverflow": false,
+    "slideCount": 4,
+    "imageAlt": "手绘晨光里相依休息的金毛犬与猫咪",
+    "imageSource": "http://127.0.0.1:8100/src/assets/home-carousel/hero-handpaint-companions-4k.webp",
+    "images": [
+      {
+        "alt": "手绘晨光里相依休息的金毛犬与猫咪",
+        "loaded": true
+      },
+      {
+        "alt": "手绘雨日窗边的温暖茶桌与花枝",
+        "loaded": true
+      },
+      {
+        "alt": "手绘晨光花野中安静停留的小兔子",
+        "loaded": true
+      },
+      {
+        "alt": "手绘薄雾湖畔亮着暖灯的小木屋",
+        "loaded": true
+      }
+    ],
+    "companionOverlayExists": false,
+    "desktopNavVisible": true,
+    "mobileNavButtonVisible": false
+  },
+  {
+    "viewport": "390x844",
+    "href": "http://127.0.0.1:8100/#/homePage",
+    "innerWidth": 390,
+    "scrollWidth": 390,
+    "horizontalOverflow": false,
+    "slideCount": 4,
+    "imageAlt": "手绘晨光里相依休息的金毛犬与猫咪",
+    "imageSource": "http://127.0.0.1:8100/src/assets/home-carousel/hero-handpaint-companions-4k.webp",
+    "images": [
+      {
+        "alt": "手绘晨光里相依休息的金毛犬与猫咪",
+        "loaded": true
+      },
+      {
+        "alt": "手绘雨日窗边的温暖茶桌与花枝",
+        "loaded": true
+      },
+      {
+        "alt": "手绘晨光花野中安静停留的小兔子",
+        "loaded": true
+      },
+      {
+        "alt": "手绘薄雾湖畔亮着暖灯的小木屋",
+        "loaded": true
+      }
+    ],
+    "companionOverlayExists": false,
+    "desktopNavVisible": false,
+    "mobileNavButtonVisible": true
+  },
+  {
+    "autoplayAdvanced": true,
+    "activeAltAfterInterval": "手绘雨日窗边的温暖茶桌与花枝"
+  }
+]

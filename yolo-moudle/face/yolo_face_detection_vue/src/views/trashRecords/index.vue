@@ -8,7 +8,11 @@
 					<span>这里记录的是情绪与身体线索，不给你贴标签。你可以回看状态变化，也可以随时删掉不想留下的记录。</span>
 				</div>
 				<button class="refresh-btn" type="button" @click="getRecords">刷新</button>
+
+			<HealingIllustratedFrame variant="clouds" />
 			</section>
+			<HealingDecorationStrip variant="sky" />
+
 
 			<section class="summary-row">
 				<div class="summary-item">
@@ -28,6 +32,8 @@
 					<strong>{{ sourceCount.camera }}</strong>
 				</div>
 			</section>
+			<HealingDecorationStrip variant="garden" />
+
 
 			<section class="toolbar">
 				<div class="filter-group">
@@ -56,7 +62,9 @@
 				<div v-if="state.records.length === 0" class="empty-state">
 					<strong>还没有留下觉察记录</strong>
 					<p>你可以先去图片、视频或摄像头感知页做一次轻柔识别。记录只会在你选择保存时留下。</p>
-				</div>
+
+			<HealingIllustratedFrame variant="garden" />
+			</div>
 
 				<article v-for="item in state.records" :key="item.id" class="record-card">
 					<div class="record-time">
@@ -158,7 +166,9 @@
 								<button type="button" class="delete-btn" @click="deleteRecord(item)">删除</button>
 							</div>
 						</div>
-					</div>
+
+			<HealingIllustratedFrame variant="rest" />
+			</div>
 				</article>
 			</section>
 
@@ -172,6 +182,7 @@
 				:total="state.total"
 				@current-change="getRecords"
 			/>
+			<HealingDecorationStrip variant="rest" />
 		</div>
 	</div>
 </template>
