@@ -12,6 +12,7 @@
 			<HealingIllustratedFrame variant="clouds" />
 			</section>
 			<HealingDecorationStrip variant="sky" />
+			<DiaryInsights />
 
 
 			<section class="summary-row">
@@ -195,6 +196,7 @@ import request from '/@/utils/request';
 import { getAnalysisRecordByAwareness, getAwarenessRecords } from '/@/api/healing';
 import { useUserInfo } from '/@/stores/userInfo';
 import { storeToRefs } from 'pinia';
+import DiaryInsights from '/@/components/emotionDiary/DiaryInsights.vue';
 
 type AwarenessRecord = {
 	id: number;

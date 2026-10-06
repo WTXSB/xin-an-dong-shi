@@ -57,8 +57,8 @@ const onCommand = async (command: string) => {
 		await ElMessageBox.confirm('确定要退出当前账号吗？', '退出登录', {
 			confirmButtonText: '确定退出', cancelButtonText: '再看看', type: 'warning',
 		});
-		Session.clear();
-		window.location.reload();
+		try { await request.post('/api/user/logout'); }
+		finally { Session.clear(); window.location.reload(); }
 	} catch (_) {
 		// 用户取消退出。
 	}

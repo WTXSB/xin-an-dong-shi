@@ -50,7 +50,7 @@
 			</article>
 			<article class="quick-card surface-card" @click="$router.push('/dataView')">
 				<el-icon><TrendCharts /></el-icon>
-				<h3>情绪画像</h3>
+				<h3>情绪日记</h3>
 				<p>用柔和的趋势看见变化，不把任何一次波动当作失败。</p>
 			</article>
 			<article class="quick-card surface-card" @click="$router.push('/trashMap')">

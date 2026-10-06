@@ -12,7 +12,7 @@
 				<span class="drawer-mark">心</span>
 				<div><strong>心安动识</strong><small>让每一次感知都被温柔接住</small></div>
 			</div>
-			<el-menu router :default-active="route.path" @select="state.drawerOpen = false">
+			<el-menu router :default-active="route.path" @select="onMobileSelect">
 				<template v-for="item in state.menuList" :key="item.path">
 					<el-sub-menu v-if="item.children && item.children.length" :index="item.path">
 						<template #title><SvgIcon :name="item.meta.icon" /><span>{{ item.meta.title }}</span></template>
@@ -28,7 +28,7 @@
 </template>
 
 <script setup lang="ts" name="layoutBreadcrumbIndex">
-import { defineAsyncComponent, computed, reactive, onMounted, onUnmounted } from 'vue';
+import { defineAsyncComponent, computed, reactive, onMounted, onUnmounted, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useRoutesList } from '/@/stores/routesList';
@@ -46,7 +46,11 @@ const { themeConfig } = storeToRefs(storesThemeConfig);
 const { routesList } = storeToRefs(stores);
 const route = useRoute();
 const state = reactive({ menuList: [] as RouteItems, drawerOpen: false });
-const menuOrder = ['/homePage', '/aboutProduct', '/diseaseDetection', '/dataView', '/trashMap', '/trashRecords', '/smartChat'];
+const menuOrder = ['/homePage', '/diseaseDetection', '/dataView', '/trashMap', '/trashRecords', '/smartChat', '/spaConnect'];
+const onMobileSelect = (path: string) => {
+	state.drawerOpen = false;
+	if (path === '/dataView') nextTick(() => window.dispatchEvent(new Event('mindease:diary-enter')));
+};
 
 const setIsShowLogo = computed(() => themeConfig.value.isShowLogo && themeConfig.value.layout === 'transverse');
 const isLayoutTransverse = computed(() => themeConfig.value.layout === 'transverse');

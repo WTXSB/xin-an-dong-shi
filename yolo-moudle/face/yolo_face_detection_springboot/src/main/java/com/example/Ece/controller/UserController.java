@@ -11,6 +11,8 @@ import com.example.Ece.mapper.UserMapper;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.util.Date;
 import java.util.Objects;
 
@@ -57,8 +59,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public Result<?> login(@RequestBody User userParam) {
-        System.out.println(userParam);
+    public Result<?> login(@RequestBody User userParam, HttpServletRequest request) {
         try{
             User userPwd = userMapper.selectByName(userParam.getUsername());
             QueryWrapper<User> queryWrapper = new QueryWrapper<>();
@@ -69,11 +70,22 @@ public class UserController {
             if (!Objects.equals(userParam.getPassword(), userPwd.getPassword())) {
                 return Result.error("-1", "密码错误！");
             } else {
+                // Private diary endpoints use a server-verified session, never a username supplied by the browser.
+                HttpSession previous = request.getSession(false);
+                if (previous != null) previous.invalidate();
+                request.getSession(true).setAttribute("diaryUsername", res.getUsername());
                 return Result.success(res);
             }
         }catch (Exception e){
             return Result.error("-1", "用户名不存在！");
         }
+    }
+
+    @PostMapping("/logout")
+    public Result<?> logout(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session != null) session.invalidate();
+        return Result.success();
     }
 
     @PostMapping("/register")

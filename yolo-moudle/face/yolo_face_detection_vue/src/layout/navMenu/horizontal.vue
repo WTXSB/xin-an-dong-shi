@@ -34,8 +34,8 @@
 </template>
 
 <script setup lang="ts" name="navMenuHorizontal">
-import { defineAsyncComponent, reactive, computed, onMounted, nextTick, onBeforeMount, ref } from 'vue';
-import { useRoute, onBeforeRouteUpdate, RouteRecordRaw } from 'vue-router';
+import { defineAsyncComponent, reactive, computed, onMounted, nextTick, ref, watch } from 'vue';
+import { useRoute, RouteRecordRaw } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useRoutesList } from '/@/stores/routesList';
 import { useThemeConfig } from '/@/stores/themeConfig';
@@ -57,10 +57,14 @@ const props = defineProps({
 
 // 定义变量内容
 const elMenuHorizontalScrollRef = ref();
-// 仅记录导航的视觉展开状态；原有 router 跳转与菜单数据保持不变。
+// 导航的视觉展开状态跟随已完成的路由；原有跳转与菜单数据保持不变。
 const expandedNav = ref('');
 const curtainSequence = ref(0);
-const revealNav = (path: string) => { expandedNav.value = path; curtainSequence.value += 1; };
+const revealNav = (path: string) => {
+	expandedNav.value = path; curtainSequence.value += 1;
+	// Includes repeat clicks on the current route; the server claims each time slot only once.
+	if (path === '/dataView') nextTick(() => window.dispatchEvent(new Event('mindease:diary-enter')));
+};
 const stores = useRoutesList();
 const storesThemeConfig = useThemeConfig();
 const { routesList } = storeToRefs(stores);
@@ -126,24 +130,29 @@ const setCurrentRouterHighlight = (currentRoute: RouteToFrom) => {
 const onALinkClick = (val: RouteItem) => {
 	other.handleOpenLink(val);
 };
-// 页面加载前
-onBeforeMount(() => {
-	setCurrentRouterHighlight(route);
-});
 // 页面加载时
 onMounted(() => {
 	initElMenuOffsetLeft();
 });
-// 路由更新时
-onBeforeRouteUpdate((to) => {
-	// 修复：https://gitee.com/lyt-top/vue-next-admin/issues/I3YX6G
-	setCurrentRouterHighlight(to);
+// 布局导航不是页面路由组件：监听实际路由，覆盖页面按钮、前进/后退和刷新。
+watch([() => route.fullPath, menuLists], () => {
+	setCurrentRouterHighlight(route);
+	const containsCurrentRoute = (item: RouteItem): boolean =>
+		item.path === state.defaultActive || route.matched.some((record) => record.path === item.path) ||
+		Boolean(item.children?.some(containsCurrentRoute));
+	const currentMenu = menuLists.value.find(containsCurrentRoute);
+	const path = currentMenu?.path || '';
+	if (expandedNav.value !== path) {
+		expandedNav.value = path;
+		curtainSequence.value += 1;
+	}
 	// 修复经典布局开启切割菜单时，点击tagsView后左侧导航菜单数据不变的问题
 	let { layout, isClassicSplitMenu } = themeConfig.value;
 	if (layout === 'classic' && isClassicSplitMenu) {
-		mittBus.emit('setSendClassicChildren', setSendClassicChildren(to.path));
+		mittBus.emit('setSendClassicChildren', setSendClassicChildren(route.path));
 	}
-});
+	initElMenuOffsetLeft();
+}, { immediate: true, flush: 'post' });
 </script>
 
 <style scoped lang="scss">

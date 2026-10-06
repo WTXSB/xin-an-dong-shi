@@ -65,12 +65,12 @@ export const dynamicRoutes: Array<RouteRecordRaw> = [
 			{
 				path: '/aboutProduct',
 				name: 'aboutProduct',
-				component: () => import('/@/views/aboutProduct/index.vue'),
+				redirect: '/homePage',
 				meta: {
 					title: '关于产品',
 					isLink: '',
-					isHide: false,
-					isKeepAlive: true,
+					isHide: true,
+					isKeepAlive: false,
 					isAffix: false,
 					isIframe: false,
 					roles: ['admin', 'common', 'others'],
@@ -82,7 +82,7 @@ export const dynamicRoutes: Array<RouteRecordRaw> = [
 				name: 'dataView',
 				component: () => import('/@/views/dataView/index.vue'),
 				meta: {
-					title: '情绪画像',
+					title: '情绪日记',
 					isLink: '',
 					isHide: false,
 					isKeepAlive: true,

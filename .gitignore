@@ -9,10 +9,13 @@ scripts/roboflow-env.local.txt
 # Logs, caches and runtime output
 # Local tool caches and browser QA profiles (may contain login state)
 .m2-repository/
+.m2/
+.pip-cache/
 .maven-home/
 .npm-cache/
 qa/edge-*/
 **/qa/edge-*/
+qa/warm-connect-20261005/*-before.vue
 logs/
 *.log
 *.out.log
@@ -34,6 +37,8 @@ venv/
 env/
 
 # Frontend dependencies and build output
+qa/warm-connect-20261005/edge-profile/
+qa/emotion-diary-20261006/edge-profile/
 node_modules/
 dist/
 coverage/

@@ -1,0 +1,57 @@
+/* 加深暖色只作用于网页表面，不给整页套滤镜，不改变地图/图表分类色。 */
+:root {
+ --ease-ink: #493326;
+ --ease-muted: #735d48;
+ --ease-caramel: #a96135;
+ --ease-caramel-deep: #8f4c27;
+ --ease-butter: #e9b750;
+ --ease-butter-soft: #f6dda2;
+ --ease-cream: #f8ebcf;
+ --ease-paper: #fff3db;
+ --ease-sage: #849b68;
+ --ease-line: rgba(139, 91, 45, .22);
+ --ease-shadow: 0 18px 46px rgba(128, 84, 34, .13);
+ --el-color-primary: #a96135 !important;
+ --el-color-primary-light-3: #c58c62 !important;
+ --el-color-primary-light-5: #d9b18d !important;
+ --el-color-primary-light-7: #ebd2b6 !important;
+ --el-color-primary-light-8: #f2e1c8 !important;
+ --el-color-primary-light-9: #f8ecd8 !important;
+ --el-color-primary-dark-2: #8f4c27 !important;
+ --el-text-color-primary: #493326;
+ --el-text-color-regular: #66513e;
+ --el-text-color-secondary: #78624e;
+ --el-disabled-bg-color: #ecdec5;
+ --next-bg-main-color: #f8ebcf;
+ --healing-paper: #fff3d9;
+}
+
+:is(.home-showcase, .about-page, .image-sense-page, .gentle-video-page, .gentle-camera-page, .emotion-page, .awareness-page, .spa-map-page, .chat-page, .spa-page) {
+ background: radial-gradient(ellipse at 6% 12%, #efd08e55, transparent 35%), radial-gradient(ellipse at 94% 72%, #cad1a633, transparent 34%), linear-gradient(160deg, #f9edd3, #f3e1bf) !important;
+}
+.layout-container .layout-navbars-breadcrumb-index { background: rgba(249, 235, 204, .97) !important; border-bottom-color: #b48a5155; }
+.mobile-nav-drawer .el-drawer__body { background: #f8ebd0 !important; }
+.layout-main :is(.primary-action, .primary-btn, .el-button--primary) { background: #a96135; border-color: #a96135; color: #fffaf0; }
+.layout-main :is(.primary-action, .primary-btn, .el-button--primary):hover:not(:disabled) { background: #934e28; border-color: #934e28; color: #fffaf0; }
+.layout-main :is(.hero-description, .hero-content > p:not(.eyebrow), .quick-card > p, .practice-item > span, .map-hero .hero-copy > span) { color: #705740 !important; }
+:is(.about-page .care-side, .spa-map-page .control-section:nth-child(3)) { --healing-paper: #ebecd6; }
+.spa-map-page .final-note { --healing-paper: #f7e2d4; }
+.chat-page .chat-topbar { background: #f5e5c5 !important; }
+.chat-page .composer-area { background: linear-gradient(180deg, transparent, #f3e1bf 22%) !important; }
+.el-card, .el-dialog, .el-message-box, .el-drawer, .el-popover.el-popper, .el-dropdown-menu { background-color: #fff2ddef !important; }
+.el-input__wrapper, .el-select__wrapper, .el-textarea__inner { color: #58412e; background: #fff4e0f5 !important; }
+.el-input__inner::placeholder, .el-textarea__inner::placeholder { color: #85715d; }
+.el-loading-mask { background: rgba(255, 241, 214, .88); }
+.el-loading-spinner .el-loading-text { color: #8f4c27; }
+.el-table { --el-table-header-bg-color: #f3dca8; --el-table-row-hover-bg-color: #f7e7c7; --el-table-header-text-color: #63472f; --el-table-text-color: #5d4835; }
+.el-message, .el-notification { background: #fff1dced; }
+.healing-frame { opacity: .98 !important; }
+.healing-scene-strip--rest { background: #f4e5c6 !important; }
+.home-showcase .hero-shade { background: linear-gradient(90deg, #f7dfaddb 0%, #fae8c5bf 34%, #fbedce52 61%, #fffaeb14 100%), linear-gradient(0deg, #c88b3714, transparent 45%); }
+@media (max-width: 640px) { .home-showcase .hero-shade { background: linear-gradient(180deg, #f6dfaddb, #f9e8c5bf); } }
+.spa-page .warm-dialog.el-dialog { max-width: calc(100vw - 28px); }
+/* Element Plus 弹窗 teleport 到 body，因此使用它原本的栏目专属 class。 */
+.warm-dialog.el-dialog { max-width: calc(100vw - 28px); }
+.warm-dialog .el-dialog__title { color: #4e3526; font-weight: 700; }
+.warm-dialog .el-dialog__footer { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 12px; }
+:is(button, input, textarea, summary, a):focus-visible { outline: 2px solid #8c5733 !important; outline-offset: 3px; }

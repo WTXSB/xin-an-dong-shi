@@ -1,0 +1,129 @@
+{
+  "checks": [
+    "repeat navigation after dismiss does not reopen",
+    "three independent mood ratings and historical diary load",
+    "typing, saving and history preserved after navigation",
+    "missing AI configuration gives honest error and preserves text",
+    "horizontal navigation renamed, route unchanged",
+    {
+      "label": "diary-1920",
+      "width": 1920,
+      "overflow": false,
+      "images": [
+        {
+          "loaded": true,
+          "ratio": true
+        }
+      ],
+      "navDirection": "row"
+    },
+    {
+      "label": "diary-1440",
+      "width": 1440,
+      "overflow": false,
+      "images": [
+        {
+          "loaded": true,
+          "ratio": true
+        }
+      ],
+      "navDirection": "row"
+    },
+    {
+      "label": "diary-1024",
+      "width": 1024,
+      "overflow": false,
+      "images": [
+        {
+          "loaded": true,
+          "ratio": true
+        }
+      ],
+      "navDirection": "row"
+    },
+    {
+      "label": "diary-768",
+      "width": 768,
+      "overflow": false,
+      "images": [
+        {
+          "loaded": true,
+          "ratio": true
+        }
+      ],
+      "navDirection": "row"
+    },
+    {
+      "label": "diary-390",
+      "width": 390,
+      "overflow": false,
+      "images": [
+        {
+          "loaded": true,
+          "ratio": true
+        }
+      ],
+      "navDirection": "row"
+    },
+    "manual animal mood editing works and mobile dialog fits",
+    {
+      "label": "awareness-analysis-1440",
+      "width": 1440,
+      "overflow": false,
+      "images": [
+        {
+          "loaded": true,
+          "ratio": true
+        }
+      ],
+      "navDirection": "row"
+    },
+    {
+      "label": "awareness-analysis-390",
+      "width": 390,
+      "overflow": false,
+      "images": [
+        {
+          "loaded": true,
+          "ratio": true
+        }
+      ],
+      "navDirection": "row"
+    }
+  ],
+  "exceptions": [],
+  "calendarBoundariesPassed": true,
+  "realDatabaseWrites": 0,
+  "backendUsed": "isolated in-memory H2 on 10099",
+  "AIVisualExampleOnly": true,
+  "apiWrites": [
+    {
+      "path": "/api/user/login",
+      "method": "POST"
+    },
+    {
+      "path": "/api/diary/prompt",
+      "method": "POST"
+    },
+    {
+      "path": "/api/diary/prompt",
+      "method": "POST"
+    },
+    {
+      "path": "/api/diary/entry",
+      "method": "PUT"
+    },
+    {
+      "path": "/api/diary/prompt",
+      "method": "POST"
+    },
+    {
+      "path": "/api/diary/analyze",
+      "method": "POST"
+    },
+    {
+      "path": "/api/diary/mood",
+      "method": "POST"
+    }
+  ]
+}

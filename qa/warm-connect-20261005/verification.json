@@ -1,0 +1,556 @@
+{
+  "sourceAudit": {
+    "spaScriptIdentical": true,
+    "spaTextAndEventBindingsIdentical": true,
+    "aboutComponentIdentical": true
+  },
+  "report": [
+    {
+      "name": "spaConnect-guest-1440",
+      "hash": "#/spaConnect",
+      "viewport": 1440,
+      "overflow": false,
+      "navLabels": [
+        "首页",
+        "温柔感知",
+        "情绪画像",
+        "心灵 SPA",
+        "觉察记录",
+        "安心对话",
+        "心有灵犀"
+      ],
+      "navDirection": "row",
+      "allIllustrationsLoaded": true,
+      "artAspectPreserved": true,
+      "background": "radial-gradient(at 6% 12%, rgba(239, 208, 142, 0.333), rgba(0, 0, 0, 0) 35%), radial-gradient(at 94% 72%, rgba(202, 209, 166, 0.2), rgba(0, 0, 0, 0) 34%), linear-gradient(160deg, rgb(249, 237, 211), rgb(243, 225, 191))",
+      "mainViewportHeight": 834,
+      "bodyPreview": "心有灵犀把心事交给愿意倾听的人写一封信，等一封回信。这里没有催促，只有被认真接住的倾诉。心有灵犀认证审核第一次见面，先打个招呼吧去身份向导选择你的角色；如果已经准备好向心灵SPA师倾诉，也可以直接完成实名。去身份向导我想倾诉，先完成实名"
+    },
+    {
+      "name": "homePage-1440",
+      "hash": "#/homePage",
+      "viewport": 1440,
+      "overflow": false,
+      "navLabels": [
+        "首页",
+        "温柔感知",
+        "情绪画像",
+        "心灵 SPA",
+        "觉察记录",
+        "安心对话",
+        "心有灵犀"
+      ],
+      "navDirection": "row",
+      "allIllustrationsLoaded": true,
+      "artAspectPreserved": true,
+      "background": "none",
+      "mainViewportHeight": 834,
+      "bodyPreview": "心安动识 · MINDEASE看见焦虑，遇见安宁 用温柔的科技看见情绪与身体线索，让每一次觉察，都成为更靠近自己的开始。 关于心安动识让科技安静地工作，让陪伴温柔地发生 我们用已经训练好的视觉模型看见表情与身体线索，再把它转化成柔和的自我觉察、正念练习和疗愈建"
+    },
+    {
+      "name": "spaConnect-guest-1920",
+      "hash": "#/spaConnect",
+      "viewport": 1920,
+      "overflow": false,
+      "navLabels": [
+        "首页",
+        "温柔感知",
+        "情绪画像",
+        "心灵 SPA",
+        "觉察记录",
+        "安心对话",
+        "心有灵犀"
+      ],
+      "navDirection": "row",
+      "allIllustrationsLoaded": true,
+      "artAspectPreserved": true,
+      "background": "radial-gradient(at 6% 12%, rgba(239, 208, 142, 0.333), rgba(0, 0, 0, 0) 35%), radial-gradient(at 94% 72%, rgba(202, 209, 166, 0.2), rgba(0, 0, 0, 0) 34%), linear-gradient(160deg, rgb(249, 237, 211), rgb(243, 225, 191))",
+      "mainViewportHeight": 1014,
+      "bodyPreview": "心有灵犀把心事交给愿意倾听的人写一封信，等一封回信。这里没有催促，只有被认真接住的倾诉。心有灵犀认证审核第一次见面，先打个招呼吧去身份向导选择你的角色；如果已经准备好向心灵SPA师倾诉，也可以直接完成实名。去身份向导我想倾诉，先完成实名"
+    },
+    {
+      "name": "homePage-1920",
+      "hash": "#/homePage",
+      "viewport": 1920,
+      "overflow": false,
+      "navLabels": [
+        "首页",
+        "温柔感知",
+        "情绪画像",
+        "心灵 SPA",
+        "觉察记录",
+        "安心对话",
+        "心有灵犀"
+      ],
+      "navDirection": "row",
+      "allIllustrationsLoaded": true,
+      "artAspectPreserved": true,
+      "background": "none",
+      "mainViewportHeight": 1014,
+      "bodyPreview": "心安动识 · MINDEASE看见焦虑，遇见安宁 用温柔的科技看见情绪与身体线索，让每一次觉察，都成为更靠近自己的开始。 关于心安动识让科技安静地工作，让陪伴温柔地发生 我们用已经训练好的视觉模型看见表情与身体线索，再把它转化成柔和的自我觉察、正念练习和疗愈建"
+    },
+    {
+      "name": "spaConnect-guest-768",
+      "hash": "#/spaConnect",
+      "viewport": 768,
+      "overflow": false,
+      "navLabels": [
+        "首页",
+        "温柔感知",
+        "情绪画像",
+        "心灵 SPA",
+        "觉察记录",
+        "安心对话",
+        "心有灵犀"
+      ],
+      "navDirection": "row",
+      "allIllustrationsLoaded": true,
+      "artAspectPreserved": true,
+      "background": "radial-gradient(at 6% 12%, rgba(239, 208, 142, 0.333), rgba(0, 0, 0, 0) 35%), radial-gradient(at 94% 72%, rgba(202, 209, 166, 0.2), rgba(0, 0, 0, 0) 34%), linear-gradient(160deg, rgb(249, 237, 211), rgb(243, 225, 191))",
+      "mainViewportHeight": 840,
+      "bodyPreview": "心有灵犀把心事交给愿意倾听的人写一封信，等一封回信。这里没有催促，只有被认真接住的倾诉。心有灵犀认证审核第一次见面，先打个招呼吧去身份向导选择你的角色；如果已经准备好向心灵SPA师倾诉，也可以直接完成实名。去身份向导我想倾诉，先完成实名"
+    },
+    {
+      "name": "homePage-768",
+      "hash": "#/homePage",
+      "viewport": 768,
+      "overflow": false,
+      "navLabels": [
+        "首页",
+        "温柔感知",
+        "情绪画像",
+        "心灵 SPA",
+        "觉察记录",
+        "安心对话",
+        "心有灵犀"
+      ],
+      "navDirection": "row",
+      "allIllustrationsLoaded": true,
+      "artAspectPreserved": true,
+      "background": "none",
+      "mainViewportHeight": 840,
+      "bodyPreview": "心安动识 · MINDEASE看见焦虑，遇见安宁 用温柔的科技看见情绪与身体线索，让每一次觉察，都成为更靠近自己的开始。 关于心安动识让科技安静地工作，让陪伴温柔地发生 我们用已经训练好的视觉模型看见表情与身体线索，再把它转化成柔和的自我觉察、正念练习和疗愈建"
+    },
+    {
+      "name": "spaConnect-guest-390",
+      "hash": "#/spaConnect",
+      "viewport": 390,
+      "overflow": false,
+      "navLabels": [
+        "首页",
+        "温柔感知",
+        "情绪画像",
+        "心灵 SPA",
+        "觉察记录",
+        "安心对话",
+        "心有灵犀"
+      ],
+      "navDirection": "row",
+      "allIllustrationsLoaded": true,
+      "artAspectPreserved": true,
+      "background": "radial-gradient(at 6% 12%, rgba(239, 208, 142, 0.333), rgba(0, 0, 0, 0) 35%), radial-gradient(at 94% 72%, rgba(202, 209, 166, 0.2), rgba(0, 0, 0, 0) 34%), linear-gradient(160deg, rgb(249, 237, 211), rgb(243, 225, 191))",
+      "mainViewportHeight": 784,
+      "bodyPreview": "心有灵犀把心事交给愿意倾听的人写一封信，等一封回信。这里没有催促，只有被认真接住的倾诉。心有灵犀认证审核第一次见面，先打个招呼吧去身份向导选择你的角色；如果已经准备好向心灵SPA师倾诉，也可以直接完成实名。去身份向导我想倾诉，先完成实名"
+    },
+    {
+      "name": "homePage-390",
+      "hash": "#/homePage",
+      "viewport": 390,
+      "overflow": false,
+      "navLabels": [
+        "首页",
+        "温柔感知",
+        "情绪画像",
+        "心灵 SPA",
+        "觉察记录",
+        "安心对话",
+        "心有灵犀"
+      ],
+      "navDirection": "row",
+      "allIllustrationsLoaded": true,
+      "artAspectPreserved": true,
+      "background": "none",
+      "mainViewportHeight": 784,
+      "bodyPreview": "心安动识 · MINDEASE看见焦虑，遇见安宁 用温柔的科技看见情绪与身体线索，让每一次觉察，都成为更靠近自己的开始。 关于心安动识让科技安静地工作，让陪伴温柔地发生 我们用已经训练好的视觉模型看见表情与身体线索，再把它转化成柔和的自我觉察、正念练习和疗愈建"
+    },
+    {
+      "name": "spaConnect-empty",
+      "hash": "#/spaConnect",
+      "viewport": 1440,
+      "overflow": false,
+      "navLabels": [
+        "首页",
+        "温柔感知",
+        "情绪画像",
+        "心灵 SPA",
+        "觉察记录",
+        "安心对话",
+        "心有灵犀"
+      ],
+      "navDirection": "row",
+      "allIllustrationsLoaded": true,
+      "artAspectPreserved": true,
+      "background": "radial-gradient(at 6% 12%, rgba(239, 208, 142, 0.333), rgba(0, 0, 0, 0) 35%), radial-gradient(at 94% 72%, rgba(202, 209, 166, 0.2), rgba(0, 0, 0, 0) 34%), linear-gradient(160deg, rgb(249, 237, 211), rgb(243, 225, 191))",
+      "mainViewportHeight": 834,
+      "bodyPreview": "心有灵犀把心事交给愿意倾听的人写一封信，等一封回信。这里没有催促，只有被认真接住的倾诉。心有灵犀认证审核第一次见面，先打个招呼吧去身份向导选择你的角色；如果已经准备好向心灵SPA师倾诉，也可以直接完成实名。去身份向导我想倾诉，先完成实名"
+    },
+    {
+      "name": "spaConnect-pending",
+      "hash": "#/spaConnect",
+      "viewport": 1440,
+      "overflow": false,
+      "navLabels": [
+        "首页",
+        "温柔感知",
+        "情绪画像",
+        "心灵 SPA",
+        "觉察记录",
+        "安心对话",
+        "心有灵犀"
+      ],
+      "navDirection": "row",
+      "allIllustrationsLoaded": true,
+      "artAspectPreserved": true,
+      "background": "radial-gradient(at 6% 12%, rgba(239, 208, 142, 0.333), rgba(0, 0, 0, 0) 35%), radial-gradient(at 94% 72%, rgba(202, 209, 166, 0.2), rgba(0, 0, 0, 0) 34%), linear-gradient(160deg, rgb(249, 237, 211), rgb(243, 225, 191))",
+      "mainViewportHeight": 834,
+      "bodyPreview": "心有灵犀把心事交给愿意倾听的人写一封信，等一封回信。这里没有催促，只有被认真接住的倾诉。心有灵犀认证审核资料正在被轻轻翻阅，请稍候你的实名信息正在审核中，通过之后就可以完整使用「心有灵犀」了。再看看好了没先逛逛"
+    },
+    {
+      "name": "spaConnect-rejected",
+      "hash": "#/spaConnect",
+      "viewport": 1440,
+      "overflow": false,
+      "navLabels": [
+        "首页",
+        "温柔感知",
+        "情绪画像",
+        "心灵 SPA",
+        "觉察记录",
+        "安心对话",
+        "心有灵犀"
+      ],
+      "navDirection": "row",
+      "allIllustrationsLoaded": true,
+      "artAspectPreserved": true,
+      "background": "radial-gradient(at 6% 12%, rgba(239, 208, 142, 0.333), rgba(0, 0, 0, 0) 35%), radial-gradient(at 94% 72%, rgba(202, 209, 166, 0.2), rgba(0, 0, 0, 0) 34%), linear-gradient(160deg, rgb(249, 237, 211), rgb(243, 225, 191))",
+      "mainViewportHeight": 834,
+      "bodyPreview": "心有灵犀把心事交给愿意倾听的人写一封信，等一封回信。这里没有催促，只有被认真接住的倾诉。心有灵犀认证审核这次资料还差一点点测试审核备注重新提交先逛逛"
+    },
+    {
+      "name": "spaConnect-patient",
+      "hash": "#/spaConnect",
+      "viewport": 1440,
+      "overflow": false,
+      "navLabels": [
+        "首页",
+        "温柔感知",
+        "情绪画像",
+        "心灵 SPA",
+        "觉察记录",
+        "安心对话",
+        "心有灵犀"
+      ],
+      "navDirection": "row",
+      "allIllustrationsLoaded": true,
+      "artAspectPreserved": true,
+      "background": "radial-gradient(at 6% 12%, rgba(239, 208, 142, 0.333), rgba(0, 0, 0, 0) 35%), radial-gradient(at 94% 72%, rgba(202, 209, 166, 0.2), rgba(0, 0, 0, 0) 34%), linear-gradient(160deg, rgb(249, 237, 211), rgb(243, 225, 191))",
+      "mainViewportHeight": 834,
+      "bodyPreview": "心有灵犀把心事交给愿意倾听的人写一封信，等一封回信。这里没有催促，只有被认真接住的倾诉。心有灵犀认证审核愿意倾听你的心灵SPA师测试倾听者测试身份测试机构 · 测试科室仅在测试浏览器中展示的样例，未写入任何后端数据。向TA倾诉我的书信往来测试陪伴者心灵SPA师"
+    },
+    {
+      "name": "spaConnect-practitioner",
+      "hash": "#/spaConnect",
+      "viewport": 1440,
+      "overflow": false,
+      "navLabels": [
+        "首页",
+        "温柔感知",
+        "情绪画像",
+        "心灵 SPA",
+        "觉察记录",
+        "安心对话",
+        "心有灵犀"
+      ],
+      "navDirection": "row",
+      "allIllustrationsLoaded": true,
+      "artAspectPreserved": true,
+      "background": "radial-gradient(at 6% 12%, rgba(239, 208, 142, 0.333), rgba(0, 0, 0, 0) 35%), radial-gradient(at 94% 72%, rgba(202, 209, 166, 0.2), rgba(0, 0, 0, 0) 34%), linear-gradient(160deg, rgb(249, 237, 211), rgb(243, 225, 191))",
+      "mainViewportHeight": 834,
+      "bodyPreview": "心有灵犀把心事交给愿意倾听的人写一封信，等一封回信。这里没有催促，只有被认真接住的倾诉。心有灵犀认证审核收到的倾诉测试陪伴者求助者测试书信，仅存在于浏览器验收环境。联结中2026-10-05 09:00"
+    },
+    {
+      "name": "spaConnect-error",
+      "hash": "#/spaConnect",
+      "viewport": 1440,
+      "overflow": false,
+      "navLabels": [
+        "首页",
+        "温柔感知",
+        "情绪画像",
+        "心灵 SPA",
+        "觉察记录",
+        "安心对话",
+        "心有灵犀"
+      ],
+      "navDirection": "row",
+      "allIllustrationsLoaded": true,
+      "artAspectPreserved": true,
+      "background": "radial-gradient(at 6% 12%, rgba(239, 208, 142, 0.333), rgba(0, 0, 0, 0) 35%), radial-gradient(at 94% 72%, rgba(202, 209, 166, 0.2), rgba(0, 0, 0, 0) 34%), linear-gradient(160deg, rgb(249, 237, 211), rgb(243, 225, 191))",
+      "mainViewportHeight": 834,
+      "bodyPreview": "心有灵犀把心事交给愿意倾听的人写一封信，等一封回信。这里没有催促，只有被认真接住的倾诉。心有灵犀认证审核第一次见面，先打个招呼吧去身份向导选择你的角色；如果已经准备好向心灵SPA师倾诉，也可以直接完成实名。去身份向导我想倾诉，先完成实名"
+    },
+    {
+      "name": "imgPredict-1440",
+      "hash": "#/imgPredict",
+      "viewport": 1440,
+      "overflow": false,
+      "navLabels": [
+        "首页",
+        "温柔感知",
+        "情绪画像",
+        "心灵 SPA",
+        "觉察记录",
+        "安心对话",
+        "心有灵犀"
+      ],
+      "navDirection": "row",
+      "allIllustrationsLoaded": true,
+      "artAspectPreserved": true,
+      "background": "none",
+      "mainViewportHeight": 834,
+      "bodyPreview": "图片温柔感知把此刻的情绪线索，轻轻看见这里不会给你贴标签。图片识别只是一段自我觉察的入口，真正重要的是你愿意停下来照顾自己。安你可以慢慢来。我们先看见当下，不急着改变什么。开始前的隐私确认图片会先上传到本地后端，再交给本地 YOLO 服务处理。你可以决定是否保"
+    },
+    {
+      "name": "videoPredict-1440",
+      "hash": "#/videoPredict",
+      "viewport": 1440,
+      "overflow": false,
+      "navLabels": [
+        "首页",
+        "温柔感知",
+        "情绪画像",
+        "心灵 SPA",
+        "觉察记录",
+        "安心对话",
+        "心有灵犀"
+      ],
+      "navDirection": "row",
+      "allIllustrationsLoaded": true,
+      "artAspectPreserved": true,
+      "background": "none",
+      "mainViewportHeight": 834,
+      "bodyPreview": "视频温柔感知把动态里的情绪线索，慢慢整理出来上传的视频只用于本次感知。这里给你的不是结论，而是一份可以帮助你回看状态的温柔线索。安小宁会这样陪你先看见画面中的表情与动作变化，再把它们整理成觉察记录、小练习和可选择保留的素材路径。开始前的隐私确认视频会先上传到本"
+    },
+    {
+      "name": "cameraPredict-1440",
+      "hash": "#/cameraPredict",
+      "viewport": 1440,
+      "overflow": false,
+      "navLabels": [
+        "首页",
+        "温柔感知",
+        "情绪画像",
+        "心灵 SPA",
+        "觉察记录",
+        "安心对话",
+        "心有灵犀"
+      ],
+      "navDirection": "row",
+      "allIllustrationsLoaded": true,
+      "artAspectPreserved": true,
+      "background": "none",
+      "mainViewportHeight": 834,
+      "bodyPreview": "摄像头温柔感知实时看见身体与情绪的细微信号摄像头只会在你主动确认后开启，也可以随时停止。结果用于自我觉察，不会给你贴标签。你始终拥有选择权是否开始、是否保存记录、是否保留结果视频路径，都由你决定。安小宁只负责陪你把线索说得更温柔。开始前的隐私确认开始时浏览器会"
+    },
+    {
+      "name": "dataView-1440",
+      "hash": "#/dataView",
+      "viewport": 1440,
+      "overflow": false,
+      "navLabels": [
+        "首页",
+        "温柔感知",
+        "情绪画像",
+        "心灵 SPA",
+        "觉察记录",
+        "安心对话",
+        "心有灵犀"
+      ],
+      "navDirection": "row",
+      "allIllustrationsLoaded": true,
+      "artAspectPreserved": true,
+      "background": "none",
+      "mainViewportHeight": 834,
+      "bodyPreview": "EMOTION PORTRAIT情绪画像轻轻回望今天被记录的情绪，让觉察成为照顾自己的开始。今日识别总量0 次积极情绪0 次消极情绪0 次中性情绪0 次积极情绪开心满足期待感激消极情绪悲伤愤怒担忧疲惫中性情绪平静专注思考观察表情识别记录最近的感知记录会在这里安"
+    },
+    {
+      "name": "trashMap-1440",
+      "hash": "#/trashMap",
+      "viewport": 1440,
+      "overflow": false,
+      "navLabels": [
+        "首页",
+        "温柔感知",
+        "情绪画像",
+        "心灵 SPA",
+        "觉察记录",
+        "安心对话",
+        "心有灵犀"
+      ],
+      "navDirection": "row",
+      "allIllustrationsLoaded": true,
+      "artAspectPreserved": true,
+      "background": "none",
+      "mainViewportHeight": 834,
+      "bodyPreview": "心灵 SPA 地图导引找一处此刻能让你慢下来的地方 位置只在你授权后读取，用来在地图上查找附近的真实资源；页面不会保存你的位置。 路线、营业状态与服务内容请以地图平台和机构公开信息为准。 地图导引仅供参考地图服务还在准备中 这盏灯很快会亮起来。页面需要一枚高德"
+    },
+    {
+      "name": "trashRecords-1440",
+      "hash": "#/trashRecords",
+      "viewport": 1440,
+      "overflow": false,
+      "navLabels": [
+        "首页",
+        "温柔感知",
+        "情绪画像",
+        "心灵 SPA",
+        "觉察记录",
+        "安心对话",
+        "心有灵犀"
+      ],
+      "navDirection": "row",
+      "allIllustrationsLoaded": true,
+      "artAspectPreserved": true,
+      "background": "none",
+      "mainViewportHeight": 834,
+      "bodyPreview": "觉察记录把每一次看见自己，都轻轻收好这里记录的是情绪与身体线索，不给你贴标签。你可以回看状态变化，也可以随时删掉不想留下的记录。刷新已保存记录0本页图片觉察0本页视频觉察0本页摄像头觉察0全部图片觉察视频觉察摄像头觉察查找还没有留下觉察记录你可以先去图片、视频"
+    },
+    {
+      "name": "smartChat-1440",
+      "hash": "#/smartChat",
+      "viewport": 1440,
+      "overflow": false,
+      "navLabels": [
+        "首页",
+        "温柔感知",
+        "情绪画像",
+        "心灵 SPA",
+        "觉察记录",
+        "安心对话",
+        "心有灵犀"
+      ],
+      "navDirection": "row",
+      "allIllustrationsLoaded": true,
+      "artAspectPreserved": true,
+      "background": "none",
+      "mainViewportHeight": 834,
+      "bodyPreview": "安安心对话 DeepSeek 陪伴式对话＋新对话安安心对话今天想从哪里聊起？你可以打字、说话，或附上经过你确认的文件与图片。整理此刻的感受我有点乱，不知道从哪里说起把任务拆小一点一想到任务就紧绷做一次短暂放松用三分钟让身体慢下来阅读文件或图片添加后逐项批准发送"
+    },
+    {
+      "name": "dataView-390",
+      "hash": "#/dataView",
+      "viewport": 390,
+      "overflow": false,
+      "navLabels": [
+        "首页",
+        "温柔感知",
+        "情绪画像",
+        "心灵 SPA",
+        "觉察记录",
+        "安心对话",
+        "心有灵犀"
+      ],
+      "navDirection": "row",
+      "allIllustrationsLoaded": true,
+      "artAspectPreserved": true,
+      "background": "none",
+      "mainViewportHeight": 784,
+      "bodyPreview": "EMOTION PORTRAIT情绪画像轻轻回望今天被记录的情绪，让觉察成为照顾自己的开始。今日识别总量0 次积极情绪0 次消极情绪0 次中性情绪0 次积极情绪开心满足期待感激消极情绪悲伤愤怒担忧疲惫中性情绪平静专注思考观察表情识别记录最近的感知记录会在这里安"
+    },
+    {
+      "name": "trashMap-390",
+      "hash": "#/trashMap",
+      "viewport": 390,
+      "overflow": false,
+      "navLabels": [
+        "首页",
+        "温柔感知",
+        "情绪画像",
+        "心灵 SPA",
+        "觉察记录",
+        "安心对话",
+        "心有灵犀"
+      ],
+      "navDirection": "row",
+      "allIllustrationsLoaded": true,
+      "artAspectPreserved": true,
+      "background": "none",
+      "mainViewportHeight": 784,
+      "bodyPreview": "心灵 SPA 地图导引找一处此刻能让你慢下来的地方 位置只在你授权后读取，用来在地图上查找附近的真实资源；页面不会保存你的位置。 路线、营业状态与服务内容请以地图平台和机构公开信息为准。 地图导引仅供参考地图服务还在准备中 这盏灯很快会亮起来。页面需要一枚高德"
+    },
+    {
+      "name": "trashRecords-390",
+      "hash": "#/trashRecords",
+      "viewport": 390,
+      "overflow": false,
+      "navLabels": [
+        "首页",
+        "温柔感知",
+        "情绪画像",
+        "心灵 SPA",
+        "觉察记录",
+        "安心对话",
+        "心有灵犀"
+      ],
+      "navDirection": "row",
+      "allIllustrationsLoaded": true,
+      "artAspectPreserved": true,
+      "background": "none",
+      "mainViewportHeight": 784,
+      "bodyPreview": "觉察记录把每一次看见自己，都轻轻收好这里记录的是情绪与身体线索，不给你贴标签。你可以回看状态变化，也可以随时删掉不想留下的记录。刷新已保存记录0本页图片觉察0本页视频觉察0本页摄像头觉察0全部图片觉察视频觉察摄像头觉察查找还没有留下觉察记录你可以先去图片、视频"
+    },
+    {
+      "name": "smartChat-390",
+      "hash": "#/smartChat",
+      "viewport": 390,
+      "overflow": false,
+      "navLabels": [
+        "首页",
+        "温柔感知",
+        "情绪画像",
+        "心灵 SPA",
+        "觉察记录",
+        "安心对话",
+        "心有灵犀"
+      ],
+      "navDirection": "row",
+      "allIllustrationsLoaded": true,
+      "artAspectPreserved": true,
+      "background": "none",
+      "mainViewportHeight": 784,
+      "bodyPreview": "安安心对话 DeepSeek 陪伴式对话＋新对话安安心对话今天想从哪里聊起？你可以打字、说话，或附上经过你确认的文件与图片。整理此刻的感受我有点乱，不知道从哪里说起把任务拆小一点一想到任务就紧绷做一次短暂放松用三分钟让身体慢下来阅读文件或图片添加后逐项批准发送"
+    }
+  ],
+  "mobileMenu": [
+    "首页",
+    "温柔感知图片感知视频感知摄像头感知",
+    "情绪画像",
+    "心灵 SPA",
+    "觉察记录",
+    "安心对话",
+    "心有灵犀"
+  ],
+  "uncaughtExceptions": [],
+  "mockedPosts": [
+    {
+      "path": "/api/spa/requests/990001/messages",
+      "method": "POST"
+    },
+    {
+      "path": "/api/spa/requests/990001/messages",
+      "method": "POST"
+    }
+  ],
+  "backendWrites": 0,
+  "legacyAboutRedirect": true
+}

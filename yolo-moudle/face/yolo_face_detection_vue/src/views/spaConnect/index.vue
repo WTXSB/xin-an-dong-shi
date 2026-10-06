@@ -2,9 +2,13 @@
 	<div class="spa-page layout-padding">
 		<div class="spa-shell layout-padding-auto layout-padding-view">
 			<section class="hero">
+				<div class="hero-copy">
 				<p class="eyebrow">心有灵犀</p>
 				<h1>把心事交给愿意倾听的人</h1>
 				<span>写一封信，等一封回信。这里没有催促，只有被认真接住的倾诉。</span>
+				</div>
+				<img class="letter-companions" src="../../assets/healing-frames/letter-companions-v1.png" alt="" aria-hidden="true" />
+				<HealingIllustratedFrame variant="rest" />
 			</section>
 
 			<!-- admin 专属：认证审核 Tab -->
@@ -16,6 +20,7 @@
 			<!-- 认证审核面板 -->
 			<section v-if="isAdmin && activeTab === 'review'" v-loading="reviewLoading" class="review-panel">
 				<div v-if="pendingList.length === 0" class="empty-state">
+					<HealingIllustratedFrame variant="garden" />
 					<strong>暂时没有等待审核的资料</strong>
 					<p>每一份递交上来的信任，都会安静地排队等你翻阅。</p>
 				</div>
@@ -50,6 +55,7 @@
 				<template v-else>
 					<!-- 无身份引导卡 -->
 					<section v-if="viewState === 'guest'" class="guide-card">
+						<HealingIllustratedFrame variant="clouds" />
 						<div>
 							<h2>第一次见面，先打个招呼吧</h2>
 							<p>去身份向导选择你的角色；如果已经准备好向心灵SPA师倾诉，也可以直接完成实名。</p>
@@ -62,6 +68,7 @@
 
 					<!-- 审核中 -->
 					<section v-else-if="viewState === 'pending'" class="status-card">
+						<HealingIllustratedFrame variant="garden" />
 						<h2>资料正在被轻轻翻阅，请稍候</h2>
 						<p>你的{{ myIdentity?.identityType === 'practitioner' ? '心灵SPA师认证' : '实名信息' }}正在审核中，通过之后就可以完整使用「心有灵犀」了。</p>
 						<div class="status-actions">
@@ -72,6 +79,7 @@
 
 					<!-- 已驳回 -->
 					<section v-else-if="viewState === 'rejected'" class="status-card">
+						<HealingIllustratedFrame variant="rest" />
 						<h2>这次资料还差一点点</h2>
 						<p class="reject-note">{{ myIdentity?.auditNote || '审核暂时没有通过，补充后可以再提交一次。' }}</p>
 						<div class="status-actions">
@@ -100,6 +108,7 @@
 									</div>
 								</div>
 								<div v-if="!messagesLoading && messages.length === 0" class="empty-state">
+									<HealingIllustratedFrame variant="clouds" />
 									<strong>信纸还是空白的</strong>
 									<p>写下第一句话，让这段陪伴从这一刻开始。</p>
 								</div>
@@ -143,10 +152,12 @@
 
 					<template v-else>
 						<!-- 心灵SPA师卡片网格（无身份与患者视角可见） -->
+						<HealingDecorationStrip v-if="viewState === 'guest' || viewState === 'patient'" variant="garden" />
 						<section v-if="viewState === 'guest' || viewState === 'patient'" class="practitioner-section">
 							<h2 class="section-title">愿意倾听你的心灵SPA师</h2>
 							<div v-loading="practitionersLoading" class="practitioner-grid">
 								<div v-if="!practitionersLoading && practitioners.length === 0" class="empty-state">
+									<HealingIllustratedFrame variant="garden" />
 									<strong>心灵SPA师们还在路上</strong>
 									<p>等他们完成认证后，就会在这里等你写信。</p>
 								</div>
@@ -167,6 +178,7 @@
 							<h2 class="section-title">{{ viewState === 'practitioner' ? '收到的倾诉' : '我的书信往来' }}</h2>
 							<div v-loading="requestsLoading" class="requests-list">
 								<div v-if="!requestsLoading && requests.length === 0" class="empty-state">
+									<HealingIllustratedFrame variant="rest" />
 									<strong>{{ viewState === 'practitioner' ? '还没有收到倾诉' : '还没有书信往来' }}</strong>
 									<p>{{ viewState === 'practitioner' ? '当有人向你递出第一封信，会出现在这里。' : '挑一位心灵SPA师，写下你的第一封信吧。' }}</p>
 								</div>
@@ -188,6 +200,9 @@
 					</template>
 				</template>
 			</template>
+		</div>
+		<div class="letter-garden" aria-hidden="true">
+			<img src="../../assets/healing-frames/letter-garden-panorama-v1.png" alt="" />
 		</div>
 
 		<!-- 实名对话框（倾诉前完成） -->
@@ -651,646 +666,6 @@ onBeforeUnmount(() => {
 });
 </script>
 
-<style scoped>
-.spa-page.layout-padding {
-	background: linear-gradient(160deg, #fdf9f3 0%, #fbf6ef 100%);
-	min-height: 100%;
-}
-
-.spa-shell.layout-padding-auto,
-.spa-shell.layout-padding-view {
-	background: transparent;
-	border: none;
-	box-shadow: none;
-}
-
-.hero {
-	margin-bottom: 20px;
-	padding: 8px 4px;
-}
-
-.eyebrow {
-	margin: 0 0 8px;
-	color: #c98f5c;
-	font-size: 14px;
-	font-weight: 800;
-	letter-spacing: 0.06em;
-}
-
-.hero h1 {
-	margin: 0 0 10px;
-	color: #4a3b30;
-	font-size: 28px;
-	line-height: 1.3;
-}
-
-.hero span {
-	color: #8a7a6c;
-	font-size: 15px;
-	line-height: 1.8;
-}
-
-.loading-block {
-	min-height: 240px;
-}
-
-.section-title {
-	margin: 26px 4px 14px;
-	color: #4a3b30;
-	font-size: 19px;
-}
-
-.primary-btn,
-.ghost-btn {
-	border: none;
-	border-radius: 8px;
-	padding: 9px 20px;
-	font-size: 14px;
-	font-weight: 700;
-	cursor: pointer;
-	transition: background 0.2s ease, color 0.2s ease;
-}
-
-.primary-btn {
-	background: #c98f5c;
-	color: #ffffff;
-}
-
-.primary-btn:hover {
-	background: #b67c4b;
-}
-
-.primary-btn:disabled {
-	opacity: 0.7;
-	cursor: not-allowed;
-}
-
-.ghost-btn {
-	background: transparent;
-	color: #b07d4e;
-	box-shadow: inset 0 0 0 1px rgba(201, 143, 92, 0.45);
-}
-
-.ghost-btn:hover {
-	background: #f6ecdf;
-}
-
-.ghost-btn.danger {
-	color: #b05c4a;
-	box-shadow: inset 0 0 0 1px rgba(176, 92, 74, 0.45);
-}
-
-.empty-state {
-	padding: 40px 20px;
-	text-align: center;
-	color: #8a7a6c;
-}
-
-.empty-state strong {
-	display: block;
-	margin-bottom: 8px;
-	color: #6d5c4d;
-	font-size: 16px;
-}
-
-.empty-state p {
-	margin: 0;
-	font-size: 14px;
-	line-height: 1.8;
-}
-
-.empty-state.small {
-	padding: 20px 10px;
-}
-
-/* admin Tab */
-.module-tabs {
-	display: inline-flex;
-	gap: 8px;
-	margin-bottom: 18px;
-	padding: 5px;
-	border-radius: 10px;
-	background: #f3e8d8;
-}
-
-.module-tabs button {
-	border: none;
-	border-radius: 8px;
-	padding: 8px 22px;
-	background: transparent;
-	color: #8a6f52;
-	font-size: 14px;
-	font-weight: 700;
-	cursor: pointer;
-}
-
-.module-tabs button.active {
-	background: #fffdf8;
-	color: #b07d4e;
-	box-shadow: 0 2px 8px rgba(150, 108, 66, 0.12);
-}
-
-/* 引导卡 / 状态卡 */
-.guide-card,
-.status-card {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 18px;
-	padding: 22px 26px;
-	border: 1px solid rgba(201, 143, 92, 0.25);
-	border-radius: 12px;
-	background: #fffdf8;
-	box-shadow: 0 10px 26px rgba(150, 108, 66, 0.08);
-}
-
-.status-card {
-	flex-direction: column;
-	align-items: flex-start;
-	max-width: 620px;
-}
-
-.guide-card h2,
-.status-card h2 {
-	margin: 0 0 8px;
-	color: #4a3b30;
-	font-size: 19px;
-}
-
-.guide-card p,
-.status-card p {
-	margin: 0;
-	color: #8a7a6c;
-	font-size: 14px;
-	line-height: 1.8;
-}
-
-.reject-note {
-	padding: 10px 14px;
-	border-radius: 8px;
-	background: #fbf1e4;
-}
-
-.guide-actions,
-.status-actions {
-	display: flex;
-	flex-shrink: 0;
-	gap: 10px;
-}
-
-/* 心灵SPA师卡片 */
-.practitioner-grid {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-	gap: 16px;
-}
-
-.practitioner-card {
-	display: flex;
-	flex-direction: column;
-	gap: 8px;
-	padding: 20px;
-	border: 1px solid rgba(201, 143, 92, 0.2);
-	border-radius: 12px;
-	background: #fffdf8;
-	box-shadow: 0 10px 24px rgba(150, 108, 66, 0.07);
-}
-
-.practitioner-card header {
-	display: flex;
-	align-items: center;
-	gap: 10px;
-}
-
-.practitioner-card header strong {
-	color: #4a3b30;
-	font-size: 17px;
-}
-
-.title-pill {
-	padding: 3px 10px;
-	border-radius: 999px;
-	background: #f3e2cc;
-	color: #a4713e;
-	font-size: 12px;
-	font-weight: 700;
-}
-
-.practitioner-card .org {
-	margin: 0;
-	color: #a08b78;
-	font-size: 13px;
-}
-
-.practitioner-card .bio {
-	flex: 1;
-	margin: 0;
-	color: #8a7a6c;
-	font-size: 14px;
-	line-height: 1.8;
-	display: -webkit-box;
-	-webkit-line-clamp: 3;
-	-webkit-box-orient: vertical;
-	overflow: hidden;
-}
-
-.practitioner-card .primary-btn {
-	align-self: flex-start;
-	margin-top: 4px;
-}
-
-/* 求助单列表 */
-.requests-list {
-	display: flex;
-	flex-direction: column;
-	gap: 12px;
-}
-
-.request-card {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	gap: 16px;
-	padding: 16px 20px;
-	border: 1px solid rgba(201, 143, 92, 0.2);
-	border-radius: 12px;
-	background: #fffdf8;
-	box-shadow: 0 8px 20px rgba(150, 108, 66, 0.06);
-	cursor: pointer;
-	transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.request-card:hover {
-	transform: translateY(-2px);
-	box-shadow: 0 14px 28px rgba(150, 108, 66, 0.12);
-}
-
-.request-main {
-	min-width: 0;
-}
-
-.request-main header {
-	display: flex;
-	align-items: baseline;
-	gap: 10px;
-	margin-bottom: 6px;
-}
-
-.request-main header strong {
-	color: #4a3b30;
-	font-size: 16px;
-}
-
-.request-main .org {
-	color: #a08b78;
-	font-size: 13px;
-}
-
-.request-main .preview {
-	margin: 0;
-	color: #8a7a6c;
-	font-size: 14px;
-	line-height: 1.7;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	max-width: 560px;
-}
-
-.request-meta {
-	display: flex;
-	flex-direction: column;
-	align-items: flex-end;
-	gap: 8px;
-	flex-shrink: 0;
-}
-
-.request-meta small {
-	color: #b3a08d;
-}
-
-.status-pill {
-	padding: 4px 12px;
-	border-radius: 999px;
-	background: #f3e2cc;
-	color: #a4713e;
-	font-size: 12px;
-	font-weight: 700;
-}
-
-.status-pill.closed {
-	background: #eee9e0;
-	color: #93866f;
-}
-
-/* 对话界面 */
-.chat-layout {
-	display: grid;
-	grid-template-columns: minmax(0, 1fr);
-	gap: 16px;
-}
-
-.chat-layout.with-records {
-	grid-template-columns: minmax(0, 1fr) 300px;
-}
-
-.chat-main {
-	display: flex;
-	flex-direction: column;
-	border: 1px solid rgba(201, 143, 92, 0.2);
-	border-radius: 12px;
-	background: #fffdf8;
-	box-shadow: 0 10px 26px rgba(150, 108, 66, 0.08);
-	overflow: hidden;
-}
-
-.chat-head {
-	display: flex;
-	align-items: center;
-	gap: 16px;
-	padding: 14px 18px;
-	border-bottom: 1px solid rgba(201, 143, 92, 0.16);
-	background: #fdf7ec;
-}
-
-.chat-peer {
-	display: flex;
-	flex-direction: column;
-}
-
-.chat-peer strong {
-	color: #4a3b30;
-	font-size: 16px;
-}
-
-.chat-peer span {
-	color: #a08b78;
-	font-size: 13px;
-}
-
-.letters {
-	flex: 1;
-	min-height: 320px;
-	max-height: 52vh;
-	overflow-y: auto;
-	padding: 20px;
-	display: flex;
-	flex-direction: column;
-	gap: 14px;
-	background: linear-gradient(180deg, #fffdf8 0%, #fbf6ef 100%);
-}
-
-.letter-item {
-	display: flex;
-	justify-content: flex-start;
-}
-
-.letter-item.mine {
-	justify-content: flex-end;
-}
-
-.letter-card {
-	max-width: 72%;
-	padding: 12px 16px;
-	border-radius: 12px;
-	border: 1px solid rgba(201, 143, 92, 0.18);
-	background: #fdf8ef;
-	box-shadow: 0 6px 14px rgba(150, 108, 66, 0.06);
-}
-
-.letter-item.mine .letter-card {
-	background: #f4dfc4;
-	border-color: rgba(201, 143, 92, 0.35);
-}
-
-.letter-tag {
-	margin: 0 0 6px;
-	color: #b07d4e;
-	font-size: 12px;
-	font-weight: 800;
-}
-
-.letter-content {
-	margin: 0;
-	color: #5b4a3c;
-	font-size: 15px;
-	line-height: 1.8;
-	white-space: pre-wrap;
-	word-break: break-word;
-}
-
-.letter-time {
-	margin: 8px 0 0;
-	color: #b3a08d;
-	font-size: 12px;
-	text-align: right;
-}
-
-.reply-box {
-	display: flex;
-	align-items: flex-end;
-	gap: 12px;
-	padding: 14px 18px;
-	border-top: 1px solid rgba(201, 143, 92, 0.16);
-	background: #fdf7ec;
-}
-
-.reply-box :deep(.el-textarea__inner) {
-	border-radius: 10px;
-	background: #fffdf8;
-	box-shadow: 0 0 0 1px rgba(201, 143, 92, 0.28);
-}
-
-.reply-box :deep(.el-textarea__inner:focus) {
-	box-shadow: 0 0 0 1px #c98f5c;
-}
-
-.send-btn {
-	flex-shrink: 0;
-	height: 40px;
-}
-
-/* 侧栏：近期记录 */
-.records-aside {
-	display: flex;
-	flex-direction: column;
-	border: 1px solid rgba(201, 143, 92, 0.2);
-	border-radius: 12px;
-	background: #fbf4e8;
-	box-shadow: 0 10px 26px rgba(150, 108, 66, 0.08);
-	overflow: hidden;
-}
-
-.records-head {
-	padding: 14px 16px;
-	border-bottom: 1px solid rgba(201, 143, 92, 0.16);
-}
-
-.records-head strong {
-	color: #4a3b30;
-	font-size: 15px;
-}
-
-.records-head p {
-	margin: 6px 0 0;
-	color: #a08b78;
-	font-size: 12px;
-	line-height: 1.7;
-}
-
-.records-list {
-	flex: 1;
-	overflow-y: auto;
-	max-height: 60vh;
-	padding: 12px;
-	display: flex;
-	flex-direction: column;
-	gap: 10px;
-}
-
-.record-item {
-	padding: 12px;
-	border: 1px solid rgba(201, 143, 92, 0.18);
-	border-radius: 10px;
-	background: #fffdf8;
-	cursor: pointer;
-	transition: box-shadow 0.15s ease;
-}
-
-.record-item:hover {
-	box-shadow: 0 8px 18px rgba(150, 108, 66, 0.12);
-}
-
-.record-line {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	margin-bottom: 6px;
-}
-
-.emotion-pill {
-	padding: 2px 10px;
-	border-radius: 999px;
-	background: #f3e2cc;
-	color: #a4713e;
-	font-size: 12px;
-	font-weight: 700;
-}
-
-.record-line small {
-	color: #b3a08d;
-}
-
-.record-item p {
-	margin: 0;
-	color: #8a7a6c;
-	font-size: 13px;
-	line-height: 1.7;
-	display: -webkit-box;
-	-webkit-line-clamp: 3;
-	-webkit-box-orient: vertical;
-	overflow: hidden;
-}
-
-/* 审核面板 */
-.review-panel {
-	display: flex;
-	flex-direction: column;
-	gap: 14px;
-}
-
-.review-card {
-	padding: 18px 22px;
-	border: 1px solid rgba(201, 143, 92, 0.22);
-	border-radius: 12px;
-	background: #fffdf8;
-	box-shadow: 0 10px 24px rgba(150, 108, 66, 0.07);
-}
-
-.review-head {
-	display: flex;
-	align-items: center;
-	gap: 12px;
-	margin-bottom: 12px;
-}
-
-.review-head strong {
-	color: #4a3b30;
-	font-size: 17px;
-}
-
-.review-head small {
-	color: #a08b78;
-}
-
-.review-badge {
-	padding: 3px 12px;
-	border-radius: 999px;
-	font-size: 12px;
-	font-weight: 800;
-}
-
-.review-badge.practitioner {
-	background: #e9f0e4;
-	color: #5d7a4c;
-}
-
-.review-badge.patient {
-	background: #f3e2cc;
-	color: #a4713e;
-}
-
-.review-fields {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-	gap: 6px 20px;
-}
-
-.review-fields p {
-	margin: 0;
-	color: #6d5c4d;
-	font-size: 14px;
-	line-height: 1.8;
-}
-
-.review-fields span {
-	display: inline-block;
-	min-width: 64px;
-	margin-right: 8px;
-	color: #b3a08d;
-	font-size: 13px;
-}
-
-.review-actions {
-	display: flex;
-	gap: 10px;
-	margin-top: 14px;
-}
-
-/* 对话框 */
-.dialog-disclaimer {
-	margin: 4px 0 0;
-	padding: 10px 12px;
-	border-radius: 8px;
-	background: #f7efe4;
-	color: #96785a;
-	font-size: 13px;
-	line-height: 1.7;
-}
-
-.warm-dialog :deep(.el-dialog__title) {
-	color: #4a3b30;
-	font-weight: 800;
-}
-
-@media (max-width: 960px) {
-	.chat-layout.with-records {
-		grid-template-columns: 1fr;
-	}
-
-	.guide-card {
-		flex-direction: column;
-		align-items: flex-start;
-	}
-}
+<style scoped lang="scss">
+@use './spa-connect-healing.scss';
 </style>

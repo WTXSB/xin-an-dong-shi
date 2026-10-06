@@ -1,12 +1,13 @@
 <template>
 	<div class="emotion-page">
 		<header class="page-heading">
-			<div><span class="eyebrow">EMOTION PORTRAIT</span><h1>情绪画像</h1></div>
+			<div><span class="eyebrow">EMOTION DIARY</span><h1>情绪日记</h1></div>
 			<p>轻轻回望今天被记录的情绪，让觉察成为照顾自己的开始。</p>
 
 			<HealingIllustratedFrame variant="clouds" />
 			</header>
 			<HealingDecorationStrip variant="sky" />
+		<EmotionDiary />
 
 
 		<section class="stat-grid">
@@ -42,9 +43,10 @@
 	</div>
 </template>
 
-<script setup lang="ts">
+<script setup lang="ts" name="dataView">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import request from '/@/utils/request';
+import EmotionDiary from '/@/components/emotionDiary/EmotionDiary.vue';
 
 interface EmotionRecord {
 	id: number | string;

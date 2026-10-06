@@ -11,7 +11,7 @@
 				ref="carouselRef"
 				class="hero-carousel"
 				height="calc(100vh - 82px)"
-				:interval="5000"
+				:interval="2500"
 				:autoplay="autoplay"
 				:pause-on-hover="true"
 				arrow="always"
@@ -30,10 +30,6 @@
 				<p class="hero-description">
 					用温柔的科技看见情绪与身体线索，让每一次觉察，都成为更靠近自己的开始。
 				</p>
-				<div class="hero-actions">
-					<el-button class="primary-action" @click="$router.push('/imgPredict')">开始温柔感知</el-button>
-					<el-button class="secondary-action" @click="$router.push('/aboutProduct')">了解心安动识</el-button>
-				</div>
 			</div>
 
 			<div class="slide-dots" aria-label="轮播图切换">
@@ -47,11 +43,13 @@
 				></button>
 			</div>
 		</section>
+		<AboutProduct class="home-about-section" />
 	</div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import AboutProduct from '/@/views/aboutProduct/index.vue';
 import heroCompanions from '/@/assets/home-carousel/hero-handpaint-companions-4k.webp';
 import heroRainyNook from '/@/assets/home-carousel/hero-handpaint-rainy-nook-4k.webp';
 import heroRabbitMeadow from '/@/assets/home-carousel/hero-handpaint-rabbit-meadow-4k.webp';
@@ -106,6 +104,12 @@ const onTouchEnd = (event: TouchEvent) => {
 	border-radius: 30px;
 	background: linear-gradient(135deg, #ffe39c 0%, #fff2c4 54%, #fff8df 100%);
 	box-shadow: 0 24px 64px rgba(142, 88, 38, 0.14);
+}
+
+.home-showcase > .home-about-section {
+	min-height: 0;
+	margin-top: 28px;
+	border-radius: 30px;
 }
 
 .hero-carousel,
@@ -175,49 +179,6 @@ h1 {
 	opacity: 1;
 }
 
-.hero-actions {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 14px;
-	margin-top: 34px;
-}
-
-.primary-action,
-.secondary-action {
-	height: 48px;
-	padding: 0 27px;
-	border-radius: 999px;
-	font-family: 'MindEase WenKai', 'KaiTi', serif;
-	font-size: 16px;
-	font-weight: 700;
-	letter-spacing: 0.04em;
-}
-
-.primary-action {
-	border-color: #bd6d3f;
-	background: #bd6d3f;
-	color: #fffaf0;
-	box-shadow: 0 12px 26px rgba(178, 96, 48, .22);
-}
-
-.primary-action:hover {
-	border-color: #a65c35;
-	background: #a65c35;
-	color: #ffffff;
-}
-
-.secondary-action {
-	border-color: rgba(153, 91, 53, .36);
-	background: rgba(255, 254, 247, .58);
-	color: #7a4b32;
-	backdrop-filter: blur(8px);
-}
-
-.secondary-action:hover {
-	border-color: rgba(153, 91, 53, .5);
-	background: rgba(255, 255, 255, .82);
-	color: #663d29;
-}
 
 .slide-dots {
 	position: absolute;
@@ -254,6 +215,10 @@ h1 {
 }
 
 @media (max-width: 1000px) {
+	.home-showcase > .home-about-section {
+		margin-top: 20px;
+		border-radius: 0;
+	}
 	.home-showcase {
 		padding: 0;
 	}
@@ -303,18 +268,6 @@ h1 {
 	.hero-description {
 		font-size: 16px;
 		line-height: 1.75;
-	}
-
-	.hero-actions {
-		gap: 10px;
-		margin-top: 26px;
-	}
-
-	.primary-action,
-	.secondary-action {
-		height: 44px;
-		padding: 0 20px;
-		font-size: 14px;
 	}
 
 	:deep(.el-carousel__arrow) {

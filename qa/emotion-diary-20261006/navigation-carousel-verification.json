@@ -1,0 +1,118 @@
+{
+  "checks": [
+    {
+      "path": "#/homePage",
+      "label": "首页",
+      "active": true,
+      "curtain": true
+    },
+    {
+      "path": "#/imgPredict",
+      "label": "温柔感知",
+      "active": true,
+      "curtain": true
+    },
+    {
+      "path": "#/homePage",
+      "label": "首页",
+      "active": true,
+      "curtain": true
+    },
+    {
+      "path": "#/smartChat",
+      "label": "安心对话",
+      "active": true,
+      "curtain": true
+    },
+    {
+      "path": "#/homePage",
+      "label": "首页",
+      "active": true,
+      "curtain": true
+    },
+    {
+      "path": "#/dataView",
+      "label": "情绪日记",
+      "active": true,
+      "curtain": true
+    },
+    {
+      "path": "#/homePage",
+      "label": "首页",
+      "active": true,
+      "curtain": true
+    },
+    {
+      "path": "#/trashMap",
+      "label": "心灵 SPA",
+      "active": true,
+      "curtain": true
+    },
+    {
+      "path": "#/homePage",
+      "label": "首页",
+      "active": true,
+      "curtain": true
+    },
+    {
+      "path": "#/trashMap",
+      "label": "心灵 SPA",
+      "active": true,
+      "curtain": true
+    },
+    {
+      "path": "#/trashMap",
+      "label": "心灵 SPA",
+      "active": true,
+      "curtain": true
+    },
+    {
+      "path": "#/trashRecords",
+      "label": "觉察记录",
+      "active": true,
+      "curtain": true
+    },
+    {
+      "path": "#/spaConnect",
+      "label": "心有灵犀",
+      "active": true,
+      "curtain": true
+    },
+    {
+      "path": "#/videoPredict",
+      "label": "温柔感知",
+      "active": true,
+      "curtain": true
+    },
+    {
+      "path": "#/cameraPredict",
+      "label": "温柔感知",
+      "active": true,
+      "curtain": true
+    },
+    {
+      "path": "#/cameraPredict?qa=navigation",
+      "label": "温柔感知",
+      "active": true,
+      "curtain": true
+    },
+    {
+      "path": "#/homePage",
+      "label": "首页",
+      "active": true,
+      "curtain": true
+    },
+    {
+      "carousel": {
+        "changes": 3,
+        "intervals": [
+          2500,
+          2501
+        ]
+      }
+    }
+  ],
+  "exceptions": [],
+  "backend": "isolated in-memory database on 10099",
+  "realDatabaseWrites": 0
+}
