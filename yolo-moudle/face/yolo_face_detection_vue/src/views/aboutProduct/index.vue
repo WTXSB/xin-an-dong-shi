@@ -83,8 +83,8 @@
 		</section>
 
 		<section class="metrics-band surface-card">
-			<div class="metric-item"><strong>{{ statistics.users }}</strong><span>位体验者</span></div>
-			<div class="metric-item"><strong>{{ statistics.records }}</strong><span>次情绪觉察</span></div>
+			<div class="metric-item"><strong>{{ statistics.users ?? '—' }}</strong><span>位体验者</span></div>
+			<div class="metric-item"><strong>{{ statistics.records ?? '—' }}</strong><span>次情绪觉察</span></div>
 			<div class="metric-item"><strong>3</strong><span>个疗愈方向</span></div>
 			<div class="metric-item"><strong>0</strong><span>贴标签表达</span></div>
 		</section>
@@ -98,17 +98,20 @@ import { onMounted, ref } from 'vue';
 import { ChatLineRound, Sunny, TrendCharts, View } from '@element-plus/icons-vue';
 import request from '/@/utils/request';
 
-const statistics = ref({ users: 68, records: 325 });
-const params = { search: '', pageNum: 1, pageSize: 10 };
+const statistics = ref<{ users: number | null; records: number | null }>({ users: null, records: null });
 
 const loadStatistics = async () => {
-	const [users, images, videos] = await Promise.allSettled([
-		request.get('/api/user', { params }), request.get('/api/imgRecords', { params }), request.get('/api/videoRecords', { params }),
-	]);
-	if (users.status === 'fulfilled' && users.value.code == 0) statistics.value.users = users.value.data.total;
-	const imageTotal = images.status === 'fulfilled' && images.value.code == 0 ? images.value.data.total : 0;
-	const videoTotal = videos.status === 'fulfilled' && videos.value.code == 0 ? videos.value.data.total : 0;
-	if (imageTotal || videoTotal) statistics.value.records = imageTotal + videoTotal;
+	try {
+		const response = await request.get('/api/statistics/overview');
+		if (response.code == 0 && response.data) {
+			statistics.value = {
+				users: Number(response.data.experienceUsers),
+				records: Number(response.data.totalAwareness),
+			};
+		}
+	} catch (error) {
+		console.warn('平台统计暂时不可用', error);
+	}
 };
 
 onMounted(loadStatistics);
