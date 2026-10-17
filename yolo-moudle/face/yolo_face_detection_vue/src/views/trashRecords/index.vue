@@ -126,7 +126,7 @@
 								</div>
 
 								<div v-if="state.analysisDetails[item.id].record.complaint || state.analysisDetails[item.id].record.additionalNotes" class="patient-notes">
-									<p v-if="state.analysisDetails[item.id].record.complaint"><span>主诉</span>{{ state.analysisDetails[item.id].record.complaint }}</p>
+									<p v-if="state.analysisDetails[item.id].record.complaint"><span>自述</span>{{ state.analysisDetails[item.id].record.complaint }}</p>
 									<p v-if="state.analysisDetails[item.id].record.additionalNotes"><span>补充说明</span>{{ state.analysisDetails[item.id].record.additionalNotes }}</p>
 								</div>
 
@@ -160,7 +160,7 @@
 								<span>{{ item.privacyNote || '你可以随时删除这条记录。' }}</span>
 							</div>
 							<div class="record-actions">
-								<button type="button" class="report-btn" @click="openReport(item)">生成预诊报告</button>
+								<button type="button" class="report-btn" @click="openReport(item)">生成心理感知报告</button>
 								<button type="button" class="detail-btn" @click="toggleAnalysisDetail(item)">
 									{{ state.expandedAnalysis[item.id] ? '收起完整分析' : '查看完整分析' }}
 								</button>

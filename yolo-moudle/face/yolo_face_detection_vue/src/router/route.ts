@@ -127,7 +127,7 @@ export const dynamicRoutes: Array<RouteRecordRaw> = [
 				name: 'preVisitReport',
 				component: () => import('/@/views/preVisitReport/index.vue'),
 				meta: {
-					title: '预诊参考报告',
+					title: '心理感知报告',
 					isLink: '',
 					isHide: true,
 					isKeepAlive: false,

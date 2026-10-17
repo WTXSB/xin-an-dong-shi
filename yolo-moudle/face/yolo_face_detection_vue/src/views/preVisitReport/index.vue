@@ -11,10 +11,10 @@
 
 			<div class="view-switch" role="tablist" aria-label="报告视角切换">
 				<button type="button" role="tab" :class="{ active: viewMode === 'letter' }" :aria-selected="viewMode === 'letter'" @click="viewMode = 'letter'">
-					写给你的一封信
+					用户视角 · 写给你的一封信
 				</button>
 				<button type="button" role="tab" :class="{ active: viewMode === 'clinician' }" :aria-selected="viewMode === 'clinician'" @click="viewMode = 'clinician'">
-					给心灵SPA师的客观参考（专业向）
+					服务者视角 · 客观参考
 				</button>
 			</div>
 
@@ -62,8 +62,8 @@
 				<template v-else-if="state.awareness && state.analysis">
 					<header class="report-header">
 						<div>
-							<p class="brand">心安动识 · 多模态心理预诊辅助平台</p>
-							<h1>心理门诊预诊参考报告</h1>
+							<p class="brand">心安动识 · 多模态情绪觉察与陪伴平台</p>
+							<h1>心理感知报告</h1>
 							<span>情绪表情与 BFRB 行为线索结构化整理</span>
 						</div>
 						<div class="report-code">
@@ -75,13 +75,13 @@
 
 					<section class="notice">
 						<strong>报告用途说明</strong>
-						<p>本报告用于帮助患者向心理门诊医生回顾检测时段内的自述、情绪与动作线索，缩短基础信息整理时间。结果由算法辅助生成，不替代医生访谈、量表评估或临床诊断。</p>
+						<p>本报告帮助用户与服务者共同回顾感知时段内的自述、情绪与动作线索，便于梳理信息和开展协同支持。结果由算法辅助生成，仅用于自我觉察与交流，不用于诊断或治疗，也不能替代专业评估。</p>
 					</section>
 
 					<section class="safety-flags-card">
 						<div class="safety-flags-header">
 							<strong>安全关注标注</strong>
-							<span>由算法辅助整理，仅供门诊沟通时参考，不构成诊断结论</span>
+							<span>由算法辅助整理，仅供协同支持时参考，不代表风险等级或诊断结论</span>
 						</div>
 						<ul v-if="safetyFlags.length" class="safety-flags-list">
 							<li v-for="(flag, index) in safetyFlags" :key="index" :class="`flag-${flag.level}`">
@@ -94,7 +94,7 @@
 					</section>
 
 					<section class="report-section">
-						<div class="section-title"><span>01</span><h2>本次预诊信息</h2></div>
+						<div class="section-title"><span>01</span><h2>本次感知信息</h2></div>
 						<div class="info-grid">
 							<div><span>记录用户</span><strong>{{ state.awareness.username || '未填写' }}</strong></div>
 							<div><span>检测来源</span><strong>{{ sourceName(state.analysis.record.sourceType || state.awareness.sourceType) }}</strong></div>
@@ -104,7 +104,7 @@
 							<div><span>BFRB连续事件</span><strong>{{ state.analysis.record.bfrbEventCount || 0 }} 次</strong></div>
 						</div>
 						<div class="patient-notes">
-							<div><span>本次主诉</span><p>{{ state.analysis.record.complaint || '本次未填写主诉。' }}</p></div>
+							<div><span>本次自述</span><p>{{ state.analysis.record.complaint || '本次未填写自述。' }}</p></div>
 							<div><span>补充说明</span><p>{{ state.analysis.record.additionalNotes || '本次未填写补充说明。' }}</p></div>
 						</div>
 					</section>
@@ -163,9 +163,9 @@
 					</section>
 
 					<section class="report-section">
-						<div class="section-title"><span>05</span><h2>供门诊沟通的参考要点</h2></div>
+						<div class="section-title"><span>05</span><h2>协同支持的参考要点</h2></div>
 						<div class="handoff-grid">
-							<div><span>来访者自述</span><p>{{ state.analysis.record.complaint || '建议在就诊时补充近期主要困扰、出现频率及持续时间。' }}</p></div>
+							<div><span>用户自述</span><p>{{ state.analysis.record.complaint || '交流时可以补充近期主要困扰、出现频率及持续时间。' }}</p></div>
 							<div><span>可进一步核实</span><p>{{ clinicianPrompt }}</p></div>
 							<div><span>觉察与照护提示</span><p>{{ state.awareness.suggestedPractice || '可在专业人员指导下进一步评估情绪、睡眠、压力事件及行为发生情境。' }}</p></div>
 						</div>
@@ -173,8 +173,8 @@
 
 					<div v-if="!state.aiSummary" class="ai-generate-panel">
 						<div>
-							<strong>需要一份更便于门诊沟通的文字整理？</strong>
-							<p>可在确认后生成 AI 辅助摘要。只整理已保存的主诉与去标识化检测统计，不输出诊断、严重程度或用药建议。</p>
+							<strong>需要一份更便于交流的文字整理？</strong>
+							<p>可在确认后生成 AI 辅助摘要。只整理已保存的自述与去标识化感知统计，不输出诊断、严重程度或用药建议。</p>
 						</div>
 						<el-button type="primary" :loading="state.aiLoading" @click="generateAiSummary">生成AI辅助摘要</el-button>
 					</div>
@@ -193,11 +193,11 @@
 						</div>
 						<div class="ai-list-grid">
 							<div>
-								<strong>可与医生进一步讨论</strong>
+								<strong>可与服务者进一步讨论</strong>
 								<ul><li v-for="item in state.aiSummary.clinicianQuestions" :key="item">{{ item }}</li></ul>
 							</div>
 							<div>
-								<strong>就诊前可准备</strong>
+								<strong>交流前可准备</strong>
 								<ul><li v-for="item in state.aiSummary.visitPreparation" :key="item">{{ item }}</li></ul>
 							</div>
 						</div>
@@ -206,7 +206,7 @@
 
 					<footer class="report-footer">
 						<strong>重要声明</strong>
-						<p>本报告仅供心理门诊预诊沟通与健康教育参考，不构成医学诊断、疾病筛查结论或治疗建议。模型结果可能受到光照、角度、遮挡、素材质量和个体差异影响，请由具备资质的专业人员结合访谈、量表及其他检查综合判断。如存在自伤、自杀或伤害他人的想法，请立即联系当地急救、警方或可信赖的专业支持。</p>
+						<p>本报告仅供自我觉察、情绪陪伴与协同支持参考，不构成医学诊断、疾病筛查结论或治疗建议。模型结果可能受到光照、角度、遮挡、素材质量和个体差异影响，不能单凭表情或动作判断心理状态；如需专业评估，请联系具备相应资质的专业人员。如存在自伤、自杀或伤害他人的想法，请立即联系当地急救、警方或可信赖的专业支持。</p>
 						<div><span>素材保留选择：{{ state.analysis.record.keepMedia ? '已选择保留素材路径' : '未选择保留素材路径' }}</span><span>报告数据来源：心安动识本地结构化检测记录</span></div>
 					</footer>
 				</template>
@@ -383,7 +383,7 @@ const structuredSummary = computed(() => {
 const interpretationReminder = computed(() => {
 	if (!state.analysis) return '';
 	return Number(state.analysis.record.bfrbEventCount || 0) > 0
-		? '上述动作是特定时段内的算法观察线索，需要结合压力情境、主观体验、出现频率及功能影响由医生进一步核实。'
+		? '上述动作是特定时段内的算法观察线索，可结合压力情境、主观体验、出现频率及日常影响，与服务者进一步讨论。'
 		: '未形成连续事件不等同于排除相关行为，可能受到观察时长、画面质量、遮挡和阈值设置影响。';
 });
 
@@ -404,7 +404,7 @@ const loadExistingAiSummary = async () => {
 			state.aiSummary = response.data as AiSummary;
 		}
 	} catch (error) {
-		// 尚未生成摘要或后端暂不可用时，仍正常展示原始预诊报告。
+		// 尚未生成摘要或后端暂不可用时，仍正常展示原始心理感知报告。
 	}
 };
 
@@ -477,7 +477,7 @@ const loadReport = async () => {
 			return;
 		}
 		if (analysisRes.code !== '0' && analysisRes.code !== 0) {
-			state.error = '这是一条旧版觉察记录，尚未关联完整结构化分析，因此不能生成可靠的预诊报告。';
+			state.error = '这是一条旧版觉察记录，尚未关联完整结构化分析，因此不能生成可靠的心理感知报告。';
 			return;
 		}
 		state.awareness = awarenessRes.data as AwarenessRecord;
@@ -494,7 +494,7 @@ const generateAiSummary = async () => {
 	if (!state.awareness || !state.analysis || state.aiLoading) return;
 	try {
 		await ElMessageBox.confirm(
-			'系统将把本次主诉、补充说明和去标识化检测统计交给后端配置的 AI 服务进行文字整理；不会发送用户名或素材路径。AI 内容不构成诊断。是否继续？',
+			'系统将把本次自述、补充说明和去标识化感知统计交给后端配置的 AI 服务进行文字整理；不会发送用户名或素材路径。AI 内容仅供辅助觉察，不用于诊断。是否继续？',
 			'生成AI辅助摘要',
 			{ confirmButtonText: '确认生成', cancelButtonText: '暂不生成', type: 'warning' }
 		);
@@ -558,7 +558,7 @@ const printReport = () => {
 	if (isLetter ? !state.letter : !state.awareness || !state.analysis) return;
 	const printingClass = isLetter ? 'previsit-printing-letter' : 'previsit-printing';
 	const originalTitle = document.title;
-	document.title = isLetter ? '心安动识-写给你的一封信' : `心安动识预诊参考报告-${reportNumber.value}`;
+	document.title = isLetter ? '心安动识-写给你的一封信' : `心安动识心理感知报告-${reportNumber.value}`;
 	document.documentElement.classList.add(printingClass);
 	document.body.classList.add(printingClass);
 	const restoreTitle = () => {

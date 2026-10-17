@@ -76,7 +76,7 @@ node qa/verify-preservation.mjs
 - 通过图片、视频、摄像头感知情绪与身体线索。
 - 用「觉察记录」承接结果，而不是给出冷冰冰的结论。
 - 用「安小宁」作为全局陪伴入口，帮助使用者慢下来、恢复内驱力。
-- 支持心灵 SPA 导引、安心对话、觉察记录回看等疗愈体验。
+- 支持心灵 SPA 导引、安心对话、觉察记录回看等自我照顾体验。
 
 ## 技术架构
 
@@ -167,13 +167,17 @@ node qa/verify-preservation.mjs
 - 无 Key 时会走本地温柔兜底回复。
 - 已测试接通 `deepseek-v4-pro`，后端返回 `provider = deepseek`。
 
-### 9. 预诊报告与双视角输出
+### 9. 心理感知报告与双视角输出
 
-- 结构化检测记录可生成预诊报告（AI 辅助摘要 + 本地模板兜底 + 禁词拦截）。
+- 网站定位为情绪觉察、陪伴与协同支持，不提供预诊、诊断或治疗。用户界面、PDF 导出标题和 AI 摘要统一使用「心理感知报告」「用户视角 / 服务者视角」「协同支持」。
+- 为兼容历史数据，原有路由、接口及角色编码保持不变；旧 AI 摘要仅在读取展示时转换称谓，不改写用户自述或历史存储，不自动重新调用 AI。
+- 演示服务者的资料明确标识为演示，不代表真实身份、资格认证或服务能力。真实服务者仍需提交相应资质并经过审核；安全声明与紧急支持提示保留。
+
+- 结构化检测记录可生成心理感知报告（AI 辅助摘要 + 本地模板兜底 + 禁词拦截）。
 - 同一份检测数据提供两种视角：
-  - **患者视角（默认）**：书信式关怀信，温柔口吻、生活化表达，给出可行动的小建议，
+  - **用户视角（默认）**：书信式关怀信，温柔口吻、生活化表达，给出可行动的小建议，
     不出现"检测、诊断、症状"等医学用词，结尾声明"只是陪伴与参考，不是任何结论"。
-  - **心灵SPA师视角**：完整客观预诊报告 + 安全关注标注
+  - **服务者视角**：完整客观心理感知报告 + 安全关注标注
     （持续愤怒主导、BFRB 高频/长持续、自述危险关键词三档规则），
     标注仅为算法线索汇总，不构成诊断依据。
 - 书信与报告均支持打印 / 另存为 PDF。
@@ -181,16 +185,16 @@ node qa/verify-preservation.mjs
   附近真实机构检索（心理咨询/心理门诊/冥想瑜伽/公园绿道/书店茶饮）、
   机构详情弹窗（电话/地址/高德详情链接）、自由缩放。
 
-### 10. 心有灵犀（医患联动）
+### 10. 心有灵犀（协同支持）
 
-- 注册后首次登录进入身份向导：「我来照顾自己」（使用者）或「我是心灵SPA师」。
+- 注册后首次登录进入身份向导：「我来照顾自己」（使用者）或「我是服务者」。
 - 双端认证体系（模拟审核流，管理员手动通过/驳回）：
-  - 心灵SPA师：医师资格证号 + 实名 + 就职医院 + 科室 + 职称 + 简介；
+  - 服务者：相应服务资格证号 + 实名 + 所在机构 + 服务部门 + 职称 + 简介；
   - 使用者：平时无需实名，发起倾诉前完成实名认证（身份证仅存掩码，绝不存明文）。
-- 已认证心灵SPA师卡片展示（医院/科室/职称/简介），使用者「向TA倾诉」寄出第一封信
+- 已认证服务者卡片展示（机构/服务部门/职称/简介），使用者「向TA倾诉」寄出第一封信
   建立联结，书信式站内对话（轮询增量刷新）。
-- 心灵SPA师可在对话侧栏查看求助者历史觉察记录，并跳转预诊报告客观参考视角，
-  形成"线上预诊、必要时转线下"的流程雏形。
+- 服务者可在对话侧栏查看用户历史觉察记录，并跳转心理感知报告客观参考视角，
+  形成"线上情绪陪伴、按需寻找专业支持"的协同流程。
 - 认证审核界面（admin）：待审列表 + 通过/驳回 + 备注。
 
 ### 11. BFRB 行为检测模型与数据管线
@@ -305,11 +309,11 @@ deployment-recommendation-tencent-cloud.docx
 | `yolo-moudle/face/yolo_face_detection_springboot/src/main/java/com/example/Ece/controller/AiChatController.java` | DeepSeek 后端代理 |
 | `yolo-moudle/face/yolo_face_detection_springboot/src/main/java/com/example/Ece/controller/AwarenessRecordController.java` | 觉察记录接口 |
 | `yolo-moudle/face/yolo_face_detection_springboot/src/main/java/com/example/Ece/controller/DetectionAnalysisRecordController.java` | 结构化检测结果保存、查询与关联接口 |
-| `yolo-moudle/face/yolo_face_detection_springboot/src/main/java/com/example/Ece/controller/PreVisitReportSummaryController.java` | 预诊报告摘要与关怀书信生成、安全标注 |
+| `yolo-moudle/face/yolo_face_detection_springboot/src/main/java/com/example/Ece/controller/PreVisitReportSummaryController.java` | 心理感知报告摘要与关怀书信生成、安全标注 |
 | `yolo-moudle/face/yolo_face_detection_springboot/src/main/java/com/example/Ece/controller/SpaConnectController.java` | 心有灵犀：身份认证、求助单、站内对话 |
-| `yolo-moudle/face/yolo_face_detection_vue/src/views/preVisitReport/index.vue` | 预诊报告双视角页面（书信/客观参考） |
+| `yolo-moudle/face/yolo_face_detection_vue/src/views/preVisitReport/index.vue` | 心理感知报告双视角页面（书信/客观参考） |
 | `yolo-moudle/face/yolo_face_detection_vue/src/views/spaConnect/index.vue` | 心有灵犀模块页 |
-| `yolo-moudle/face/yolo_face_detection_vue/src/views/trashMap/index.vue` | 心灵 SPA 专属疗愈地图（高德 API） |
+| `yolo-moudle/face/yolo_face_detection_vue/src/views/trashMap/index.vue` | 心灵 SPA 专属放松地图（高德 API） |
 | `yolo-moudle/face/yolo_face_detection_flask/facetry.py` | YOLO 图片、视频、摄像头推理服务 |
 | `yolo-moudle/face/yolo_face_detection_flask/bfrb_detect.py` | BFRB 手脸几何规则 + 行为模型直检 |
 | `yolo-moudle/face/yolo_face_detection_flask/pseudo_label_pipeline.py` | 伪标注数据管线 |
@@ -332,8 +336,8 @@ deployment-recommendation-tencent-cloud.docx
 - `/ai/chat` 已接入 DeepSeek，返回 `provider = deepseek`。
 - 图片、视频、摄像头页面均已通过浏览器基础检查。
 - 图片与视频链路已通过结构化落库、幂等、刷新回查与隐私不保存验证。
-- 心有灵犀全流程（注册 → 身份向导 → 认证提交 → admin 审核 → 发起倾诉 → 双向书信对话 → 医生查看历史报告）已经浏览器端到端走查。
-- 预诊报告双视角（书信禁词检查、幂等缓存、安全标注规则）已经接口与浏览器验证。
+- 心有灵犀全流程（注册 → 身份向导 → 认证提交 → admin 审核 → 发起倾诉 → 双向书信对话 → 服务者查看历史报告）已经浏览器端到端走查。
+- 心理感知报告双视角（书信禁词检查、幂等缓存、安全标注规则）已经接口与浏览器验证。
 - 心灵 SPA 地图高德 API（IP 定位、真实 POI、详情弹窗、缩放）已经浏览器实测。
 
 ## 情绪日记、三时段日历与 AI 回顾（2026-10-06）
@@ -359,5 +363,5 @@ deployment-recommendation-tencent-cloud.docx
 - 给安心对话增加流式输出体验。
 - 行为模型迭代：扩充多人物多场景自录数据、修正伪标注噪声帧，缩小跨域差距。
 - 腕戴传感器通道原型（STM32 + IMU 时序手势识别），与视觉通道形成多传感器融合。
-- 医院实地调研，「心有灵犀」接入真实医生并完善角色权限。
+- 支持机构实地调研，「心有灵犀」接入具备相应资质的服务者并完善角色权限。
 - 腾讯云部署时拆分主站与 YOLO 推理服务，避免小规格服务器资源紧张。

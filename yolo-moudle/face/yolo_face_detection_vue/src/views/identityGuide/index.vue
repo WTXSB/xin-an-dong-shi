@@ -12,7 +12,7 @@
 					</svg>
 				</div>
 				<h1>资料正在被轻轻翻阅</h1>
-				<p>你的{{ identity?.identityType === 'practitioner' ? '心灵SPA师认证' : '实名信息' }}已经收到，正在审核中。审核通过后，这里会为你点亮完整的「心有灵犀」。</p>
+				<p>你的{{ identity?.identityType === 'practitioner' ? '服务者认证' : '实名信息' }}已经收到，正在审核中。审核通过后，这里会为你点亮完整的「心有灵犀」。</p>
 				<div class="status-actions">
 					<button class="primary-btn" type="button" @click="goHome">先逛逛</button>
 					<button class="ghost-btn" type="button" @click="refreshIdentity">再看看好了没</button>
@@ -33,7 +33,7 @@
 				<section class="hero">
 					<p class="eyebrow">心有灵犀 · 初次见面</p>
 					<h1>先认识一下彼此，再决定怎么相伴</h1>
-					<span>这里不需要一下子给出答案。你可以只是来照顾自己，也可以是愿意倾听别人的心灵SPA师。</span>
+					<span>这里不需要一下子给出答案。你可以只是来照顾自己，也可以是愿意倾听别人的服务者。</span>
 				</section>
 
 				<section v-if="viewMode === 'select'" class="choice-row">
@@ -44,7 +44,7 @@
 							</svg>
 						</div>
 						<h2>我来照顾自己</h2>
-						<p>大部分功能无需实名，向心灵SPA师倾诉前完成实名即可。先进去慢慢看看，什么时候准备好了都可以。</p>
+						<p>大部分功能无需实名，向服务者倾诉前完成实名即可。先进去慢慢看看，什么时候准备好了都可以。</p>
 						<div class="choice-actions">
 							<button class="primary-btn" type="button" @click="goHome">先进去看看</button>
 							<button class="ghost-btn" type="button" @click="goHome">今天先不选了</button>
@@ -59,7 +59,7 @@
 								<path d="M46 12l1.6 3.6L51 17l-3.4 1.4L46 22l-1.6-3.6L41 17l3.4-1.4z" fill="#e4b98a" />
 							</svg>
 						</div>
-						<h2>我是心灵SPA师</h2>
+						<h2>我是服务者</h2>
 						<p>完成认证后，你可以收到向你倾诉的信，陪伴那些愿意把心事交给你的人。</p>
 						<div class="choice-actions">
 							<button class="primary-btn" type="button" @click="viewMode = 'practitionerForm'">去认证</button>
@@ -67,11 +67,11 @@
 					</article>
 				</section>
 
-				<!-- 心灵SPA师认证表单 -->
+				<!-- 服务者认证表单 -->
 				<section v-else-if="viewMode === 'practitionerForm'" class="form-card">
 					<header class="form-head">
 						<div>
-							<p class="eyebrow">心灵SPA师认证</p>
+							<p class="eyebrow">服务者认证</p>
 							<h2>让信任从真实开始</h2>
 						</div>
 						<button class="ghost-btn" type="button" @click="viewMode = 'select'">返回选择</button>
@@ -82,16 +82,16 @@
 							<el-input v-model="practitionerForm.realName" placeholder="请输入真实姓名" />
 						</el-form-item>
 						<el-form-item label="资格证号" prop="licenseNo">
-							<el-input v-model="practitionerForm.licenseNo" placeholder="心理咨询师 / 医师资格证编号" />
+							<el-input v-model="practitionerForm.licenseNo" placeholder="与所提供支持相对应的有效资格证编号" />
 						</el-form-item>
-						<el-form-item label="就职医院" prop="hospital">
-							<el-input v-model="practitionerForm.hospital" placeholder="所在医院或机构" />
+						<el-form-item label="所在机构" prop="hospital">
+							<el-input v-model="practitionerForm.hospital" placeholder="请输入实际所在机构" />
 						</el-form-item>
-						<el-form-item label="科室" prop="department">
-							<el-input v-model="practitionerForm.department" placeholder="如 临床心理科" />
+						<el-form-item label="服务部门" prop="department">
+							<el-input v-model="practitionerForm.department" placeholder="如 情绪支持服务部" />
 						</el-form-item>
 						<el-form-item label="职称" prop="title">
-							<el-input v-model="practitionerForm.title" placeholder="如 主治医师 / 心理咨询师" />
+							<el-input v-model="practitionerForm.title" placeholder="请填写与实际资质相符的职称（选填）" />
 						</el-form-item>
 						<el-form-item label="简介" prop="bio">
 							<el-input v-model="practitionerForm.bio" type="textarea" :rows="3" placeholder="用几句话介绍你的陪伴方式（选填）" />
@@ -138,8 +138,8 @@ const practitionerForm = reactive({
 const practitionerRules = reactive<FormRules>({
 	realName: [{ required: true, message: '请输入真实姓名', trigger: 'blur' }],
 	licenseNo: [{ required: true, message: '请输入资格证号', trigger: 'blur' }],
-	hospital: [{ required: true, message: '请输入就职医院或机构', trigger: 'blur' }],
-	department: [{ required: true, message: '请输入科室', trigger: 'blur' }],
+	hospital: [{ required: true, message: '请输入实际所在机构', trigger: 'blur' }],
+	department: [{ required: true, message: '请输入服务部门', trigger: 'blur' }],
 });
 
 const goHome = () => {

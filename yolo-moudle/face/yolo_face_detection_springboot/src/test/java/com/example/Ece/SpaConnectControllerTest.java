@@ -157,8 +157,8 @@ class SpaConnectControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("0"))
                 .andExpect(jsonPath("$.data.status").value("active"))
-                .andExpect(jsonPath("$.data.counterpart.realName").value("林安宁"))
-                .andExpect(jsonPath("$.data.counterpart.hospital").value("武汉心安医院"))
+                .andExpect(jsonPath("$.data.counterpart.realName").value("林安宁（演示）"))
+                .andExpect(jsonPath("$.data.counterpart.hospital").value("心安情绪支持站（演示）"))
                 .andExpect(jsonPath("$.data.latestMessage.content").value("最近心里有点闷，想找人聊聊"))
                 .andReturn().getResponse().getContentAsString();
         long requestId = objectMapper.readTree(response).path("data").path("id").asLong();

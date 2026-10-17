@@ -3,7 +3,7 @@
 		<div class="spa-shell layout-padding-auto layout-padding-view">
 			<section class="hero">
 				<div class="hero-copy">
-				<p class="eyebrow">心有灵犀</p>
+				<p class="eyebrow">心有灵犀 · 协同支持</p>
 				<h1>把心事交给愿意倾听的人</h1>
 				<span>写一封信，等一封回信。这里没有催促，只有被认真接住的倾诉。</span>
 				</div>
@@ -28,7 +28,7 @@
 				<article v-for="item in pendingList" :key="item.username" class="review-card">
 					<header class="review-head">
 						<span :class="['review-badge', item.identityType]">
-							{{ item.identityType === 'practitioner' ? '医师认证' : '患者实名' }}
+							{{ item.identityType === 'practitioner' ? '服务者认证' : '用户实名' }}
 						</span>
 						<strong>{{ item.realName }}</strong>
 						<small>账号：{{ item.username }}</small>
@@ -36,8 +36,8 @@
 					<div class="review-fields">
 						<p v-if="item.idCard"><span>身份证号</span>{{ item.idCard }}</p>
 						<p v-if="item.licenseNo"><span>资格证号</span>{{ item.licenseNo }}</p>
-						<p v-if="item.hospital"><span>就职医院</span>{{ item.hospital }}</p>
-						<p v-if="item.department"><span>科室</span>{{ item.department }}</p>
+						<p v-if="item.hospital"><span>所在机构</span>{{ item.hospital }}</p>
+						<p v-if="item.department"><span>服务部门</span>{{ item.department }}</p>
 						<p v-if="item.title"><span>职称</span>{{ item.title }}</p>
 						<p v-if="item.bio"><span>简介</span>{{ item.bio }}</p>
 					</div>
@@ -58,7 +58,7 @@
 						<HealingIllustratedFrame variant="clouds" />
 						<div>
 							<h2>第一次见面，先打个招呼吧</h2>
-							<p>去身份向导选择你的角色；如果已经准备好向心灵SPA师倾诉，也可以直接完成实名。</p>
+							<p>去身份向导选择你的角色；如果已经准备好向服务者倾诉，也可以直接完成实名。</p>
 						</div>
 						<div class="guide-actions">
 							<button class="primary-btn" type="button" @click="router.push('/identityGuide')">去身份向导</button>
@@ -70,7 +70,7 @@
 					<section v-else-if="viewState === 'pending'" class="status-card">
 						<HealingIllustratedFrame variant="garden" />
 						<h2>资料正在被轻轻翻阅，请稍候</h2>
-						<p>你的{{ myIdentity?.identityType === 'practitioner' ? '心灵SPA师认证' : '实名信息' }}正在审核中，通过之后就可以完整使用「心有灵犀」了。</p>
+						<p>你的{{ myIdentity?.identityType === 'practitioner' ? '服务者认证' : '实名信息' }}正在审核中，通过之后就可以完整使用「心有灵犀」了。</p>
 						<div class="status-actions">
 							<button class="ghost-btn" type="button" @click="loadIdentity">再看看好了没</button>
 							<button class="primary-btn" type="button" @click="router.push('/')">先逛逛</button>
@@ -129,7 +129,7 @@
 							</footer>
 						</div>
 
-						<!-- 心灵SPA师侧栏：TA 的近期记录 -->
+						<!-- 服务者侧栏：TA 的近期记录 -->
 						<aside v-if="isPractitionerView" class="records-aside">
 							<header class="records-head">
 								<strong>TA 的近期记录</strong>
@@ -151,14 +151,14 @@
 					</section>
 
 					<template v-else>
-						<!-- 心灵SPA师卡片网格（无身份与患者视角可见） -->
+						<!-- 服务者卡片网格（无身份与用户视角可见） -->
 						<HealingDecorationStrip v-if="viewState === 'guest' || viewState === 'patient'" variant="garden" />
 						<section v-if="viewState === 'guest' || viewState === 'patient'" class="practitioner-section">
-							<h2 class="section-title">愿意倾听你的心灵SPA师</h2>
+							<h2 class="section-title">愿意倾听你的服务者</h2>
 							<div v-loading="practitionersLoading" class="practitioner-grid">
 								<div v-if="!practitionersLoading && practitioners.length === 0" class="empty-state">
 									<HealingIllustratedFrame variant="garden" />
-									<strong>心灵SPA师们还在路上</strong>
+									<strong>服务者们还在路上</strong>
 									<p>等他们完成认证后，就会在这里等你写信。</p>
 								</div>
 								<article v-for="p in practitioners" :key="p.username" class="practitioner-card">
@@ -166,7 +166,7 @@
 										<strong>{{ p.realName }}</strong>
 										<span v-if="p.title" class="title-pill">{{ p.title }}</span>
 									</header>
-									<p class="org">{{ [p.hospital, p.department].filter(Boolean).join(' · ') || '心灵SPA师' }}</p>
+									<p class="org">{{ [p.hospital, p.department].filter(Boolean).join(' · ') || '服务者' }}</p>
 									<p class="bio">{{ p.bio || '愿意安静地听你把话说完。' }}</p>
 									<button class="primary-btn" type="button" @click="onConfide(p)">向TA倾诉</button>
 								</article>
@@ -180,7 +180,7 @@
 								<div v-if="!requestsLoading && requests.length === 0" class="empty-state">
 									<HealingIllustratedFrame variant="rest" />
 									<strong>{{ viewState === 'practitioner' ? '还没有收到倾诉' : '还没有书信往来' }}</strong>
-									<p>{{ viewState === 'practitioner' ? '当有人向你递出第一封信，会出现在这里。' : '挑一位心灵SPA师，写下你的第一封信吧。' }}</p>
+									<p>{{ viewState === 'practitioner' ? '当有人向你递出第一封信，会出现在这里。' : '挑一位服务者，写下你的第一封信吧。' }}</p>
 								</div>
 								<article v-for="item in requests" :key="item.id" class="request-card" @click="openConversation(item)">
 									<div class="request-main">
@@ -328,7 +328,7 @@ const loadIdentity = async () => {
 
 const isPractitionerView = computed(() => viewState.value === 'practitioner' && myIdentity.value?.identityType === 'practitioner');
 
-// ---------- 心灵SPA师列表 ----------
+// ---------- 服务者列表 ----------
 const practitioners = ref<Practitioner[]>([]);
 const practitionersLoading = ref(false);
 
@@ -478,9 +478,9 @@ const counterpartName = (item: SpaRequestItem) => {
 };
 
 const counterpartSubtitle = (item: SpaRequestItem) => {
-	if (isPractitionerView.value) return '求助者';
+	if (isPractitionerView.value) return '用户';
 	const parts = [item.counterpartHospital || item.hospital, item.counterpartDepartment || item.department].filter(Boolean);
-	return parts.length ? parts.join(' · ') : '心灵SPA师';
+	return parts.length ? parts.join(' · ') : '服务者';
 };
 
 // ---------- 对话 ----------
@@ -566,7 +566,7 @@ const sendCurrentMessage = async () => {
 	}
 };
 
-// ---------- 心灵SPA师侧栏：TA 的近期记录 ----------
+// ---------- 服务者侧栏：TA 的近期记录 ----------
 const patientRecords = ref<PatientRecordItem[]>([]);
 const recordsLoading = ref(false);
 

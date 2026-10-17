@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
- * 「心有灵犀」医患联动：实名认证、联动单与留言
+ * 「心有灵犀」协同支持：实名认证、联动单与留言
  * 文案保持温柔克制，身份证号只保存掩码
  */
 @RestController
@@ -82,12 +82,12 @@ public class SpaConnectController {
         identity.setRealName(limit(realName, 64));
 
         if (IDENTITY_PRACTITIONER.equals(identityType)) {
-            // 心灵SPA师需要补充执业信息，便于平台核验
+            // 服务者需要补充服务资质信息，便于平台核验
             String licenseNo = StrUtil.trim(params.getString("licenseNo"));
             String hospital = StrUtil.trim(params.getString("hospital"));
             String department = StrUtil.trim(params.getString("department"));
             if (StrUtil.isBlank(licenseNo) || StrUtil.isBlank(hospital) || StrUtil.isBlank(department)) {
-                return Result.error("400", "心灵SPA师认证需要填写资格证号、所在机构与科室");
+                return Result.error("400", "服务者认证需要填写资格证号、所在机构与服务部门");
             }
             identity.setLicenseNo(limit(licenseNo, 64));
             identity.setHospital(limit(hospital, 128));
@@ -178,7 +178,7 @@ public class SpaConnectController {
     }
 
     /**
-     * 已完成认证的心灵SPA师列表，只展示公开信息
+     * 已完成认证的服务者列表，只展示公开信息
      */
     @GetMapping("/practitioners")
     public Result<?> practitioners() {
@@ -203,7 +203,7 @@ public class SpaConnectController {
     }
 
     /**
-     * 记录者向心灵SPA师发出联动邀请
+     * 记录者向服务者发出联动邀请
      */
     @PostMapping("/requests")
     @Transactional(rollbackFor = Exception.class)
@@ -216,12 +216,12 @@ public class SpaConnectController {
         }
         SpaIdentity patient = findIdentity(patientUsername);
         if (patient == null || !AUDIT_APPROVED.equals(patient.getAuditStatus())) {
-            return Result.error("403", "请先完成实名认证，再向心灵SPA师说出你的心事");
+            return Result.error("403", "请先完成实名认证，再向服务者说出你的心事");
         }
         SpaIdentity practitioner = findIdentity(practitionerUsername);
         if (practitioner == null || !IDENTITY_PRACTITIONER.equals(practitioner.getIdentityType())
                 || !AUDIT_APPROVED.equals(practitioner.getAuditStatus())) {
-            return Result.error("404", "这位心灵SPA师暂时还无法接收联动邀请");
+            return Result.error("404", "这位服务者暂时还无法接收联动邀请");
         }
         SpaRequest request = new SpaRequest();
         request.setPatientUsername(patientUsername);
@@ -335,7 +335,7 @@ public class SpaConnectController {
     }
 
     /**
-     * 心灵SPA师查看联动对方的觉察记录，仅该单的SPA师本人可见
+     * 服务者查看联动对方的觉察记录，仅该单的SPA师本人可见
      */
     @GetMapping("/requests/{id}/patient-records")
     public Result<?> patientRecords(@PathVariable long id, @RequestParam String username) {
@@ -344,7 +344,7 @@ public class SpaConnectController {
             return Result.error("404", "未找到这张联动单");
         }
         if (!request.getPractitionerUsername().equals(StrUtil.trim(username))) {
-            return Result.error("403", "只有这张联动单的心灵SPA师本人可以查看对方的觉察记录");
+            return Result.error("403", "只有这张联动单的服务者本人可以查看对方的觉察记录");
         }
         List<AwarenessRecord> records = awarenessRecordMapper.selectList(
                 Wrappers.<AwarenessRecord>lambdaQuery()
@@ -415,7 +415,7 @@ public class SpaConnectController {
         data.put("createdAt", request.getCreatedAt());
         data.put("updatedAt", request.getUpdatedAt());
 
-        // 对方信息：记录者看到心灵SPA师的公开资料，心灵SPA师看到对方的称呼
+        // 对方信息：记录者看到服务者的公开资料，服务者看到对方的称呼
         Map<String, Object> counterpart = new LinkedHashMap<>();
         SpaIdentity practitioner = findIdentity(request.getPractitionerUsername());
         if (request.getPatientUsername().equals(viewerUsername)) {

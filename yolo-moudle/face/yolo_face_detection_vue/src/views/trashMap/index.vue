@@ -179,7 +179,7 @@ const AMAP_PLUGINS = ['AMap.Scale', 'AMap.ToolBar', 'AMap.Geolocation', 'AMap.Pl
 const CATEGORIES = [
 	{
 		key: 'mind',
-		title: '心理咨询与心理门诊',
+		title: '心理支持资源',
 		keywords: '心理咨询|心理门诊|精神科',
 		color: '#d89b72',
 	},

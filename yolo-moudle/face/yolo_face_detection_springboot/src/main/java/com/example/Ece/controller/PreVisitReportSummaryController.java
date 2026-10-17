@@ -37,15 +37,15 @@ import java.util.*;
 @RestController
 @RequestMapping("/preVisitReportSummaries")
 public class PreVisitReportSummaryController {
-    private static final String PROMPT_VERSION = "previsit-summary-v1";
+    private static final String PROMPT_VERSION = "perception-summary-v2";
     private static final String SAFETY_NOTE =
             "本内容仅对已保存的自述和算法线索进行辅助整理，不构成医学诊断、严重程度判断、疾病筛查结论、用药或治疗建议。";
     private static final String SYSTEM_PROMPT =
-            "你是心理门诊预诊材料的文字整理助手。你只能整理输入中明确给出的自述和检测统计，不得补充不存在的事实。"
+            "你是心安动识心理感知报告的文字整理助手，帮助用户与服务者开展协同支持。你只能整理输入中明确给出的自述和感知统计，不得补充不存在的事实。"
                     + "禁止诊断任何疾病，禁止判断轻中重程度，禁止建议药物、停药、加药、减药或治疗方案。"
                     + "不得把表情、动作或模型置信度解释为疾病证据，不得根据未识别到事件推断不存在问题。"
                     + "不得进行自伤、自杀或他伤风险分级；如输入没有相关自述，不得主动推断。"
-                    + "使用客观、克制、非污名化的中文。只输出JSON对象，不要Markdown。"
+                    + "使用客观、克制、非污名化的中文，称呼记录者为用户、支持者为服务者，不使用患者、医生、门诊、预诊或医患联动等定位。只输出JSON对象，不要Markdown。"
                     + "JSON必须包含objectiveSummary字符串、clinicianQuestions字符串数组、visitPreparation字符串数组三个字段。";
     private static final List<String> PROHIBITED_OUTPUT = Arrays.asList(
             "确诊", "诊断为", "抑郁症", "焦虑症", "强迫症", "双相", "自闭症",
@@ -62,7 +62,7 @@ public class PreVisitReportSummaryController {
                     + "只输出书信正文纯文本，不要JSON，不要Markdown，不要解释。";
     private static final List<String> LETTER_PROHIBITED_OUTPUT = Arrays.asList(
             "检测结果", "诊断", "症状", "证明", "确诊", "疾病", "障碍", "治疗", "用药", "处方",
-            "病理", "临床", "患者", "病人", "轻度", "中度", "重度"
+            "病理", "临床", "患者", "病人", "轻度", "中度", "重度", "医生", "预诊", "医患"
     );
     private static final String LETTER_DISCLAIMER =
             "这封信基于你主动分享的记录写成，只是陪伴与参考，不是任何结论。";
@@ -260,7 +260,7 @@ public class PreVisitReportSummaryController {
                                            DetectionAnalysisRecord analysis,
                                            List<DetectionEmotionResult> emotions,
                                            List<DetectionBfrbEvent> events) {
-        return "请依据以下去标识化数据生成预诊材料辅助摘要。不得输出姓名、账号、素材路径或诊断结论：\n"
+        return "请依据以下去标识化数据生成心理感知报告辅助摘要，用于自我觉察与协同支持。不得输出姓名、账号、素材路径或诊断结论：\n"
                 + buildDeidentifiedData(awareness, analysis, emotions, events).toJSONString();
     }
 
@@ -354,7 +354,7 @@ public class PreVisitReportSummaryController {
                 "准备近期主要困扰、持续时间和典型触发情境的简短记录。",
                 "如方便，记录一周内相关情绪或动作的大致频率及持续时间。",
                 "整理近期睡眠、学习或工作压力、生活事件以及已经尝试的应对方式。",
-                "就诊时主动说明本报告来自算法辅助整理，需要由医生进一步核实。"
+                "交流时主动说明本报告来自算法辅助整理，可与服务者结合实际经历进一步核实。"
         );
         return new GeneratedSummary(objective, questions, preparation, "local-fallback", "rule-summary-v1");
     }
@@ -627,15 +627,39 @@ public class PreVisitReportSummaryController {
         data.put("provider", summary.getProvider());
         data.put("modelName", summary.getModelName());
         data.put("promptVersion", summary.getPromptVersion());
-        data.put("objectiveSummary", summary.getObjectiveSummary());
-        data.put("clinicianQuestions", parseStoredArray(summary.getClinicianQuestionsJson()));
-        data.put("visitPreparation", parseStoredArray(summary.getVisitPreparationJson()));
+        // Normalize only generated copy on read; preserve historical records and cached provenance.
+        data.put("objectiveSummary", supportCopy(summary.getObjectiveSummary()));
+        data.put("clinicianQuestions", supportCopy(parseStoredArray(summary.getClinicianQuestionsJson())));
+        data.put("visitPreparation", supportCopy(parseStoredArray(summary.getVisitPreparationJson())));
         data.put("safetyNote", summary.getSafetyNote());
         data.put("safetyFlags", safetyFlags);
         data.put("safetyFlagsNote", SAFETY_FLAGS_NOTE);
         data.put("generatedAt", summary.getGeneratedAt());
         data.put("cached", cached);
         return data;
+    }
+
+    private String supportCopy(String text) {
+        if (text == null) return null;
+        return text.replace("心理门诊预诊参考报告", "心理感知报告")
+                .replace("心理门诊医生", "服务者")
+                .replace("预诊参考报告", "心理感知报告")
+                .replace("预诊报告", "心理感知报告")
+                .replace("医患联动", "协同支持")
+                .replace("心灵SPA师", "服务者")
+                .replace("患者", "用户")
+                .replace("医生", "服务者")
+                .replace("门诊沟通", "支持交流")
+                .replace("就诊", "交流")
+                .replace("预诊材料", "感知材料")
+                .replace("预诊信息", "感知信息")
+                .replace("主诉", "自述");
+    }
+
+    private List<String> supportCopy(List<String> texts) {
+        List<String> normalized = new ArrayList<>();
+        for (String text : texts) normalized.add(supportCopy(text));
+        return normalized;
     }
 
     private Map<String, Object> toLetterResponse(CareLetterSummary letter, boolean cached) {
@@ -646,7 +670,7 @@ public class PreVisitReportSummaryController {
         data.put("provider", letter.getProvider());
         data.put("modelName", letter.getModelName());
         data.put("promptVersion", letter.getPromptVersion());
-        data.put("letterText", letter.getLetterText());
+        data.put("letterText", supportCopy(letter.getLetterText()));
         data.put("generatedAt", letter.getGeneratedAt());
         data.put("cached", cached);
         return data;

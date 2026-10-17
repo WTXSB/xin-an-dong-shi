@@ -5,7 +5,7 @@
 				<p class="eyebrow">关于心安动识</p>
 				<h1>让科技安静地工作，让陪伴温柔地发生</h1>
 				<p>
-					我们用已经训练好的视觉模型看见表情与身体线索，再把它转化成柔和的自我觉察、正念练习和疗愈建议。这里不急着给你贴标签，只陪你慢慢看见自己。
+					我们用已经训练好的视觉模型看见表情与身体线索，再把它转化成柔和的自我觉察、正念练习和自我照顾建议。这里不急着给你贴标签，只陪你慢慢看见自己。
 				</p>
 				<div class="hero-actions">
 					<el-button class="primary-action" :icon="View" @click="$router.push('/imgPredict')">进入温柔感知</el-button>
@@ -18,7 +18,7 @@
 				<div class="evidence-heading">
 					<span class="eyebrow">核心技术路径</span>
 					<h2>多证据协同觉察</h2>
-					<p>将不同视觉线索相互佐证，把一次检测整理成可追溯的预诊信息。</p>
+					<p>将不同视觉线索相互佐证，把一次感知整理成可追溯的觉察信息。</p>
 				</div>
 				<div class="evidence-list" aria-label="三类视觉证据">
 					<div class="evidence-item emotion-evidence"><span>情</span><div><strong>情绪表情</strong><small>面部情绪与置信度</small></div></div>
@@ -28,7 +28,7 @@
 				<div class="evidence-bridge"><i></i><span>多模型交叉佐证</span><i></i></div>
 				<div class="report-output">
 					<div class="report-mark">报告</div>
-					<div><strong>形成医生可读的预诊资料</strong><small>结构化记录 · AI 辅助摘要 · PDF 导出</small></div>
+					<div><strong>形成便于协同支持的心理感知报告</strong><small>结构化记录 · AI 辅助摘要 · PDF 导出</small></div>
 				</div>
 
 			<HealingIllustratedFrame variant="garden" />
@@ -64,7 +64,7 @@
 
 		<section class="care-layout">
 			<div class="care-main surface-card">
-				<span class="eyebrow">今日疗愈推荐</span>
+				<span class="eyebrow">今日放松推荐</span>
 				<h2>先让身体知道：现在是安全的</h2>
 				<div class="practice-list">
 					<div class="practice-item"><strong>4-4-6 呼吸</strong><span>吸气 4 秒，停 4 秒，呼气 6 秒。让节奏慢慢降下来。</span></div>
@@ -85,7 +85,7 @@
 		<section class="metrics-band surface-card">
 			<div class="metric-item"><strong>{{ statistics.users ?? '—' }}</strong><span>位体验者</span></div>
 			<div class="metric-item"><strong>{{ statistics.records ?? '—' }}</strong><span>次情绪觉察</span></div>
-			<div class="metric-item"><strong>3</strong><span>个疗愈方向</span></div>
+			<div class="metric-item"><strong>3</strong><span>个放松方向</span></div>
 			<div class="metric-item"><strong>0</strong><span>贴标签表达</span></div>
 		</section>
 

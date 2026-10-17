@@ -2,7 +2,7 @@
 	<details class="pre-visit-notes">
 		<summary>
 			<div>
-				<strong>补充预诊信息</strong>
+				<strong>补充感知信息</strong>
 				<span>选填·帮助后续报告更完整</span>
 			</div>
 			<em>展开填写</em>
@@ -10,7 +10,7 @@
 
 		<div class="notes-content">
 			<label>
-				<span>本次主诉</span>
+				<span>本次自述</span>
 				<el-input
 					v-model="complaintValue"
 					type="textarea"
@@ -35,7 +35,7 @@
 				/>
 			</label>
 
-			<p>内容会随本次结构化分析保存，仅用于生成预诊参考信息。不填写也可以正常完成感知。</p>
+			<p>内容会随本次结构化分析保存，仅用于生成心理感知报告。不填写也可以正常完成感知。</p>
 		</div>
 	</details>
 </template>

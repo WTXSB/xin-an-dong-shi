@@ -1,7 +1,7 @@
 import request from '/@/utils/request';
 
 /**
- * 「心有灵犀」医患联动模块接口
+ * 「心有灵犀」协同支持模块接口
  * 统一返回 { code: '0', data: ... } 包装，code 非 '0' 为错误（含 403 / 404）
  */
 
@@ -85,7 +85,7 @@ export interface ReviewPayload {
 	note?: string;
 }
 
-// 提交身份认证申请（患者实名 / 心灵SPA师认证）
+// 提交身份认证申请（用户实名 / 服务者认证）
 export function applyIdentity(data: IdentityApplyPayload) {
 	return request.post('/api/spa/identity/apply', data);
 }
@@ -105,7 +105,7 @@ export function reviewIdentity(data: ReviewPayload) {
 	return request.post('/api/spa/identity/review', data);
 }
 
-// 已通过认证的心灵SPA师列表
+// 已通过认证的服务者列表
 export function getPractitioners() {
 	return request.get('/api/spa/practitioners');
 }
@@ -130,7 +130,7 @@ export function getSpaMessages(requestId: number, username: string, afterId = 0)
 	return request.get(`/api/spa/requests/${requestId}/messages`, { params: { username, afterId } });
 }
 
-// （仅该单心灵SPA师）查看对方的近期觉察记录
+// （仅该单服务者）查看对方的近期觉察记录
 export function getPatientRecords(requestId: number, username: string) {
 	return request.get(`/api/spa/requests/${requestId}/patient-records`, { params: { username } });
 }

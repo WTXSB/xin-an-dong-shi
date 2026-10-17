@@ -153,7 +153,7 @@
 						<span>{{ keepMedia ? '记录里保留视频路径' : '记录里不保留视频路径' }}</span>
 					</div>
 					<div v-if="savedAwarenessRecordId" class="report-entry">
-						<el-button type="primary" @click="openPreVisitReport">生成预诊报告</el-button>
+						<el-button type="primary" @click="openPreVisitReport">生成心理感知报告</el-button>
 						<span>报告基于本次保存的情绪与BFRB结构化结果。</span>
 					</div>
 

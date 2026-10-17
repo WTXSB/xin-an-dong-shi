@@ -159,7 +159,7 @@
 							<span>{{ keepMedia ? '记录里保留图片路径' : '记录里不保留图片路径' }}</span>
 						</div>
 						<div v-if="savedAwarenessRecordId" class="report-entry">
-							<el-button type="primary" @click="openPreVisitReport">生成预诊报告</el-button>
+							<el-button type="primary" @click="openPreVisitReport">生成心理感知报告</el-button>
 							<span>使用本次已保存的结构化分析生成，可刷新后从觉察记录再次打开。</span>
 						</div>
 					</div>
